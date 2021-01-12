@@ -33,6 +33,11 @@ jobs:
 
       - name: Pack nuget
         run: dotnet pack FluentChange.Blazor --configuration Release --no-restore
-        
+
+deploy:
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+    
       - name: Push nuget
         run: dotnet nuget push FluentChange.Blazor/bin/Release/*.nupkg --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json

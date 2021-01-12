@@ -7,9 +7,12 @@
     <Product>Blazor Extentions</Product>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Version>0.0.1</Version>
+    <Version>0.0.2</Version>
     <Description>Blazor Lazy Loading &amp; Plugin Modules for WebAssembly</Description>
     <PackageTags>Blazor WebAssembly Lazy Loading Plugin Module</PackageTags>
+    <PackageProjectUrl>https://github.com/FluentChange/FluentChange.Blazor</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/FluentChange/FluentChange.Blazor</RepositoryUrl>
+    <RepositoryType>GitHub</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
