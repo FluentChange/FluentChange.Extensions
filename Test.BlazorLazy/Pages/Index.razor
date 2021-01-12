@@ -1,0 +1,115 @@
+﻿@page "/"
+@using System.Reflection
+@inject LazyLoaderService AssemblyLoader
+@inject TestXService testX
+@inject IServiceProvider provider 
+
+<h1>Hello, world!  </h1>
+<p>@result2</p>
+Welcome to your new app.
+
+
+<div>
+    <Lazy Plugin="Plugin1" Component="SurveyPrompt" Parameters="@paramsx"></Lazy>
+</div>
+
+@if (loaded == true)
+{
+<p>@result</p>
+}
+
+<button @onclick="Load1">Load 1</button>
+<button @onclick="Load2">Load 2</button>
+<button @onclick="ReloadAssemblies">Reload List</button>
+
+<hr/>
+<button @onclick="AddServices">Add Services</button>
+<button @onclick="TestNewService">Test New Service</button>
+@if (assemblies != null)
+{
+<ul>
+    @foreach (var a in assemblies)
+        {
+    <li><b>@a.GetName().Name</b>@a.FullName</li>
+        }
+
+</ul>
+}
+
+@code{
+
+    public Dictionary<string, object> paramsx = new Dictionary<string, object>();
+    public IEnumerable<Assembly> assemblies = new List<Assembly>();
+    public bool loaded;
+    string result;
+    string result2 = "";
+
+    public async void ReloadAssemblies()
+    {
+        assemblies = AssemblyLoader.getLoadedAssemblies();
+        StateHasChanged();
+    }
+
+    public async void Load1()
+    {
+        loaded = true;
+        var loadedA = await AssemblyLoader.LoadAssembliesFromWeb("Plugin1");
+
+        if (loadedA != null)
+        {
+
+            foreach (var type in loadedA.GetTypes())
+            {
+                Console.WriteLine("T " + type.FullName + " " + type.BaseType?.Name);
+            }
+
+            //result = a.FullName;
+            var t = loadedA.GetTypes().Single(t => t.Name.EndsWith("Class1"));
+
+            var instance = Activator.CreateInstance(t);
+
+            var helloMethod = t.GetMethod("GetHello");
+            result = (string)helloMethod.Invoke(instance, new object[] { "Lazy People" });
+
+            assemblies = AssemblyLoader.getLoadedAssemblies();
+
+
+
+        }
+        StateHasChanged();
+
+    }
+
+    public async void Load2()
+    {
+        var loaded2 = await AssemblyLoader.LoadAssembliesFromWeb("Plugin2");
+
+        assemblies = AssemblyLoader.getLoadedAssemblies();
+
+        StateHasChanged();
+
+    }
+
+    public async void AddServices()
+    {
+        result2 = testX.AddSubservices();
+
+    }
+
+    public async void TestNewService()
+    {
+
+        //result2 = service.HelloY();
+
+    }
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        paramsx.Add("Title", "Hihihihih");
+        assemblies = AssemblyLoader.getLoadedAssemblies();
+
+    }
+
+}

@@ -1,0 +1,47 @@
+@using System.Reflection
+@inject LazyLoaderService AssemblyLoader
+
+<Router AppAssembly="@typeof(Program).Assembly" AdditionalAssemblies="_lazyLoadedAssemblies" OnNavigateAsync="@OnNavigateAsync">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+    </Found>
+    <NotFound>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <p>Sorry, there's nothing at this address.</p>
+        </LayoutView>
+    </NotFound>
+    <Navigating>
+        <p>Loading the page...</p>
+    </Navigating>
+
+</Router>
+@code
+{
+    private List<Assembly> _lazyLoadedAssemblies = new List<Assembly>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        //var lib1 = await AssemblyLoader.LoadAssembliesFromWeb(Constants.Plugin1);
+        //var lib2 = await AssemblyLoader.LoadAssembliesFromWeb(Constants.Plugin2);
+
+        //_lazyLoadedAssemblies.AddRange(lib1);
+        //_lazyLoadedAssemblies.AddRange(lib2);
+    }
+    private async Task OnNavigateAsync(NavigationContext args)
+    {
+        Console.WriteLine("NAV " + args.Path);
+        if (args.Path.EndsWith("info"))
+        {
+            Console.WriteLine("INFO");
+            var lib1 = await AssemblyLoader.LoadAssembliesFromWeb("Plugin1");
+            _lazyLoadedAssemblies.Add(lib1);
+
+        }
+        if (args.Path.EndsWith("info2"))
+        {
+            Console.WriteLine("INFO2");
+            var lib2 = await AssemblyLoader.LoadAssembliesFromWeb("Plugin2");
+            _lazyLoadedAssemblies.Add(lib2);
+        }
+    }
+}

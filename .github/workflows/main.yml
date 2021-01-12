@@ -1,0 +1,32 @@
+name: CI Deployment Backend Azure Functions
+env:
+  OUTPUT_PATH: ${{ github.workspace }}/.output
+  DOTNET_VERSION: "5.0"
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v2
+
+      - name: Setup Dotnet ${{ env.DOTNET_VERSION }}
+        uses: actions/setup-dotnet@v1
+        with:
+            dotnet-version: ${{ env.DOTNET_VERSION }}
+            
+      - name: Install dependencies
+        run: dotnet restore FluentChange.Blazor.sln
+      
+      - name: Build
+        run: dotnet build FluentChange.Blazor.sln --configuration Release --no-restore
