@@ -32,7 +32,7 @@ jobs:
         run: dotnet build FluentChange.Blazor.sln --configuration Release --no-restore
 
       - name: Pack nuget
-        run: dotnet pack FluentChange.Blazor -p:PackageVersion=$([System.DateTime]::Now.ToString('yyyy.MM.dd.HHmmss')) --configuration Release --no-build --no-restore 
+        run: dotnet pack FluentChange.Blazor --configuration Release --no-build --no-restore 
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v1
@@ -51,4 +51,4 @@ jobs:
           path: nuget
       
       - name: Push nuget
-        run: dotnet nuget push nuget/*.nupkg --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
+        run: dotnet nuget push nuget/*.nupkg --skip-duplicate --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
