@@ -32,7 +32,7 @@ jobs:
         run: dotnet build FluentChange.Blazor.sln --configuration Release --no-restore
 
       - name: Pack nuget
-        run: dotnet pack FluentChange.Blazor --configuration Release --no-restore
+        run: dotnet pack FluentChange.Blazor --configuration Release --no-restore --output ${{ env.OUTPUT_PATH }}
 
   deploy:
     runs-on: ubuntu-latest
@@ -40,4 +40,4 @@ jobs:
     steps:
     
       - name: Push nuget
-        run: dotnet nuget push FluentChange.Blazor/bin/Release/*.nupkg --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
+        run: dotnet nuget push ${{ env.OUTPUT_PATH }}/*.nupkg --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
