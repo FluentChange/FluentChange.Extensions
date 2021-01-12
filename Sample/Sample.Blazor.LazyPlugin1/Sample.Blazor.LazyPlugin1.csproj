@@ -4,17 +4,19 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
+
+
   <ItemGroup>
     <SupportedPlatform Include="browser" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="5.0.1" />
-    <PackageReference Include="Syncfusion.Blazor.Calendars" Version="18.4.0.33" />
-    <PackageReference Include="System.Net.Http.Json" Version="5.0.0" />  
+    <PackageReference Include="System.Net.Http.Json" Version="5.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FluentChange.Blazor\FluentChange.Blazor.csproj" />
-    <ProjectReference Include="..\Test.BlazorShared\Sample.Blazor.Shared.csproj" />
+    <ProjectReference Include="..\..\FluentChange.Blazor\FluentChange.Blazor.csproj" />
+    <ProjectReference Include="..\Sample.Blazor.Shared\Sample.Blazor.Shared.csproj" />
   </ItemGroup>
+
 
 </Project>
