@@ -32,7 +32,7 @@ jobs:
         run: dotnet build FluentChange.Blazor.sln --configuration Release --no-restore
 
       - name: Pack nuget
-        run: dotnet pack FluentChange.Blazor -p:PackageVersion=$([System.DateTime]::Now.ToString(&quot;yyyy.MM.dd.HHmmss&quot;)) --configuration Release --no-build --no-restore 
+        run: dotnet pack FluentChange.Blazor -p:PackageVersion=$([System.DateTime]::Now.ToString('yyyy.MM.dd.HHmmss')) --configuration Release --no-build --no-restore 
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v1
