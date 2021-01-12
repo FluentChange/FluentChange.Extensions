@@ -1,4 +1,4 @@
-name: CI Deployment Backend Azure Functions
+name: CI
 env:
   OUTPUT_PATH: ${{ github.workspace }}/.output
   DOTNET_VERSION: "5.0"
@@ -34,11 +34,11 @@ jobs:
       - name: Pack nuget
         run: dotnet pack FluentChange.Blazor --configuration Release --no-restore 
 
-      - name: Package functions
+      - name: Upload artifacts
         uses: actions/upload-artifact@v1
         with:
           name: nuget
-          path: FluentChange.Blazor/bin/Release/*.nupkg
+          path: ./FluentChange.Blazor/bin/Release/*.nupkg
 
   deploy:
     runs-on: ubuntu-latest
@@ -51,4 +51,4 @@ jobs:
           path: nuget
       
       - name: Push nuget
-        run: dotnet nuget push nuget/*.nupkg --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
+        run: dotnet nuget push ./nuget/*.nupkg --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
