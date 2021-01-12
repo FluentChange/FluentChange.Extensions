@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build]
     steps:
-      - name: Download website
+      - name: Download artifacts
         uses: actions/download-artifact@v1
         with:
           name: nuget
