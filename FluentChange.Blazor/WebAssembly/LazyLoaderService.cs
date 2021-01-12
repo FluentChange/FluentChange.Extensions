@@ -1,4 +1,5 @@
-﻿using FluentChange.Blazor.Interfaces;
+﻿using Blazored.LocalStorage;
+using FluentChange.Blazor.Interfaces;
 using LightInject;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -14,14 +15,15 @@ namespace FluentChange.Blazor.WebAssembly
     {
 
         private readonly Dictionary<string, Assembly> alreadyLazyLoaded;
-        private readonly LightInject.ServiceContainer container;
+        private readonly ServiceContainer container;
         public readonly IEnumerable<Assembly> alreadyBaseLoaded;
-        public readonly ILazyAssemblyLocationResolver assemblyLocationResolver;
-
-        public LazyLoaderService(ServiceContainer container, ILazyAssemblyLocationResolver assemblyLocationResolver)
+        public readonly LazyAssemblyWebResolver assemblyLocationResolver;
+        private readonly ISyncLocalStorageService localStorage;
+        public LazyLoaderService(ServiceContainer container, LazyAssemblyWebResolver assemblyLocationResolver, ISyncLocalStorageService localStorage)
         {
             this.container = container;
             this.assemblyLocationResolver = assemblyLocationResolver;
+            this.localStorage = localStorage;
 
             alreadyLazyLoaded = new Dictionary<string, Assembly>();
             //loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies().Select(a => a.GetName().Name + ".dll").ToHashSet();
@@ -36,9 +38,16 @@ namespace FluentChange.Blazor.WebAssembly
 
         public async Task<Assembly> LoadAssembliesFromWeb(string name)
         {
-
             var assemblyToLoad = assemblyLocationResolver.Resolve(name);
 
+            if (assemblyToLoad is WebLazyAssembly) return await LoadAssemblyFromWebUrl(assemblyToLoad as WebLazyAssembly);
+            if (assemblyToLoad is NugetLazyAssembly) return await LoadAssemblyFromNuget(assemblyToLoad as NugetLazyAssembly);
+            throw new NotImplementedException();
+        }
+
+        private async Task<Assembly> LoadAssemblyFromWebUrl(WebLazyAssembly lazywebassembly)
+        {
+            var assemblyToLoad = lazywebassembly.Url;
             Console.WriteLine("TRY LOAD " + assemblyToLoad);
             Assembly newLoadedAssembly;
 
@@ -105,6 +114,10 @@ namespace FluentChange.Blazor.WebAssembly
             }
 
             return newLoadedAssembly;
+        }
+        private async Task<Assembly> LoadAssemblyFromNuget(NugetLazyAssembly lazywebassembly)
+        {
+            throw new NotImplementedException();
         }
     }
 }

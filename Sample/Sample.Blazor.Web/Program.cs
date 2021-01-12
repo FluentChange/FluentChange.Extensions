@@ -1,4 +1,5 @@
 using FluentChange.Blazor.Interfaces;
+using FluentChange.Blazor.Services;
 using FluentChange.Blazor.WebAssembly;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,14 +17,16 @@ namespace Sample.Blazor.Web
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
             builder.RootComponents.Add<App>("#app");
 
-            builder.UseLightInjectWithContainerInjection();
+            builder.UseLazyBlazorPlugins()
+                .AddWebPlugin("Plugin1", "https://myskipper.blob.core.windows.net/data/Sample.Blazor.LazyPlugin1.dll")
+                .AddWebPlugin("Plugin2", "https://myskipper.blob.core.windows.net/data/Sample.Blazor.LazyPlugin2.dll");
 
             // Microsoft DI
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
             // not sure why, but need to AddSingleton here manually, can't use reflection
             builder.Services.AddSingleton<LazyLoaderService>();
-            builder.Services.AddSingleton<ILazyAssemblyLocationResolver, LazyAssemblyWebResolver>();
+            builder.Services.AddSingleton<TestLocalStorage>();
 
             await builder.Build().RunAsync();
         }

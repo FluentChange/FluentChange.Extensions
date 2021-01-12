@@ -1,4 +1,5 @@
 ﻿
+using Blazored.LocalStorage;
 using FluentChange.Blazor.Interfaces;
 using LightInject;
 using LightInject.Microsoft.DependencyInjection;
@@ -12,7 +13,7 @@ namespace FluentChange.Blazor.WebAssembly
 {
     public static class DepencyInjectionExtensions
     {
-        public static void UseLightInjectWithContainerInjection(this WebAssemblyHostBuilder builder)
+        public static LazyBlazorPluginBuilder UseLazyBlazorPlugins(this WebAssemblyHostBuilder builder)
         {
             // create own LightInject container so that it can be injected and manipulated later. used for late loading services
             var container = new ServiceContainer();
@@ -29,6 +30,15 @@ namespace FluentChange.Blazor.WebAssembly
             builder.Services.AddAllInterfaceServices(thisAssembly); // load all services from this assembly
             builder.Services.AddAllInterfaceServices(callingAssembly); // load all services from executing assembly
 
+            builder.Services.AddBlazoredLocalStorage(); // used to cache lazy loaded assemblies locally, for fast startup
+
+            var resolver = new LazyAssemblyWebResolver();
+            var lazyBuilder = new LazyBlazorPluginBuilder(resolver);
+
+            container.RegisterInstance(resolver);
+
+            return lazyBuilder;
+
         }
 
         public static void AddAllInterfaceServices(this IServiceCollection services, Assembly assembly = null)
@@ -43,7 +53,7 @@ namespace FluentChange.Blazor.WebAssembly
         public static void AddAllInterfaceServices(this ServiceContainer container, Assembly assembly = null)
         {
             if (assembly == null) assembly = Assembly.GetExecutingAssembly();
-        
+
             container.AddInterfaceServices<ISingletonService>(ServiceLifetime.Singleton, assembly);
             container.AddInterfaceServices<IScopedService>(ServiceLifetime.Scoped, assembly);
             container.AddInterfaceServices<ITransientService>(ServiceLifetime.Transient, assembly);
@@ -94,14 +104,14 @@ namespace FluentChange.Blazor.WebAssembly
 
 
         private static ILifetime ResolveLifetime(ServiceLifetime serviceLifetime)
-        {  
+        {
             switch (serviceLifetime)
             {
                 case ServiceLifetime.Scoped: return new PerScopeLifetime();
                 case ServiceLifetime.Singleton: return new PerContainerLifetime();
                 case ServiceLifetime.Transient: return new PerRequestLifeTime();
                 default: throw new ArgumentException();
-            }                      
+            }
         }
 
 
