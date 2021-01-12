@@ -31,8 +31,8 @@ jobs:
       - name: Build
         run: dotnet build FluentChange.Blazor.sln --configuration Release --no-restore
 
-      - name: Pack
+      - name: Pack nuget
         run: dotnet pack FluentChange.Blazor --configuration Release --no-restore
         
-      - name: Publish
-        run: dotnet nuget push FluentChange.Blazor/bin/Release/net5.0/*.nupkg --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
+      - name: Push nuget
+        run: dotnet nuget push FluentChange.Blazor/bin/Release/*.nupkg --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
