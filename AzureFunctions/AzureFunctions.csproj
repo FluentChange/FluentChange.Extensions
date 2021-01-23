@@ -7,12 +7,13 @@
     <Product>Azure Functions Extension</Product>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Version>0.0.2</Version>
+    <Version>0.0.3</Version>
     <Description>Azure functions extension for simple CRUD + List functions following the DRY principle.</Description>
     <PackageTags>Azure Functions CRUD List DRY</PackageTags>
-    <PackageProjectUrl>https://github.com/FluentChange/FluentChange.AzureFunctions</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/FluentChange/FluentChange.AzureFunctions</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/FluentChange/FluentChange.Extensions/tree/master/AzureFunctions</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/FluentChange/FluentChange.Extensions</RepositoryUrl>
     <RepositoryType>GitHub</RepositoryType>
+    <PackageId>FluentChange.Extensions.AzureFunctions</PackageId>
   </PropertyGroup>
 
   <ItemGroup>
