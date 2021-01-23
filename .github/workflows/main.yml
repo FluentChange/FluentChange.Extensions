@@ -66,4 +66,4 @@ jobs:
           path: nuget
       
       - name: Push nuget
-        run: dotnet nuget push nuget/*.nupkg --skip-duplicate --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
+        run: dotnet nuget push nuget/**/*.nupkg --skip-duplicate --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
