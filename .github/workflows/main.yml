@@ -46,7 +46,7 @@ jobs:
         run: dotnet pack Blazor.csproj --configuration Release --no-build --no-restore 
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         with:
           name: nuget
           path: |
