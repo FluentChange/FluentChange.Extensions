@@ -1,5 +1,5 @@
 # FluentChange.Blazor
-Blazor Extension
+Blazor extension for lazy loading
 
 ![Build & Test](https://github.com/FluentChange/FluentChange.Blazor/workflows/CI/badge.svg?branch=master)
 
