@@ -38,22 +38,22 @@ jobs:
         run: dotnet build FluentChange.Extensions.sln --configuration Release --no-restore
 
       - name: Pack nuget AzureFunctions
-        run: dotnet pack AzureFunctions/FluentChange.AzureFunctions.sln --configuration Release --no-build --no-restore 
+        run: dotnet pack AzureFunctions/AzureFunctions.sln --configuration Release --no-build --no-restore 
 
       - name: Pack nuget Blazor
-        run: dotnet pack Blazor/FluentChange.Blazor.sln --configuration Release --no-build --no-restore 
+        run: dotnet pack Blazor/Blazor.sln --configuration Release --no-build --no-restore 
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v1
         with:
           name: nugetAzureFunctions
-          path: AzureFunctions/FluentChange.AzureFunctions/bin/Release/
+          path: AzureFunctions/bin/Release/
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v1
         with:
           name: nugetBlazor
-          path: Blazor/FluentChange.Blazor/bin/Release/
+          path: Blazor/bin/Release/
 
   deploy1:
     runs-on: ubuntu-latest
