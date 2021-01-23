@@ -4,10 +4,10 @@
     <TargetFramework>net5.0</TargetFramework>
     <Authors>Frank Mühlschlegel</Authors>
     <Company>Fluent Change</Company>
-    <Product>Blazor Extentions</Product>
+    <Product>Blazor Extension</Product>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Version>0.0.2</Version>
+    <Version>0.0.3</Version>
     <Description>Blazor Lazy Loading &amp; Plugin Modules for WebAssembly</Description>
     <PackageTags>Blazor WebAssembly Lazy Loading Plugin Module</PackageTags>
     <PackageProjectUrl>https://github.com/FluentChange/FluentChange.Blazor</PackageProjectUrl>
