@@ -48,36 +48,20 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v1
         with:
-          name: nugetAzureFunctions
-          path: AzureFunctions/bin/Release/
+          name: nuget
+          path: |
+            AzureFunctions/bin/Release/
+            Blazor/bin/Release/
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v1
-        with:
-          name: nugetBlazor
-          path: Blazor/bin/Release/
 
-  deploy1:
+  deploy:
     runs-on: ubuntu-latest
     needs: [build]
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v1
         with:
-          name: nugetAzureFunctions
-          path: nuget
-      
-      - name: Push nuget
-        run: dotnet nuget push nuget/*.nupkg --skip-duplicate --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
-
-  deploy2:
-    runs-on: ubuntu-latest
-    needs: [build]
-    steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v1
-        with:
-          name: nugetBlazor
+          name: nuget
           path: nuget
       
       - name: Push nuget
