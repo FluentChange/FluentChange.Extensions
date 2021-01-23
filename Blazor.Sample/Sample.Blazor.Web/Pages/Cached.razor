@@ -1,0 +1,23 @@
+﻿@page "/cached"
+@using System.Reflection
+@inject TestLocalStorage localStorage
+
+<h1>Hello, local storage </h1>
+<p>Your last button press: @text</p>
+<button @onclick="Update">Update</button>
+
+@code{
+
+    string text = "";
+
+    public async void Update()
+    {
+        localStorage.Write("on " + DateTime.UtcNow);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        text = localStorage.Read();
+    }
+
+}

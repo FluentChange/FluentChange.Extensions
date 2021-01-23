@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\FluentChange.Blazor\FluentChange.Blazor.csproj" />
+    <ProjectReference Include="..\..\Blazor\Blazor.csproj" />
   </ItemGroup>
 
 </Project>

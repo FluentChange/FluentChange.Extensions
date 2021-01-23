@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\FluentChange.Blazor\FluentChange.Blazor.csproj" />
+    <ProjectReference Include="..\..\Blazor\Blazor.csproj" />
     <ProjectReference Include="..\Sample.Blazor.Shared\Sample.Blazor.Shared.csproj" />
   </ItemGroup>
 

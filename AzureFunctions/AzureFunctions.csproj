@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Authors>Frank Mühlschlegel</Authors>
+    <Company>Fluent Change</Company>
+    <Product>Azure Functions Extension</Product>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Version>0.0.2</Version>
+    <Description>Azure functions extension for simple CRUD + List functions following the DRY principle.</Description>
+    <PackageTags>Azure Functions CRUD List DRY</PackageTags>
+    <PackageProjectUrl>https://github.com/FluentChange/FluentChange.AzureFunctions</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/FluentChange/FluentChange.AzureFunctions</RepositoryUrl>
+    <RepositoryType>GitHub</RepositoryType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Azure.WebJobs" Version="3.0.25" />
+    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Http" Version="3.0.2" />
+
+  </ItemGroup>
+
+</Project>
