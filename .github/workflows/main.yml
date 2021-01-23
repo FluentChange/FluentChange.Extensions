@@ -49,9 +49,8 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: nuget
-          path: |
-            AzureFunctions/bin/Release/
-            Blazor/bin/Release/
+          path: '**/bin/Release/*.nupkg'
+     
 
 
   deploy:
