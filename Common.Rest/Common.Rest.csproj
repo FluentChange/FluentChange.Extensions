@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Authors>Frank Mühlschlegel</Authors>
+    <Company>Fluent Change</Company>
+    <Product>Common Rest Extension</Product>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Version>0.0.1</Version>
+    <Description>Common classes and models for rest and json api</Description>
+    <PackageTags>Common Rest Json Reponse Request Client Api</PackageTags>
+    <PackageProjectUrl>https://github.com/FluentChange/FluentChange.Extensions/tree/master/Common.Rest</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/FluentChange/FluentChange.Extensions</RepositoryUrl>
+    <RepositoryType>GitHub</RepositoryType>
+    <PackageId>FluentChange.Extensions.Common.Rest</PackageId>
+    <AssemblyName>FluentChange.Extensions.Common.Rest</AssemblyName>
+    <RootNamespace>FluentChange.Extensions.Common.Rest</RootNamespace>
+  </PropertyGroup>
+
+</Project>
