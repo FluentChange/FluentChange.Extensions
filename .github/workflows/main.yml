@@ -38,8 +38,8 @@ jobs:
         run: dotnet build FluentChange.Extensions.sln --configuration Release --no-restore
 
       - name: Pack nuget AzureFunctions
-        working-directory: ./AzureFunctions
-        run: dotnet pack AzureFunctions.csproj --configuration Release --no-build --no-restore 
+        working-directory: ./Azure.Functions
+        run: dotnet pack Azure.Functions.csproj --configuration Release --no-build --no-restore 
 
       - name: Pack nuget Blazor
         working-directory: ./Blazor
@@ -50,7 +50,7 @@ jobs:
         with:
           name: nuget
           path: |
-            ./AzureFunctions/bin/Release/
+            ./Azure.Functions/bin/Release/
             ./Blazor/bin/Release/
      
 
