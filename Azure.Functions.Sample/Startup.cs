@@ -10,6 +10,7 @@ namespace DemoCRUDLFunctions
         public override void Configure(IFunctionsHostBuilder builder)
         {   
             builder.Services.AddSingleton<TodoService>();
+            builder.Services.AddSingleton<ProductService>();
             builder.Services.AddSingleton<EventService>();
         }
     }

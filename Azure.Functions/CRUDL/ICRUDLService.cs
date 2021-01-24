@@ -11,4 +11,5 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         T Read(Guid id);
         void Update(T todo);
     }
+       
 }

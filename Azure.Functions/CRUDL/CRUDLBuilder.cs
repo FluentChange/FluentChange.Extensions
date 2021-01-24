@@ -8,6 +8,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using FluentChange.Extensions.Azure.Functions.Helper;
+using FluentChange.Extensions.Common.Rest;
+using System.Linq;
 
 namespace FluentChange.Extensions.Azure.Functions.CRUDL
 {
@@ -52,6 +54,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             var builder = new CRUDLBuilderEntityService<T, S>(service);
             return builder;
         }
+    
         public CRUDLBuilderEntityInterfaceService<T, S> UseInterface<S>() where S : class, ICRUDLService<T>
         {
             var service = provider.GetService<S>();
@@ -59,6 +62,8 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             return builder;
         }
     }
+
+      
 
     public class CRUDLBuilderEntityInterfaceService<T, S> where S : class, ICRUDLService<T> where T : class
     {
@@ -78,10 +83,12 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
     public class CRUDLBuilderEntityService<T, S> where S : class where T : class
     {
         private readonly S service;
+        private bool useResponseWrapper;
 
         public CRUDLBuilderEntityService(S service)
         {
             this.service = service;
+            this.useResponseWrapper = false;
         }
 
         private Func<S, Action<T>> createFunc;
@@ -126,6 +133,12 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             return this;
         }
 
+        public CRUDLBuilderEntityService<T, S>  WrapResponse ()
+        {
+            useResponseWrapper = true;
+            return this;
+        }
+
         public async Task<HttpResponseMessage> Handle(HttpRequest req, ILogger log, string id)
         {
 
@@ -140,13 +153,13 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
                     var idGuid = Guid.Parse(id);
                     var read = readFunc.Invoke(service).Invoke(idGuid);
 
-                    return ResponseHelper.CreateJsonResponse(read);
+                    return Respond(read);
                 }
                 else
                 {
                     if (listFunc == null) throw new NotImplementedException();
                     var list = listFunc.Invoke(service).Invoke();
-                    return ResponseHelper.CreateJsonResponse(list);
+                    return Respond(list);
                 }
             }
             if (req.Method == "POST")
@@ -160,7 +173,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
 
                 if (todo == null) throw new ArgumentNullException();
                 createFunc.Invoke(service).Invoke(todo);
-                return ResponseHelper.CreateJsonResponse(null);
+                return Respond();
 
             }
             if (req.Method == "PUT")
@@ -175,7 +188,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
                 if (todo == null) throw new ArgumentNullException();
 
                 updateFunc.Invoke(service).Invoke(todo);
-                return ResponseHelper.CreateJsonResponse(null);
+                return Respond(); 
             }
             if (req.Method == "DELETE")
             {
@@ -184,12 +197,53 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
                 var idGuid = Guid.Parse(id);
 
                 deleteFunc.Invoke(service).Invoke(idGuid);
-                return ResponseHelper.CreateJsonResponse(null);
+                return Respond();
             }
             throw new NotImplementedException();
         }
 
 
+
+        private HttpResponseMessage Respond()
+        {
+            if (useResponseWrapper)
+            {
+                var response = new Response();                
+                return ResponseHelper.CreateJsonResponse(response);
+            }
+            else
+            {
+                return ResponseHelper.CreateJsonResponse(null);
+            }
+        }
+
+        private HttpResponseMessage Respond(T result)
+        {
+            if (useResponseWrapper)
+            {
+                var response = new SingleResponse<T>();
+                response.Result = result;
+                return ResponseHelper.CreateJsonResponse(response);
+            }
+            else
+            {
+                return ResponseHelper.CreateJsonResponse(result);
+            }
+        }
+
+        private HttpResponseMessage Respond(IEnumerable<T> results)
+        {
+            if (useResponseWrapper)
+            {
+                var response = new MultiResponse<T>();
+                response.Results = results.ToList();
+                return ResponseHelper.CreateJsonResponse(response);
+            }
+            else
+            {
+                return ResponseHelper.CreateJsonResponse(results);
+            }
+        }
     }
 }
 

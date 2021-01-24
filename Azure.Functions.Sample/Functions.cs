@@ -74,5 +74,18 @@ namespace DemoCRUDLFunctions
                 .Handle(req, log, id);
 
         }
+
+        [FunctionName("Sample6ProductCRUDL")]
+        public async Task<HttpResponseMessage> Run6([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", "put", "delete", Route = "sample6/products" + CRUDLHelper.Id)] string id, HttpRequest req, ILogger log)
+        {
+
+            return await CRUDL
+                .ForEntity<Product>()
+                .Use<ProductService>()
+                .With(s => s.Create, s => s.Read, s => s.Update, s => s.Delete, s => s.List)
+                .WrapResponse()
+                .Handle(req, log, id);
+
+        }
     }
 }
