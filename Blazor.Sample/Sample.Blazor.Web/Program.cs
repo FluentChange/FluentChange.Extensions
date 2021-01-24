@@ -1,6 +1,6 @@
-using FluentChange.Blazor.Interfaces;
-using FluentChange.Blazor.Services;
-using FluentChange.Blazor.WebAssembly;
+using FluentChange.Extensions.Blazor.Interfaces;
+using FluentChange.Extensions.Blazor.Services;
+using FluentChange.Extensions.Blazor.WebAssembly;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Sample.Blazor.Web.Services;

@@ -1,8 +1,8 @@
-using FluentChange.Blazor.Nuget;
+using FluentChange.Extensions.Blazor.Nuget;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
-namespace FluentChange.Blazor.Tests
+namespace FluentChange.Extensions.Blazor.Tests
 {
     [TestClass]
     public class MicroNugetTests

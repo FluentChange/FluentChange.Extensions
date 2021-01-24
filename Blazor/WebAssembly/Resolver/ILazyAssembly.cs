@@ -1,4 +1,4 @@
-﻿namespace FluentChange.Blazor.WebAssembly
+﻿namespace FluentChange.Extensions.Blazor.WebAssembly
 {
     public interface ILazyAssembly
     {

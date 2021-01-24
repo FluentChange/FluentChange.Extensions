@@ -1,4 +1,4 @@
-﻿using FluentChange.Blazor.Interfaces;
+﻿using FluentChange.Extensions.Blazor.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;

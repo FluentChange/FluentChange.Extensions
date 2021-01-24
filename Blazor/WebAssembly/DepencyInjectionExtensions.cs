@@ -1,6 +1,6 @@
 ﻿
 using Blazored.LocalStorage;
-using FluentChange.Blazor.Interfaces;
+using FluentChange.Extensions.Blazor.Interfaces;
 using LightInject;
 using LightInject.Microsoft.DependencyInjection;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -9,7 +9,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 
-namespace FluentChange.Blazor.WebAssembly
+namespace FluentChange.Extensions.Blazor.WebAssembly
 {
     public static class DepencyInjectionExtensions
     {

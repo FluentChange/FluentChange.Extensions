@@ -1,5 +1,5 @@
 ﻿using Blazored.LocalStorage;
-using FluentChange.Blazor.Interfaces;
+using FluentChange.Extensions.Blazor.Interfaces;
 using LightInject;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -9,7 +9,7 @@ using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace FluentChange.Blazor.WebAssembly
+namespace FluentChange.Extensions.Blazor.WebAssembly
 {
     public class LazyLoaderService: ISingletonService
     {

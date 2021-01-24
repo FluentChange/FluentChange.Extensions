@@ -5,7 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 
-namespace FluentChange.AzureFunctions.Helper
+namespace FluentChange.Extensions.Azure.Functions.Helper
 {
     public static class ResponseHelper
     {

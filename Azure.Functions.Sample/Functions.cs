@@ -1,6 +1,6 @@
 using DemoCRUDLFunctions.Models;
 using DemoCRUDLFunctions.Services;
-using FluentChange.AzureFunctions.CRUDL;
+using FluentChange.Extensions.Azure.Functions.CRUDL;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;

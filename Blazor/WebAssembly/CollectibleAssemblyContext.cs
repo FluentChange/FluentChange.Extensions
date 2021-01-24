@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using System.Runtime.Loader;
 
-namespace FluentChange.Blazor.WebAssembly
+namespace FluentChange.Extensions.Blazor.WebAssembly
 {
     public class CollectibleAssemblyContext : AssemblyLoadContext
     {

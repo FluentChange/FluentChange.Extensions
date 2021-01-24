@@ -1,12 +1,12 @@
 ﻿using Blazored.LocalStorage;
-using FluentChange.Blazor.Interfaces;
+using FluentChange.Extensions.Blazor.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FluentChange.Blazor.Services
+namespace FluentChange.Extensions.Blazor.Services
 {
     public class TestLocalStorage: ISingletonService
     {

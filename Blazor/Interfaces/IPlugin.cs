@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace FluentChange.Blazor.Interfaces
+namespace FluentChange.Extensions.Blazor.Interfaces
 {
     public interface IPlugin
     {

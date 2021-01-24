@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace FluentChange.AzureFunctions.CRUDL
+namespace FluentChange.Extensions.Azure.Functions.CRUDL
 {
     public interface ICRUDLService<T> where T : class
     {

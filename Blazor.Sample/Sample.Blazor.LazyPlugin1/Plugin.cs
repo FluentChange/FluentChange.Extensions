@@ -1,4 +1,4 @@
-﻿using FluentChange.Blazor.Interfaces;
+﻿using FluentChange.Extensions.Blazor.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 

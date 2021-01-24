@@ -1,4 +1,4 @@
-﻿namespace FluentChange.Blazor.Interfaces
+﻿namespace FluentChange.Extensions.Blazor.Interfaces
 {
     public interface ISingletonService
     {

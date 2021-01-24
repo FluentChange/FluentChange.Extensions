@@ -1,5 +1,4 @@
 ﻿using DemoCRUDLFunctions.Services;
-using FluentChange.AzureFunctions.CRUDL;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 

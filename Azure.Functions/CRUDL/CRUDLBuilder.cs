@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
-using FluentChange.AzureFunctions.Helper;
+using FluentChange.Extensions.Azure.Functions.Helper;
 
-namespace FluentChange.AzureFunctions.CRUDL
+namespace FluentChange.Extensions.Azure.Functions.CRUDL
 {
     public class CRUDLBuilder
     {

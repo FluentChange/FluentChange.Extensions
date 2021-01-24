@@ -1,4 +1,4 @@
-﻿using FluentChange.Blazor.WebAssembly;
+﻿using FluentChange.Extensions.Blazor.WebAssembly;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using System;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace FluentChange.Blazor.WebAssembly
+namespace FluentChange.Extensions.Blazor.WebAssembly
 {
     public class Lazy : ComponentBase
     {

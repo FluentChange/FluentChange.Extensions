@@ -1,5 +1,5 @@
 ﻿using DemoCRUDLFunctions.Models;
-using FluentChange.AzureFunctions.CRUDL;
+using FluentChange.Extensions.Azure.Functions.CRUDL;
 using System;
 using System.Collections.Generic;
 using System.Linq;

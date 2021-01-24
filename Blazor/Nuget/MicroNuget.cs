@@ -6,7 +6,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace FluentChange.Blazor.Nuget
+namespace FluentChange.Extensions.Blazor.Nuget
 {
     public class MicroNuget
     {

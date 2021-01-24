@@ -1,4 +1,4 @@
-﻿namespace FluentChange.AzureFunctions.CRUDL
+﻿namespace FluentChange.Extensions.Azure.Functions.CRUDL
 {
     public static class CRUDLHelper
     {

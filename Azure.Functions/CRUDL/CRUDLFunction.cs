@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace FluentChange.AzureFunctions.CRUDL
+namespace FluentChange.Extensions.Azure.Functions.CRUDL
 {
     public abstract class CRUDLFunction
     {  

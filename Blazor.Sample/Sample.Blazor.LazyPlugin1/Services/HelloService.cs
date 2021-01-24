@@ -1,4 +1,4 @@
-﻿using FluentChange.Blazor.Interfaces;
+﻿using FluentChange.Extensions.Blazor.Interfaces;
 
 namespace Test.BlazorPlugin1
 {

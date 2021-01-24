@@ -1,5 +1,5 @@
 ﻿
-using FluentChange.Blazor.Interfaces;
+using FluentChange.Extensions.Blazor.Interfaces;
 
 namespace Sample.Blazor.Web.Services
 {

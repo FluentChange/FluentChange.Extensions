@@ -1,5 +1,5 @@
-﻿using FluentChange.Blazor.Interfaces;
-using FluentChange.Blazor.WebAssembly;
+﻿using FluentChange.Extensions.Blazor.Interfaces;
+using FluentChange.Extensions.Blazor.WebAssembly;
 using System;
 using System.Collections.Generic;
 using System.IO;
