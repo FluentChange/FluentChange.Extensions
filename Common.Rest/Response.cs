@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Common.Web
+namespace FluentChange.Extensions.Common.Rest
 {
     public class Response
     {
