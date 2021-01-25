@@ -22,21 +22,24 @@ namespace DemoCRUDLFunctions.Services
             todos.Add(t);
         }
 
-        public void Create(Todo todo)
+        public Todo Create(Todo todo)
         {
             if (todo.Id != Guid.Empty) throw new ArgumentException();
+            todo.Id = Guid.NewGuid();
             todos.Add(todo);
+            return todo;
         }
         public Todo Read(Guid id)
         {
             if (id == Guid.Empty) throw new ArgumentException();
             return todos.SingleOrDefault(t => t.Id == id);
         }
-        public void Update(Todo todo)
+        public Todo Update(Todo todo)
         {
             if (todo.Id == Guid.Empty) throw new ArgumentException();
             Delete(todo.Id);
             todos.Add(todo);
+            return todo;
         }
         public void Delete(Guid id)
         {

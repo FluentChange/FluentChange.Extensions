@@ -22,21 +22,24 @@ namespace DemoCRUDLFunctions.Services
             events.Add(t);
         }
 
-        public void New(Event @event)
+        public Event New(Event @event)
         {
             if (@event.Id != Guid.Empty) throw new ArgumentException();
+            @event.Id = Guid.NewGuid();
             events.Add(@event);
+            return @event;
         }
         public Event Get(Guid id)
         {
             if (id == Guid.Empty) throw new ArgumentException();
             return events.SingleOrDefault(t => t.Id == id);
         }
-        public void Edit(Event @event)
+        public Event Edit(Event @event)
         {
             if (@event.Id == Guid.Empty) throw new ArgumentException();
             Remove(@event.Id);
             events.Add(@event);
+            return @event;
         }
         public void Remove(Guid id)
         {

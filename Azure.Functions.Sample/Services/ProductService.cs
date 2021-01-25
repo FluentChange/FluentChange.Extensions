@@ -22,21 +22,24 @@ namespace DemoCRUDLFunctions.Services
             products.Add(t);
         }
 
-        public void Create(Product todo)
+        public Product Create(Product product)
         {
-            if (todo.Id != Guid.Empty) throw new ArgumentException();
-            products.Add(todo);
+            if (product.Id != Guid.Empty) throw new ArgumentException();
+            product.Id = Guid.NewGuid();
+            products.Add(product);
+            return product;
         }
         public Product Read(Guid id)
         {
             if (id == Guid.Empty) throw new ArgumentException();
             return products.SingleOrDefault(t => t.Id == id);
         }
-        public void Update(Product todo)
+        public Product Update(Product product)
         {
-            if (todo.Id == Guid.Empty) throw new ArgumentException();
-            Delete(todo.Id);
-            products.Add(todo);
+            if (product.Id == Guid.Empty) throw new ArgumentException();
+            Delete(product.Id);
+            products.Add(product);
+            return product;
         }
         public void Delete(Guid id)
         {

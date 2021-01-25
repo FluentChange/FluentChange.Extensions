@@ -32,7 +32,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             return await ForEntity<T>().UseInterface<S>().Handle(req, log, id);
         }
 
-        public CRUDLBuilderEntityService<T, S> With<T, S>(Func<S, Action<T>> create, Func<S, Func<Guid, T>> read, Func<S, Action<T>> update, Func<S, Action<Guid>> delete, Func<S, Func<IEnumerable<T>>> list) where T : class where S : class
+        public CRUDLBuilderEntityService<T, S> With<T, S>(Func<S, Func<T, T>> create, Func<S, Func<Guid, T>> read, Func<S, Func<T, T>> update, Func<S, Action<Guid>> delete, Func<S, Func<IEnumerable<T>>> list) where T : class where S : class
         {
             return ForEntity<T>().Use<S>().With(create, read, update, delete, list);
         }
@@ -54,7 +54,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             var builder = new CRUDLBuilderEntityService<T, S>(service);
             return builder;
         }
-    
+
         public CRUDLBuilderEntityInterfaceService<T, S> UseInterface<S>() where S : class, ICRUDLService<T>
         {
             var service = provider.GetService<S>();
@@ -63,7 +63,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         }
     }
 
-      
+
 
     public class CRUDLBuilderEntityInterfaceService<T, S> where S : class, ICRUDLService<T> where T : class
     {
@@ -91,13 +91,13 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             this.useResponseWrapper = false;
         }
 
-        private Func<S, Action<T>> createFunc;
+        private Func<S, Func<T, T>> createFunc;
         private Func<S, Func<Guid, T>> readFunc;
-        private Func<S, Action<T>> updateFunc;
+        private Func<S, Func<T, T>> updateFunc;
         private Func<S, Action<Guid>> deleteFunc;
         private Func<S, Func<IEnumerable<T>>> listFunc;
 
-        public CRUDLBuilderEntityService<T, S> With(Func<S, Action<T>> create, Func<S, Func<Guid, T>> read, Func<S, Action<T>> update, Func<S, Action<Guid>> delete, Func<S, Func<IEnumerable<T>>> list)
+        public CRUDLBuilderEntityService<T, S> With(Func<S, Func<T, T>> create, Func<S, Func<Guid, T>> read, Func<S, Func<T, T>> update, Func<S, Action<Guid>> delete, Func<S, Func<IEnumerable<T>>> list)
         {
             createFunc = create;
             readFunc = read;
@@ -107,7 +107,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             return this;
         }
 
-        public CRUDLBuilderEntityService<T, S> Create(Func<S, Action<T>> predicate)
+        public CRUDLBuilderEntityService<T, S> Create(Func<S, Func<T, T>> predicate)
         {
             createFunc = predicate;
             return this;
@@ -117,7 +117,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             readFunc = predicate;
             return this;
         }
-        public CRUDLBuilderEntityService<T, S> Update(Func<S, Action<T>> predicate)
+        public CRUDLBuilderEntityService<T, S> Update(Func<S, Func<T, T>> predicate)
         {
             updateFunc = predicate;
             return this;
@@ -133,7 +133,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             return this;
         }
 
-        public CRUDLBuilderEntityService<T, S>  WrapResponse ()
+        public CRUDLBuilderEntityService<T, S> WrapResponse()
         {
             useResponseWrapper = true;
             return this;
@@ -188,7 +188,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
                 if (todo == null) throw new ArgumentNullException();
 
                 updateFunc.Invoke(service).Invoke(todo);
-                return Respond(); 
+                return Respond();
             }
             if (req.Method == "DELETE")
             {
@@ -208,7 +208,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         {
             if (useResponseWrapper)
             {
-                var response = new Response();                
+                var response = new Response();
                 return ResponseHelper.CreateJsonResponse(response);
             }
             else
