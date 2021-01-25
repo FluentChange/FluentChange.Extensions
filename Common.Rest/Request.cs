@@ -4,4 +4,10 @@
     {
 
     }
+
+    public class SingleRequest<T> : Request where T : class
+    {
+        public T Result { get; set; }
+
+    }
 }
