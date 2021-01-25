@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Authors>Frank Mühlschlegel</Authors>
+    <Company>Fluent Change</Company>
+    <Product>System Extensions</Product>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Version>0.0.1</Version>
+    <Description>Extensions to the System class of .NET Core</Description>
+    <PackageTags>System Helpers</PackageTags>
+    <PackageProjectUrl>https://github.com/FluentChange/FluentChange.Extensions/tree/master/System</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/FluentChange/FluentChange.Extensions</RepositoryUrl>
+    <RepositoryType>GitHub</RepositoryType>
+    <PackageId>FluentChange.Extensions.System</PackageId>
+    <AssemblyName>FluentChange.Extensions.System</AssemblyName>
+    <RootNamespace>FluentChange.Extensions.System</RootNamespace>
+  </PropertyGroup>
+
+</Project>

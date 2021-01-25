@@ -49,6 +49,10 @@ jobs:
         working-directory: ./Blazor
         run: dotnet pack Blazor.csproj --configuration Release --no-build --no-restore 
 
+      - name: Pack nuget System
+        working-directory: ./System
+        run: dotnet pack System.csproj --configuration Release --no-build --no-restore 
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -57,7 +61,7 @@ jobs:
             ./Azure.Functions/bin/Release/
             ./Common.Rest/bin/Release/
             ./Blazor/bin/Release/
-     
+            ./System/bin/Release/
 
 
   deploy:
