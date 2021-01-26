@@ -21,9 +21,14 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             this.provider = provider;
         }
 
-        public CRUDLBuilderEntity<T> ForEntity<T>() where T : class
+        public CRUDLBuilderEntity<T, T> ForEntity<T>() where T : class
         {
-            var builder = new CRUDLBuilderEntity<T>(provider);
+            var builder = new CRUDLBuilderEntity<T, T>(provider);
+            return builder;
+        }
+        public CRUDLBuilderEntity<T, M> ForEntityWithMapping<T, M>() where T : class where M : class
+        {
+            var builder = new CRUDLBuilderEntity<T, M>(provider);
             return builder;
         }
 
@@ -32,46 +37,70 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             return await ForEntity<T>().UseInterface<S>().Handle(req, log, id);
         }
 
-        public CRUDLBuilderEntityService<T, S> With<T, S>(Func<S, Func<T, T>> create, Func<S, Func<Guid, T>> read, Func<S, Func<T, T>> update, Func<S, Action<Guid>> delete, Func<S, Func<IEnumerable<T>>> list) where T : class where S : class
+        public async Task<HttpResponseMessage> HandleAndMap<T, M, S>(HttpRequest req, ILogger log, string id) where T : class where M : class where S : class, ICRUDLService<T>
+        {
+            return await ForEntityWithMapping<T, M>().UseInterface<S>().Handle(req, log, id);
+        }
+
+        public CRUDLBuilderEntityService<T, T, S> With<T, S>(Func<S, Func<T, T>> create, Func<S, Func<Guid, T>> read, Func<S, Func<T, T>> update, Func<S, Action<Guid>> delete, Func<S, Func<IEnumerable<T>>> list) where T : class where S : class
         {
             return ForEntity<T>().Use<S>().With(create, read, update, delete, list);
+        }
+        public CRUDLBuilderEntityService<T, M, S> WithAndMap<T, M, S>(Func<S, Func<T, T>> create, Func<S, Func<Guid, T>> read, Func<S, Func<T, T>> update, Func<S, Action<Guid>> delete, Func<S, Func<IEnumerable<T>>> list) where T : class where S : class where M : class
+        {
+            return ForEntityWithMapping<T, M>().Use<S>().With(create, read, update, delete, list);
         }
     }
 
 
-    public class CRUDLBuilderEntity<T> where T : class
+    public class CRUDLBuilderEntity<T, M> where T : class where M : class
     {
         private readonly IServiceProvider provider;
+        private readonly bool usesMapping;
 
         public CRUDLBuilderEntity(IServiceProvider provider)
         {
             this.provider = provider;
+            this.usesMapping = !(typeof(T).Equals(typeof(M)));
         }
 
-        public CRUDLBuilderEntityService<T, S> Use<S>() where S : class
+        public CRUDLBuilderEntityService<T, M, S> Use<S>() where S : class
         {
             var service = provider.GetService<S>();
-            var builder = new CRUDLBuilderEntityService<T, S>(service);
+            var mapper = GetMapperService();
+            var builder = new CRUDLBuilderEntityService<T, M, S>(service, mapper);
+            return builder;
+        }     
+
+        public CRUDLBuilderEntityInterfaceService<T, M, S> UseInterface<S>() where S : class, ICRUDLService<T>
+        {
+            var service = provider.GetService<S>();
+            var mapper = GetMapperService();
+            var builder = new CRUDLBuilderEntityInterfaceService<T, M, S>(service, mapper);
             return builder;
         }
-
-        public CRUDLBuilderEntityInterfaceService<T, S> UseInterface<S>() where S : class, ICRUDLService<T>
+        private IEntityMapper GetMapperService()
         {
-            var service = provider.GetService<S>();
-            var builder = new CRUDLBuilderEntityInterfaceService<T, S>(service);
-            return builder;
+            IEntityMapper mapper = null;
+            if (usesMapping)
+            {
+                mapper = provider.GetService<IEntityMapper>();
+                if (mapper == null) throw new Exception("Mapper is missing");
+            }
+
+            return mapper;
         }
     }
 
 
 
-    public class CRUDLBuilderEntityInterfaceService<T, S> where S : class, ICRUDLService<T> where T : class
+    public class CRUDLBuilderEntityInterfaceService<T, M, S> where S : class, ICRUDLService<T> where M : class where T : class
     {
-        private readonly CRUDLBuilderEntityService<T, S> internalBuilder;
-        public CRUDLBuilderEntityInterfaceService(S service)
+        private readonly CRUDLBuilderEntityService<T, M, S> internalBuilder;
+        public CRUDLBuilderEntityInterfaceService(S service, IEntityMapper mapper)
         {
 
-            internalBuilder = new CRUDLBuilderEntityService<T, S>(service);
+            internalBuilder = new CRUDLBuilderEntityService<T, M, S>(service, mapper);
             internalBuilder.With(s => s.Create, s => s.Read, s => s.Update, s => s.Delete, s => s.List);
         }
         public async Task<HttpResponseMessage> Handle(HttpRequest req, ILogger log, string id)
@@ -80,15 +109,19 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         }
     }
 
-    public class CRUDLBuilderEntityService<T, S> where S : class where T : class
+    public class CRUDLBuilderEntityService<T, M, S> where S : class where T : class where M : class
     {
         private readonly S service;
-        private bool useResponseWrapper;
+        private readonly IEntityMapper mapper;
+        private bool wrapRequestAndResponse;
+        private readonly bool usesMapping;
 
-        public CRUDLBuilderEntityService(S service)
+        public CRUDLBuilderEntityService(S service, IEntityMapper mapper)
         {
             this.service = service;
-            this.useResponseWrapper = false;
+            this.mapper = mapper;
+            this.wrapRequestAndResponse = false;
+            this.usesMapping = !(typeof(T).Equals(typeof(M)));
         }
 
         private Func<S, Func<T, T>> createFunc;
@@ -97,7 +130,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         private Func<S, Action<Guid>> deleteFunc;
         private Func<S, Func<IEnumerable<T>>> listFunc;
 
-        public CRUDLBuilderEntityService<T, S> With(Func<S, Func<T, T>> create, Func<S, Func<Guid, T>> read, Func<S, Func<T, T>> update, Func<S, Action<Guid>> delete, Func<S, Func<IEnumerable<T>>> list)
+        public CRUDLBuilderEntityService<T, M, S> With(Func<S, Func<T, T>> create, Func<S, Func<Guid, T>> read, Func<S, Func<T, T>> update, Func<S, Action<Guid>> delete, Func<S, Func<IEnumerable<T>>> list)
         {
             createFunc = create;
             readFunc = read;
@@ -107,41 +140,40 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             return this;
         }
 
-        public CRUDLBuilderEntityService<T, S> Create(Func<S, Func<T, T>> predicate)
+        public CRUDLBuilderEntityService<T, M, S> Create(Func<S, Func<T, T>> predicate)
         {
             createFunc = predicate;
             return this;
         }
-        public CRUDLBuilderEntityService<T, S> Read(Func<S, Func<Guid, T>> predicate)
+        public CRUDLBuilderEntityService<T, M, S> Read(Func<S, Func<Guid, T>> predicate)
         {
             readFunc = predicate;
             return this;
         }
-        public CRUDLBuilderEntityService<T, S> Update(Func<S, Func<T, T>> predicate)
+        public CRUDLBuilderEntityService<T, M, S> Update(Func<S, Func<T, T>> predicate)
         {
             updateFunc = predicate;
             return this;
         }
-        public CRUDLBuilderEntityService<T, S> Delete(Func<S, Action<Guid>> predicate)
+        public CRUDLBuilderEntityService<T, M, S> Delete(Func<S, Action<Guid>> predicate)
         {
             deleteFunc = predicate;
             return this;
         }
-        public CRUDLBuilderEntityService<T, S> List(Func<S, Func<IEnumerable<T>>> predicate)
+        public CRUDLBuilderEntityService<T, M, S> List(Func<S, Func<IEnumerable<T>>> predicate)
         {
             listFunc = predicate;
             return this;
         }
 
-        public CRUDLBuilderEntityService<T, S> WrapResponse()
+        public CRUDLBuilderEntityService<T, M, S> WrapRequestAndResponse()
         {
-            useResponseWrapper = true;
+            wrapRequestAndResponse = true;
             return this;
         }
 
         public async Task<HttpResponseMessage> Handle(HttpRequest req, ILogger log, string id)
         {
-
             log.LogInformation("CRUDL Function " + req.Method.ToUpper() + " " + typeof(S).Name + "/" + typeof(T).Name);
 
             if (req.Method == "GET")
@@ -165,30 +197,22 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             if (req.Method == "POST")
             {
                 if (createFunc == null) throw new NotImplementedException();
-                if (req.Body == null) throw new ArgumentNullException();
-                if (req.Body.Length == 0) throw new ArgumentNullException();
+                T create = await GetRequestBody(req);
 
-                string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-                var todo = JsonConvert.DeserializeObject<T>(requestBody);
+                if (create == null) throw new ArgumentNullException();
+                createFunc.Invoke(service).Invoke(create);
 
-                if (todo == null) throw new ArgumentNullException();
-                createFunc.Invoke(service).Invoke(todo);
-                return Respond();
-
+                return Respond(create);
             }
             if (req.Method == "PUT")
             {
                 if (updateFunc == null) throw new NotImplementedException();
-                if (req.Body == null) throw new ArgumentNullException();
-                if (req.Body.Length == 0) throw new ArgumentNullException();
+                T update = await GetRequestBody(req);
 
-                string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-                var todo = JsonConvert.DeserializeObject<T>(requestBody);
+                if (update == null) throw new ArgumentNullException();
+                updateFunc.Invoke(service).Invoke(update);
 
-                if (todo == null) throw new ArgumentNullException();
-
-                updateFunc.Invoke(service).Invoke(todo);
-                return Respond();
+                return Respond(update);
             }
             if (req.Method == "DELETE")
             {
@@ -202,11 +226,27 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             throw new NotImplementedException();
         }
 
+        private async Task<T> GetRequestBody(HttpRequest req)
+        {
+            if (req.Body == null) throw new ArgumentNullException();
+            if (req.Body.Length == 0) throw new ArgumentNullException();
 
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            if (wrapRequestAndResponse)
+            {
+                var entityWrapped = JsonConvert.DeserializeObject<SingleRequest<T>>(requestBody);
+                return entityWrapped.Result;
+            }
+            else
+            {
+                var entity = JsonConvert.DeserializeObject<T>(requestBody);
+                return entity;
+            }
+        }
 
         private HttpResponseMessage Respond()
         {
-            if (useResponseWrapper)
+            if (wrapRequestAndResponse)
             {
                 var response = new Response();
                 return ResponseHelper.CreateJsonResponse(response);
@@ -219,33 +259,68 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
 
         private HttpResponseMessage Respond(T result)
         {
-            if (useResponseWrapper)
+            if (wrapRequestAndResponse)
             {
-                var response = new SingleResponse<T>();
-                response.Result = result;
-                return ResponseHelper.CreateJsonResponse(response);
+                if (usesMapping)
+                {
+                    var mappedResult = mapper.MapTo<M>(result);
+                    var response = new SingleResponse<M>();
+                    response.Result = mappedResult;
+                    return ResponseHelper.CreateJsonResponse(response);
+                }
+                else
+                {
+                    var response = new SingleResponse<T>();
+                    response.Result = result;
+                    return ResponseHelper.CreateJsonResponse(response);
+                }
+             
             }
             else
             {
-                return ResponseHelper.CreateJsonResponse(result);
+                if (usesMapping)
+                {                
+                    var mappedResult = mapper.MapTo<M>(result);     
+                    return ResponseHelper.CreateJsonResponse(mappedResult);
+                }
+                else
+                {
+                    return ResponseHelper.CreateJsonResponse(result);
+                }
             }
         }
 
         private HttpResponseMessage Respond(IEnumerable<T> results)
         {
-            if (useResponseWrapper)
+            if (wrapRequestAndResponse)
             {
-                var response = new MultiResponse<T>();
-                response.Results = results.ToList();
-                return ResponseHelper.CreateJsonResponse(response);
+                if (usesMapping)
+                {
+                    var mappedResults = mapper.ProjectTo<M>(results.AsQueryable());
+                    var response = new MultiResponse<M>();
+                    response.Results = mappedResults.ToList();
+                    return ResponseHelper.CreateJsonResponse(response);
+                }
+                else
+                {
+                    var response = new MultiResponse<T>();
+                    response.Results = results.ToList();
+                    return ResponseHelper.CreateJsonResponse(response);
+                }
             }
             else
             {
-                return ResponseHelper.CreateJsonResponse(results);
+                if (usesMapping)
+                {
+                    var mappedResults = mapper.ProjectTo<M>(results.AsQueryable());
+                    return ResponseHelper.CreateJsonResponse(mappedResults);
+                }
+                else
+                {
+                  
+                    return ResponseHelper.CreateJsonResponse(results);
+                }
             }
         }
     }
 }
-
-
-

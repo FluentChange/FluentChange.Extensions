@@ -42,7 +42,7 @@ namespace DemoCRUDLFunctions
         {
 
             return await CRUDL
-                .With<Event,EventService>(s => s.New, s => s.Get, s => s.Edit, s => s.Remove, s => s.All)
+                .With<Event, EventService>(s => s.New, s => s.Get, s => s.Edit, s => s.Remove, s => s.All)
                 .Handle(req, log, id);
 
         }
@@ -83,7 +83,21 @@ namespace DemoCRUDLFunctions
                 .ForEntity<Product>()
                 .Use<ProductService>()
                 .With(s => s.Create, s => s.Read, s => s.Update, s => s.Delete, s => s.List)
-                .WrapResponse()
+                .WrapRequestAndResponse()
+                .Handle(req, log, id);
+
+        }
+
+
+        [FunctionName("Sample7ProductMappingCRUDL")]
+        public async Task<HttpResponseMessage> Run7([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", "put", "delete", Route = "sample7/products" + CRUDLHelper.Id)] string id, HttpRequest req, ILogger log)
+        {
+
+            return await CRUDL
+                .ForEntityWithMapping<Product, ApiProduct>()
+                .Use<ProductService>()
+                .With(s => s.Create, s => s.Read, s => s.Update, s => s.Delete, s => s.List)
+                .WrapRequestAndResponse()
                 .Handle(req, log, id);
 
         }

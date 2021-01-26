@@ -11,4 +11,12 @@ namespace DemoCRUDLFunctions.Models
         public string Description { get; set; }
         public double Price { get; set; }
     }
+
+    public class ApiProduct
+    {
+        public Guid Identifier { get; set; }
+        public string Name { get; set; }
+        public string Text { get; set; }
+        public double Price { get; set; }
+    }
 }
