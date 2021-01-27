@@ -13,13 +13,19 @@ namespace DemoCRUDLFunctions.Services
         {
             events = new List<Event>();
 
-            var t = new Event();
-            t.Id = Guid.Parse("33bc54bf-9e0c-494d-84ad-cc239837f543");
-            t.Title = "Test Event";
-            t.Description = "Description Event";
-            t.Date = DateTime.Now;
+            var t1 = new Event();
+            t1.Id = Guid.Parse("33bc54bf-9e0c-494d-84ad-cc239837f543");
+            t1.Title = "Test Event 1";
+            t1.Description = "Description Event 1";
+            t1.Date = DateTime.Now;
 
-            events.Add(t);
+            var t2 = new Event();
+            t2.Id = Guid.Parse("44bc54bf-9e0c-494d-84ad-cc239837f543");
+            t2.Title = "Test Event 2";
+            t2.Description = "Description Event 2";
+            t2.Date = DateTime.Now.AddDays(1);
+
+            events.Add(t1);
         }
 
         public Event New(Event @event)

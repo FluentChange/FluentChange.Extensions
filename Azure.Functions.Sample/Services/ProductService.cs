@@ -13,13 +13,20 @@ namespace DemoCRUDLFunctions.Services
         {
             products = new List<Product>();
 
-            var t = new Product();
-            t.Id = Guid.Parse("66bc54bf-9e0c-494d-84ad-cc239837f543");
-            t.Title = "Test Product";
-            t.Description = "Description Product";
-            t.Price = 123.5;
+            var p1 = new Product();
+            p1.Id = Guid.Parse("66bc54bf-9e0c-494d-84ad-cc239837f543");
+            p1.Title = "Test Product 1";
+            p1.Description = "Description Product 1";
+            p1.Price = 123.5;
 
-            products.Add(t);
+            var p2 = new Product();
+            p2.Id = Guid.Parse("77bc54bf-9e0c-494d-84ad-cc239837f543");
+            p2.Title = "Test Product 2";
+            p2.Description = "Description Product 2";
+            p2.Price = 444.4;
+
+            products.Add(p1);
+            products.Add(p2);
         }
 
         public Product Create(Product product)

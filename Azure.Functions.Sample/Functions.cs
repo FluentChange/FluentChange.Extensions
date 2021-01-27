@@ -1,6 +1,7 @@
 using DemoCRUDLFunctions.Models;
 using DemoCRUDLFunctions.Services;
 using FluentChange.Extensions.Azure.Functions.CRUDL;
+using FluentChange.Extensions.Azure.Functions.Helper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
@@ -18,7 +19,7 @@ namespace DemoCRUDLFunctions
         }
 
         [FunctionName("Sample1TodoCRUDL")]
-        public async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", "put", "delete", Route = "sample1/todos" + CRUDLHelper.Id)] string id, HttpRequest req, ILogger log)
+        public async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", "put", "delete", Route = "sample1/todos" + CRUDLHelper.Id)] HttpRequest req, string id, ILogger log)
         {
 
             return await CRUDL
@@ -27,7 +28,7 @@ namespace DemoCRUDLFunctions
         }
 
         [FunctionName("Sample2TodoCRUDL")]
-        public async Task<HttpResponseMessage> Run2([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", "put", "delete", Route = "sample2/todos" + CRUDLHelper.Id)] string id, HttpRequest req, ILogger log)
+        public async Task<HttpResponseMessage> Run2([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", "put", "delete", Route = "sample2/todos" + CRUDLHelper.Id)] HttpRequest req, string id, ILogger log)
         {
 
             return await CRUDL
@@ -38,7 +39,7 @@ namespace DemoCRUDLFunctions
         }
 
         [FunctionName("Sample3EventCRUDL")]
-        public async Task<HttpResponseMessage> Run3([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", "put", "delete", Route = "sample3/events" + CRUDLHelper.Id)] string id, HttpRequest req, ILogger log)
+        public async Task<HttpResponseMessage> Run3([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", "put", "delete", Route = "sample3/events" + CRUDLHelper.Id)] HttpRequest req, string id, ILogger log)
         {
 
             return await CRUDL
@@ -48,7 +49,7 @@ namespace DemoCRUDLFunctions
         }
 
         [FunctionName("Sample4EventCRUDL")]
-        public async Task<HttpResponseMessage> Run4([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", "put", "delete", Route = "sample4/events" + CRUDLHelper.Id)] string id, HttpRequest req, ILogger log)
+        public async Task<HttpResponseMessage> Run4([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", "put", "delete", Route = "sample4/events" + CRUDLHelper.Id)] HttpRequest req, string id, ILogger log)
         {
 
             return await CRUDL
@@ -60,7 +61,7 @@ namespace DemoCRUDLFunctions
         }
 
         [FunctionName("Sample5EventCRUDL")]
-        public async Task<HttpResponseMessage> Run5([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", "put", "delete", Route = "sample5/events" + CRUDLHelper.Id)] string id, HttpRequest req, ILogger log)
+        public async Task<HttpResponseMessage> Run5([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", "put", "delete", Route = "sample5/events" + CRUDLHelper.Id)] HttpRequest req, string id, ILogger log)
         {
 
             return await CRUDL
@@ -76,7 +77,7 @@ namespace DemoCRUDLFunctions
         }
 
         [FunctionName("Sample6ProductCRUDL")]
-        public async Task<HttpResponseMessage> Run6([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", "put", "delete", Route = "sample6/products" + CRUDLHelper.Id)] string id, HttpRequest req, ILogger log)
+        public async Task<HttpResponseMessage> Run6([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", "put", "delete", Route = "sample6/products" + CRUDLHelper.Id)] HttpRequest req, string id, ILogger log)
         {
 
             return await CRUDL
@@ -90,15 +91,22 @@ namespace DemoCRUDLFunctions
 
 
         [FunctionName("Sample7ProductMappingCRUDL")]
-        public async Task<HttpResponseMessage> Run7([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", "put", "delete", Route = "sample7/products" + CRUDLHelper.Id)] string id, HttpRequest req, ILogger log)
+        public async Task<HttpResponseMessage> Run7([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", "put", "delete", Route = "sample7/products" + CRUDLHelper.Id)] HttpRequest req, string id, ILogger log)
         {
+            try
+            {
+                return await CRUDL
+              .ForEntityWithMapping<Product, ApiProduct>()
+              .Use<ProductService>()
+              .With(s => s.Create, s => s.Read, s => s.Update, s => s.Delete, s => s.List)
+              .WrapRequestAndResponse()
+              .Handle(req, log, id);
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.CreateJsonResponse(ex.ToString(), System.Net.HttpStatusCode.InternalServerError);
+            }
 
-            return await CRUDL
-                .ForEntityWithMapping<Product, ApiProduct>()
-                .Use<ProductService>()
-                .With(s => s.Create, s => s.Read, s => s.Update, s => s.Delete, s => s.List)
-                .WrapRequestAndResponse()
-                .Handle(req, log, id);
 
         }
     }

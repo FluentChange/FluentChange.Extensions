@@ -1,8 +1,9 @@
-﻿using System;
+﻿using FluentChange.Extensions.Common.Rest;
+using System;
 
 namespace DemoCRUDLFunctions.Models
 {
-    public class Event
+    public class Event: IEntityWithId
     {
         public Guid Id { get; set; }
         public string Title { get; set; }

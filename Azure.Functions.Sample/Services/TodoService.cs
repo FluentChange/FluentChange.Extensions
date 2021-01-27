@@ -13,13 +13,20 @@ namespace DemoCRUDLFunctions.Services
         {
             todos = new List<Todo>();
 
-            var t = new Todo();
-            t.Id = Guid.Parse("16bc54bf-9e0c-494d-84ad-cc239837f543");
-            t.Title = "Test Todo";
-            t.Description = "Description Todo";
-            t.Done = false;
+            var t1 = new Todo();
+            t1.Id = Guid.Parse("11bc54bf-9e0c-494d-84ad-cc239837f543");
+            t1.Title = "Test Todo 1";
+            t1.Description = "Description Todo 1";
+            t1.Done = false;
 
-            todos.Add(t);
+            var t2 = new Todo();
+            t2.Id = Guid.Parse("22bc54bf-9e0c-494d-84ad-cc239837f543");
+            t2.Title = "Test Todo 2";
+            t2.Description = "Description Todo 2";
+            t2.Done = false;
+
+            todos.Add(t1);
+            todos.Add(t2);
         }
 
         public Todo Create(Todo todo)
