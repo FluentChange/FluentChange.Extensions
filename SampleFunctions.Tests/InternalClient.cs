@@ -24,7 +24,7 @@ namespace SampleFunctions.Tests
 
             try
             {
-                var response2 = rest.Execute(request);
+                //var response2 = rest.Execute(request);
                 var response = rest.Execute<T>(request);
                 return response.Data;
             }

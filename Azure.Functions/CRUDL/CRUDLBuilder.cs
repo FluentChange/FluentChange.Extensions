@@ -213,9 +213,9 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
                     T create = await GetRequestBody(req);
 
                     if (create == null) throw new ArgumentNullException();
-                    createFunc.Invoke(service).Invoke(create);
+                    var resultCreated = createFunc.Invoke(service).Invoke(create);
 
-                    return Respond(create);
+                    return Respond(resultCreated);
                 }
                 if (req.Method == "PUT")
                 {
@@ -223,9 +223,9 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
                     T update = await GetRequestBody(req);
 
                     if (update == null) throw new ArgumentNullException();
-                    updateFunc.Invoke(service).Invoke(update);
+                    var resultUpdated = updateFunc.Invoke(service).Invoke(update);
 
-                    return Respond(update);
+                    return Respond(resultUpdated);
                 }
                 if (req.Method == "DELETE")
                 {
@@ -253,13 +253,31 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             if (wrapRequestAndResponse)
             {
-                var entityWrapped = JsonConvert.DeserializeObject<SingleRequest<T>>(requestBody);
-                return entityWrapped.Data;
+                if (usesMapping)
+                {
+                    var entityWrapped = JsonConvert.DeserializeObject<SingleRequest<M>>(requestBody);
+                    var entityMapped = mapper.MapTo<T>(entityWrapped.Data);
+                    return entityMapped;
+                }
+                else
+                {
+                    var entityWrapped = JsonConvert.DeserializeObject<SingleRequest<T>>(requestBody);
+                    return entityWrapped.Data;
+                }
             }
             else
             {
-                var entity = JsonConvert.DeserializeObject<T>(requestBody);
-                return entity;
+                if (usesMapping)
+                {
+                    var entity = JsonConvert.DeserializeObject<M>(requestBody);
+                    var entityMapped = mapper.MapTo<T>(entity);
+                    return entityMapped;
+                }
+                else
+                {
+                    var entity = JsonConvert.DeserializeObject<T>(requestBody);
+                    return entity;
+                }
             }
         }
         private HttpResponseMessage RespondError(Exception ex)
@@ -268,7 +286,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             {
                 var response = new Response();
                 response.Errors.Add(new Error() { Message = ex.Message, FullMessage = ex.ToString() });
-                return ResponseHelper.CreateJsonResponse(response,System.Net.HttpStatusCode.InternalServerError);
+                return ResponseHelper.CreateJsonResponse(response, System.Net.HttpStatusCode.InternalServerError);
             }
             else
             {
