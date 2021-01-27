@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FluentChange.Extensions.System.Helper;
+using System;
 using System.Collections.Generic;
 
 
@@ -8,57 +9,58 @@ namespace FluentChange.Extensions.Common.Rest
     {
         private readonly IRestClient rest;
         private readonly string route;
-        private Action beforeEachRequest;
-        public GenericCRUDLApi(IRestClient rest, string route)
+
+        private Dictionary<string, string> routeParams;
+        public GenericCRUDLApi(IRestClient rest, string route, Dictionary<string, string> routeParams)
         {
             this.rest = rest;
             this.route = route;
+            this.routeParams = routeParams;
         }
-
-        public void BeforeEachRequest(Action action)
-        {
-            this.beforeEachRequest = action;
-        }     
+              
 
         public SingleResponse<T> Create(T entity)
         {
             var request = new SingleRequest<T>();
             request.Data = entity;
-            beforeEachRequest.Invoke();
-            return rest.Post<SingleResponse<T>>(route, request);
+            var paramsDic = routeParams.Copy();
+
+            return rest.Post<SingleResponse<T>>(route, request, paramsDic);
         }
 
         public SingleResponse<T> Read(Guid id)
         {
-            var paramsDic = new Dictionary<string, string>();
-            paramsDic.Add("id", id.ToString());
+            var paramsDic = routeParams.Copy();       
+            paramsDic.Add(Routes.ParamNameId, id.ToString());      
 
-            beforeEachRequest.Invoke();
-
-            return rest.Get<SingleResponse<T>>(route + "/{id?}", paramsDic);
+            return rest.Get<SingleResponse<T>>(route + Routes.OptionalId, paramsDic);
         }
+
+       
 
         public SingleResponse<T> Update(T entity)
         {
             var request = new SingleRequest<T>();
             request.Data = entity;
-            var paramsDic = new Dictionary<string, string>();
-            paramsDic.Add("id", entity.Id.ToString());
-            beforeEachRequest.Invoke();
-            return rest.Put<SingleResponse<T>>(route + "/{id?}", request, paramsDic);
+            var paramsDic = routeParams.Copy();
+            paramsDic.Add(Routes.ParamNameId, entity.Id.ToString());
+ 
+            return rest.Put<SingleResponse<T>>(route + Routes.OptionalId, request, paramsDic);
         }
 
         public void Delete(Guid id)
         {
-            var paramsDic = new Dictionary<string, string>();
-            paramsDic.Add("id", id.ToString());
-            beforeEachRequest.Invoke();
-            rest.Delete<SingleResponse<T>>(route + "/{id?}", paramsDic);
+            var paramsDic = routeParams.Copy();
+            paramsDic.Add(Routes.ParamNameId, id.ToString());
+   
+            rest.Delete<SingleResponse<T>>(route + Routes.OptionalId, paramsDic);
         }
         public MultiResponse<T> List()
         {
-            beforeEachRequest.Invoke();
-            return rest.Get<MultiResponse<T>>(route);
+            var paramsDic = routeParams.Copy();
+            return rest.Get<MultiResponse<T>>(route, paramsDic);
         }
+
+      
     }
 }

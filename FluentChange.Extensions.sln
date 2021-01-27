@@ -29,13 +29,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Azure.Functions", "Azure.Fu
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Azure.Functions", "Azure.Functions\Azure.Functions.csproj", "{E6C5E913-1E54-4226-A4D1-BEA69E3AF21D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample", "Azure.Functions.Sample\Sample.csproj", "{6BDF80AF-F3AB-4E26-8706-595AB3784509}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleFunctions", "Azure.Functions.Sample\SampleFunctions.csproj", "{6BDF80AF-F3AB-4E26-8706-595AB3784509}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{EAC7228C-83A1-4B00-9AB6-7E9BBE73078B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common.Rest", "Common.Rest\Common.Rest.csproj", "{698385EB-6DCC-4C79-BE42-5D8BC5C16DCE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System", "System\System.csproj", "{7B4F56DD-0907-4EB0-9DF6-9F01FC4CB620}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "System", "System\System.csproj", "{7B4F56DD-0907-4EB0-9DF6-9F01FC4CB620}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "System", "System", "{6DA040D0-DB55-4076-9FEF-5559B87848AE}"
 EndProject

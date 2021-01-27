@@ -235,7 +235,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             if (wrapRequestAndResponse)
             {
                 var entityWrapped = JsonConvert.DeserializeObject<SingleRequest<T>>(requestBody);
-                return entityWrapped.Result;
+                return entityWrapped.Data;
             }
             else
             {
