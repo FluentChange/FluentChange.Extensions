@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace FluentChange.Extensions.Common.Rest
 {
-    public abstract class GenericCRUDLApi<T> where T : class, IEntityWithId
+    public class GenericCRUDLApi<T> where T : class, IEntityWithId
     {
         private readonly IRestClient rest;
         private readonly string route;
