@@ -68,14 +68,21 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         {
             var service = provider.GetService<S>();
             var mapper = GetMapperService();
+            if (service == null) throw new NullReferenceException(nameof(service));
+            if (mapper == null) throw new NullReferenceException(nameof(mapper));
+
             var builder = new CRUDLBuilderEntityService<T, M, S>(service, mapper);
             return builder;
-        }     
+        }
 
         public CRUDLBuilderEntityInterfaceService<T, M, S> UseInterface<S>() where S : class, ICRUDLService<T>
         {
             var service = provider.GetService<S>();
             var mapper = GetMapperService();
+
+            if (service == null) throw new NullReferenceException(nameof(service));
+            if (mapper == null) throw new NullReferenceException(nameof(mapper));
+
             var builder = new CRUDLBuilderEntityInterfaceService<T, M, S>(service, mapper);
             return builder;
         }
@@ -99,6 +106,8 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         private readonly CRUDLBuilderEntityService<T, M, S> internalBuilder;
         public CRUDLBuilderEntityInterfaceService(S service, IEntityMapper mapper)
         {
+            if (service == null) throw new ArgumentNullException(nameof(service));
+            if (mapper == null) throw new ArgumentNullException(nameof(mapper));
 
             internalBuilder = new CRUDLBuilderEntityService<T, M, S>(service, mapper);
             internalBuilder.With(s => s.Create, s => s.Read, s => s.Update, s => s.Delete, s => s.List);
@@ -118,6 +127,8 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
 
         public CRUDLBuilderEntityService(S service, IEntityMapper mapper)
         {
+            if (service == null) throw new ArgumentNullException(nameof(service));
+            if (mapper == null) throw new ArgumentNullException(nameof(mapper));
             this.service = service;
             this.mapper = mapper;
             this.wrapRequestAndResponse = false;
@@ -176,54 +187,62 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         {
             log.LogInformation("CRUDL Function " + req.Method.ToUpper() + " " + typeof(S).Name + "/" + typeof(T).Name);
 
-            if (req.Method == "GET")
+            try
             {
-
-                if (!String.IsNullOrEmpty(id))
+                if (req.Method == "GET")
                 {
-                    if (readFunc == null) throw new NotImplementedException();
+
+                    if (!String.IsNullOrEmpty(id))
+                    {
+                        if (readFunc == null) throw new NotImplementedException();
+                        var idGuid = Guid.Parse(id);
+                        var read = readFunc.Invoke(service).Invoke(idGuid);
+
+                        return Respond(read);
+                    }
+                    else
+                    {
+                        if (listFunc == null) throw new NotImplementedException();
+                        var list = listFunc.Invoke(service).Invoke();
+                        return Respond(list);
+                    }
+                }
+                if (req.Method == "POST")
+                {
+                    if (createFunc == null) throw new NotImplementedException();
+                    T create = await GetRequestBody(req);
+
+                    if (create == null) throw new ArgumentNullException();
+                    createFunc.Invoke(service).Invoke(create);
+
+                    return Respond(create);
+                }
+                if (req.Method == "PUT")
+                {
+                    if (updateFunc == null) throw new NotImplementedException();
+                    T update = await GetRequestBody(req);
+
+                    if (update == null) throw new ArgumentNullException();
+                    updateFunc.Invoke(service).Invoke(update);
+
+                    return Respond(update);
+                }
+                if (req.Method == "DELETE")
+                {
+                    if (deleteFunc == null) throw new NotImplementedException();
+                    if (String.IsNullOrEmpty(id)) throw new ArgumentNullException();
                     var idGuid = Guid.Parse(id);
-                    var read = readFunc.Invoke(service).Invoke(idGuid);
 
-                    return Respond(read);
+                    deleteFunc.Invoke(service).Invoke(idGuid);
+                    return Respond();
                 }
-                else
-                {
-                    if (listFunc == null) throw new NotImplementedException();
-                    var list = listFunc.Invoke(service).Invoke();
-                    return Respond(list);
-                }
+                throw new NotImplementedException();
             }
-            if (req.Method == "POST")
+            catch (Exception ex)
             {
-                if (createFunc == null) throw new NotImplementedException();
-                T create = await GetRequestBody(req);
-
-                if (create == null) throw new ArgumentNullException();
-                createFunc.Invoke(service).Invoke(create);
-
-                return Respond(create);
+                return RespondError(ex);
             }
-            if (req.Method == "PUT")
-            {
-                if (updateFunc == null) throw new NotImplementedException();
-                T update = await GetRequestBody(req);
 
-                if (update == null) throw new ArgumentNullException();
-                updateFunc.Invoke(service).Invoke(update);
-
-                return Respond(update);
-            }
-            if (req.Method == "DELETE")
-            {
-                if (deleteFunc == null) throw new NotImplementedException();
-                if (String.IsNullOrEmpty(id)) throw new ArgumentNullException();
-                var idGuid = Guid.Parse(id);
-
-                deleteFunc.Invoke(service).Invoke(idGuid);
-                return Respond();
-            }
-            throw new NotImplementedException();
         }
 
         private async Task<T> GetRequestBody(HttpRequest req)
@@ -243,7 +262,19 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
                 return entity;
             }
         }
-
+        private HttpResponseMessage RespondError(Exception ex)
+        {
+            if (wrapRequestAndResponse)
+            {
+                var response = new Response();
+                response.Errors.Add(new Error() { Message = ex.Message, FullMessage = ex.ToString() });
+                return ResponseHelper.CreateJsonResponse(response,System.Net.HttpStatusCode.InternalServerError);
+            }
+            else
+            {
+                return ResponseHelper.CreateJsonResponse(null, System.Net.HttpStatusCode.InternalServerError);
+            }
+        }
         private HttpResponseMessage Respond()
         {
             if (wrapRequestAndResponse)
@@ -274,13 +305,13 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
                     response.Result = result;
                     return ResponseHelper.CreateJsonResponse(response);
                 }
-             
+
             }
             else
             {
                 if (usesMapping)
-                {                
-                    var mappedResult = mapper.MapTo<M>(result);     
+                {
+                    var mappedResult = mapper.MapTo<M>(result);
                     return ResponseHelper.CreateJsonResponse(mappedResult);
                 }
                 else
@@ -317,7 +348,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
                 }
                 else
                 {
-                  
+
                     return ResponseHelper.CreateJsonResponse(results);
                 }
             }
