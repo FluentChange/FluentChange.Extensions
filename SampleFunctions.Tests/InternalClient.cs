@@ -51,7 +51,7 @@ namespace SampleFunctions.Tests
         {
             route = ReplaceParams(route, parameters);
 
-            var request = new RestSharp.RestRequest(route, RestSharp.Method.POST);
+            var request = new RestSharp.RestRequest(route, RestSharp.Method.PUT);
             request.AddJsonBody(requestBody);
 
             var response = rest.Execute<T>(request);

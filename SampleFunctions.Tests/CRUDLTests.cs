@@ -6,10 +6,10 @@ using System;
 namespace SampleFunctions.Tests
 {
     [TestClass]
-    public class UnitTest1
+    public class CRUDLTests
     {
         [TestMethod]
-        public void CRUDLAPI()
+        public void Sample7Products()
         {
             var rest = new FunctionsApiClient();
 
