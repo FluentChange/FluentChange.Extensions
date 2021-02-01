@@ -48,12 +48,12 @@ namespace FluentChange.Extensions.Common.Rest
             return rest.Put<SingleResponse<T>>(route + Routes.PatternId, request, paramsDic);
         }
 
-        public void Delete(Guid id)
+        public Response Delete(Guid id)
         {
             var paramsDic = routeParams.Copy();
             paramsDic.Add(Routes.ParamNameId, id.ToString());
 
-            rest.Delete<SingleResponse<T>>(route + Routes.PatternId, paramsDic);
+            return rest.Delete<Response>(route + Routes.PatternId, paramsDic);
         }
         public MultiResponse<T> List()
         {

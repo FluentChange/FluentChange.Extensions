@@ -44,7 +44,9 @@ namespace SampleFunctions.Tests
             var listNewAfterUpdate = rest.Sample7Products.List();
             Assert.AreEqual(3, listNewAfterUpdate.Results.Count);
 
-            rest.Sample7Products.Delete(created.Result.Id);
+            var deleted = rest.Sample7Products.Delete(created.Result.Id);
+            Assert.IsNotNull(deleted);
+            if (deleted.Errors != null) Assert.AreEqual(0, deleted.Errors.Count);
 
             var listNewAfterDelete = rest.Sample7Products.List();
             Assert.AreEqual(2, listNewAfterDelete.Results.Count);
