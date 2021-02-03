@@ -16,7 +16,17 @@ namespace FluentChange.Extensions.System.Helper
               .Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
-        public static string GetRNGString(int length)
+        public static string GetRNGStringBase64(int length)
+        {
+            using (var rng = new RNGCryptoServiceProvider())
+            {
+                byte[] tokenData = new byte[length];
+                rng.GetBytes(tokenData);
+                return Convert.ToBase64String(tokenData);
+            }
+        }
+
+        public static string GetRNGStringAlphaNumDashs(int length)
         {
             string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-_";
             return GetRNGString(length, chars);

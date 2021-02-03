@@ -7,7 +7,7 @@
     <Product>System Extensions</Product>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Version>0.0.3</Version>
+    <Version>0.0.4</Version>
     <Description>Extensions to the System class of .NET Core</Description>
     <PackageTags>System Helpers</PackageTags>
     <PackageProjectUrl>https://github.com/FluentChange/FluentChange.Extensions/tree/master/System</PackageProjectUrl>
