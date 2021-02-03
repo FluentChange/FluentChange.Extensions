@@ -13,5 +13,11 @@ namespace FluentChange.Extensions.System.Helper
             name = rgx.Replace(name, "");
             return name.ToLower();
         }
+
+        public static bool IsSlug(string name)
+        {
+            var makeSlug = MakeSlug(name);
+            return name.ToLower() == makeSlug;
+        }
     }
 }
