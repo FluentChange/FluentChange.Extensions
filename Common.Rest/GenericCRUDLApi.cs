@@ -1,7 +1,7 @@
 ﻿using FluentChange.Extensions.System.Helper;
 using System;
 using System.Collections.Generic;
-
+using System.Threading.Tasks;
 
 namespace FluentChange.Extensions.Common.Rest
 {
@@ -19,46 +19,46 @@ namespace FluentChange.Extensions.Common.Rest
         }
 
 
-        public SingleResponse<T> Create(T entity)
+        public async Task<SingleResponse<T>> Create(T entity)
         {
             var request = new SingleRequest<T>();
             request.Data = entity;
             var paramsDic = routeParams.Copy();
-
-            return rest.Post<SingleResponse<T>>(route, request, paramsDic);
+             
+            return await rest.Post<SingleResponse<T>>(route, request, paramsDic);
         }
 
-        public SingleResponse<T> Read(Guid id)
+        public async Task<SingleResponse<T>> Read(Guid id)
         {
             var paramsDic = routeParams.Copy();
             paramsDic.Add(Routes.ParamNameId, id.ToString());
             var read = rest.Get<SingleResponse<T>>(route + Routes.PatternId, paramsDic);
-            return read;
+            return await read;
         }
 
 
 
-        public SingleResponse<T> Update(T entity)
+        public async Task<SingleResponse<T>> Update(T entity)
         {
             var request = new SingleRequest<T>();
             request.Data = entity;
             var paramsDic = routeParams.Copy();
             paramsDic.Add(Routes.ParamNameId, entity.Id.ToString());
 
-            return rest.Put<SingleResponse<T>>(route + Routes.PatternId, request, paramsDic);
+            return await rest.Put<SingleResponse<T>>(route + Routes.PatternId, request, paramsDic);
         }
 
-        public Response Delete(Guid id)
+        public async Task<Response> Delete(Guid id)
         {
             var paramsDic = routeParams.Copy();
             paramsDic.Add(Routes.ParamNameId, id.ToString());
 
-            return rest.Delete<Response>(route + Routes.PatternId, paramsDic);
+            return await rest.Delete<Response>(route + Routes.PatternId, paramsDic);
         }
-        public MultiResponse<T> List()
+        public async Task<MultiResponse<T>> List()
         {
             var paramsDic = routeParams.Copy();
-            return rest.Get<MultiResponse<T>>(route, paramsDic);
+            return await rest.Get<MultiResponse<T>>(route, paramsDic);
         }
 
 
@@ -77,39 +77,39 @@ namespace FluentChange.Extensions.Common.Rest
         }
               
 
-        public T Create(T entity)
+        public async Task<T> Create(T entity)
         {
             var paramsDic = routeParams.Copy();
-            return rest.Post<T>(route, entity, paramsDic);
+            return await rest.Post<T>(route, entity, paramsDic);
         }
 
-        public T Read(Guid id)
+        public async Task<T> Read(Guid id)
         {
             var paramsDic = routeParams.Copy();       
             paramsDic.Add(Routes.ParamNameId, id.ToString());      
 
-            return rest.Get<T>(route + Routes.PatternId, paramsDic);
+            return await rest.Get<T>(route + Routes.PatternId, paramsDic);
         }              
 
-        public T Update(T entity)
+        public async Task<T> Update(T entity)
         {         
             var paramsDic = routeParams.Copy();
             paramsDic.Add(Routes.ParamNameId, entity.Id.ToString());
  
-            return rest.Put<T>(route + Routes.PatternId, entity, paramsDic);
+            return await rest.Put<T>(route + Routes.PatternId, entity, paramsDic);
         }
 
-        public void Delete(Guid id)
+        public async Task Delete(Guid id)
         {
             var paramsDic = routeParams.Copy();
             paramsDic.Add(Routes.ParamNameId, id.ToString());
    
-            rest.Delete<T>(route + Routes.PatternId, paramsDic);
+            await rest.Delete<T>(route + Routes.PatternId, paramsDic);
         }
-        public IEnumerable<T> List()
+        public async Task<IEnumerable<T>> List()
         {
             var paramsDic = routeParams.Copy();
-            return rest.Get<IEnumerable<T>>(route, paramsDic);
+            return await rest.Get<IEnumerable<T>>(route, paramsDic);
         }
 
       

@@ -1,6 +1,7 @@
 ﻿using FluentChange.Extensions.Common.Rest;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace SampleFunctions.Tests
 {
@@ -17,7 +18,7 @@ namespace SampleFunctions.Tests
             //routeParams = new Dictionary<string, string>();
         }
 
-        public T Get<T>(string route, Dictionary<string, string> parameters = null)
+        public async Task<T> Get<T>(string route, Dictionary<string, string> parameters = null)
         {
             route = ReplaceParams(route, parameters);
             var request = new RestSharp.RestRequest(route, RestSharp.Method.GET);
@@ -37,7 +38,7 @@ namespace SampleFunctions.Tests
             return default(T);
 
         }
-        public T Post<T>(string route, object requestBody, Dictionary<string, string> parameters = null)
+        public async Task<T> Post<T>(string route, object requestBody, Dictionary<string, string> parameters = null)
         { 
             route = ReplaceParams(route, parameters);
 
@@ -47,7 +48,7 @@ namespace SampleFunctions.Tests
             return response.Data;
         }
 
-        public T Put<T>(string route, object requestBody, Dictionary<string, string> parameters = null)
+        public async Task<T> Put<T>(string route, object requestBody, Dictionary<string, string> parameters = null)
         {
             route = ReplaceParams(route, parameters);
 
@@ -58,7 +59,7 @@ namespace SampleFunctions.Tests
             return response.Data;
         }
 
-        public T Delete<T>(string route, Dictionary<string, string> parameters = null)
+        public async Task<T> Delete<T>(string route, Dictionary<string, string> parameters = null)
         {
             route = ReplaceParams(route, parameters);
             var request = new RestSharp.RestRequest(route, RestSharp.Method.DELETE);

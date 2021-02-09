@@ -9,14 +9,14 @@ namespace SampleFunctions.Tests
     public class CRUDLTests
     {
         [TestMethod]
-        public void Sample7Products()
+        public async void Sample7Products()
         {
             var rest = new FunctionsApiClient();
 
-            var list = rest.Sample7Products.List();
+            var list = await rest.Sample7Products.List();
             Assert.AreEqual(2, list.Results.Count);
 
-            var read = rest.Sample7Products.Read(Guid.Parse("66bc54bf-9e0c-494d-84ad-cc239837f543"));
+            var read = await rest.Sample7Products.Read(Guid.Parse("66bc54bf-9e0c-494d-84ad-cc239837f543"));
             Assert.IsNotNull(read);
             Assert.IsNotNull(read.Result);
             Assert.AreEqual("Test Product 1", read.Result.Name);
@@ -28,27 +28,27 @@ namespace SampleFunctions.Tests
                 Price = 555.5
             };
 
-            var created = rest.Sample7Products.Create(newProduct);
+            var created = await rest.Sample7Products.Create(newProduct);
 
             Assert.IsNotNull(created.Result);
             Assert.IsNotNull(created.Result.Id);
             Assert.AreEqual("New Product 1", created.Result.Name);
 
-            var listNewAfterCreate = rest.Sample7Products.List();
+            var listNewAfterCreate = await rest.Sample7Products.List();
             Assert.AreEqual(3, listNewAfterCreate.Results.Count);
 
             created.Result.Name = "Updated Name";
-            var updated = rest.Sample7Products.Update(created.Result);
+            var updated = await rest.Sample7Products.Update(created.Result);
             Assert.AreEqual("Updated Name", updated.Result.Name);
 
-            var listNewAfterUpdate = rest.Sample7Products.List();
+            var listNewAfterUpdate = await rest.Sample7Products.List();
             Assert.AreEqual(3, listNewAfterUpdate.Results.Count);
 
-            var deleted = rest.Sample7Products.Delete(created.Result.Id);
+            var deleted = await rest.Sample7Products.Delete(created.Result.Id);
             Assert.IsNotNull(deleted);
             if (deleted.Errors != null) Assert.AreEqual(0, deleted.Errors.Count);
 
-            var listNewAfterDelete = rest.Sample7Products.List();
+            var listNewAfterDelete = await rest.Sample7Products.List();
             Assert.AreEqual(2, listNewAfterDelete.Results.Count);
         }
 
