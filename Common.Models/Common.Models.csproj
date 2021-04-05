@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Authors>Frank Mühlschlegel</Authors>
+    <Company>Fluent Change</Company>
+    <Product>Common Models</Product>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Version>0.0.1</Version>
+    <Description>Common Models </Description>
+    <PackageTags>Common Models</PackageTags>
+    <PackageProjectUrl>https://github.com/FluentChange/FluentChange.Extensions/tree/master/Common.Models</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/FluentChange/FluentChange.Extensions</RepositoryUrl>
+    <RepositoryType>GitHub</RepositoryType>
+    <PackageId>FluentChange.Extensions.Common.Models</PackageId>
+    <AssemblyName>FluentChange.Extensions.Common.Models</AssemblyName>
+    <RootNamespace>FluentChange.Extensions.Common.Models</RootNamespace>
+  </PropertyGroup>
+
+</Project>

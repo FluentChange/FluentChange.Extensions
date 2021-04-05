@@ -45,6 +45,10 @@ jobs:
         working-directory: ./Common.Rest
         run: dotnet pack Common.Rest.csproj --configuration Release --no-build --no-restore 
 
+      - name: Pack nuget Common.Models
+        working-directory: ./Common.Models
+        run: dotnet pack Common.Models.csproj --configuration Release --no-build --no-restore 
+
       - name: Pack nuget Blazor
         working-directory: ./Blazor
         run: dotnet pack Blazor.csproj --configuration Release --no-build --no-restore 
@@ -60,6 +64,7 @@ jobs:
           path: |
             ./Azure.Functions/bin/Release/
             ./Common.Rest/bin/Release/
+            ./Common.Models/bin/Release/
             ./Blazor/bin/Release/
             ./System/bin/Release/
 
