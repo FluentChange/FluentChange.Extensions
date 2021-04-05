@@ -345,7 +345,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             {
                 if (usesMapping)
                 {
-                    var mappedResults = mapper.ProjectTo<M>(results.AsQueryable());
+                    var mappedResults = mapper.ProjectTo<M>(results.ToList().AsQueryable());
                     var response = new MultiResponse<M>();
                     response.Results = mappedResults.ToList();
                     return ResponseHelper.CreateJsonResponse(response);
@@ -361,7 +361,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             {
                 if (usesMapping)
                 {
-                    var mappedResults = mapper.ProjectTo<M>(results.AsQueryable());
+                    var mappedResults = mapper.ProjectTo<M>(results.ToList().AsQueryable());
                     return ResponseHelper.CreateJsonResponse(mappedResults);
                 }
                 else
