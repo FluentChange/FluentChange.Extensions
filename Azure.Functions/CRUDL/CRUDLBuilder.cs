@@ -124,6 +124,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         private readonly IEntityMapper mapper;
         private bool wrapRequestAndResponse;
         private readonly bool usesMapping;
+        private JsonSerializerSettings jsonSettings;
 
         public CRUDLBuilderEntityService(S service, IEntityMapper mapper)
         {
@@ -148,6 +149,12 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             updateFunc = update;
             deleteFunc = delete;
             listFunc = list;
+            return this;
+        }
+
+        public CRUDLBuilderEntityService<T, M, S> WithJson(JsonSerializerSettings settings)
+        {
+            this.jsonSettings = settings;
             return this;
         }
 
@@ -286,11 +293,11 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             {
                 var response = new Response();
                 response.Errors.Add(new Error() { Message = ex.Message, FullMessage = ex.ToString() });
-                return ResponseHelper.CreateJsonResponse(response, System.Net.HttpStatusCode.InternalServerError);
+                return ResponseHelper.CreateJsonResponse(response, System.Net.HttpStatusCode.InternalServerError, jsonSettings);
             }
             else
             {
-                return ResponseHelper.CreateJsonResponse(null, System.Net.HttpStatusCode.InternalServerError);
+                return ResponseHelper.CreateJsonResponse(null, System.Net.HttpStatusCode.InternalServerError, jsonSettings);
             }
         }
         private HttpResponseMessage Respond()
@@ -298,11 +305,11 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             if (wrapRequestAndResponse)
             {
                 var response = new Response();
-                return ResponseHelper.CreateJsonResponse(response);
+                return ResponseHelper.CreateJsonResponse(response, jsonSettings);
             }
             else
             {
-                return ResponseHelper.CreateJsonResponse(null);
+                return ResponseHelper.CreateJsonResponse(null, jsonSettings);
             }
         }
 
@@ -315,13 +322,13 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
                     var mappedResult = mapper.MapTo<M>(result);
                     var response = new SingleResponse<M>();
                     response.Result = mappedResult;
-                    return ResponseHelper.CreateJsonResponse(response);
+                    return ResponseHelper.CreateJsonResponse(response, jsonSettings);
                 }
                 else
                 {
                     var response = new SingleResponse<T>();
                     response.Result = result;
-                    return ResponseHelper.CreateJsonResponse(response);
+                    return ResponseHelper.CreateJsonResponse(response, jsonSettings);
                 }
 
             }
@@ -330,11 +337,11 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
                 if (usesMapping)
                 {
                     var mappedResult = mapper.MapTo<M>(result);
-                    return ResponseHelper.CreateJsonResponse(mappedResult);
+                    return ResponseHelper.CreateJsonResponse(mappedResult, jsonSettings);
                 }
                 else
                 {
-                    return ResponseHelper.CreateJsonResponse(result);
+                    return ResponseHelper.CreateJsonResponse(result, jsonSettings);
                 }
             }
         }
@@ -348,13 +355,13 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
                     var mappedResults = mapper.ProjectTo<M>(results.ToList().AsQueryable());
                     var response = new MultiResponse<M>();
                     response.Results = mappedResults.ToList();
-                    return ResponseHelper.CreateJsonResponse(response);
+                    return ResponseHelper.CreateJsonResponse(response, jsonSettings);
                 }
                 else
                 {
                     var response = new MultiResponse<T>();
                     response.Results = results.ToList();
-                    return ResponseHelper.CreateJsonResponse(response);
+                    return ResponseHelper.CreateJsonResponse(response, jsonSettings);
                 }
             }
             else
@@ -362,12 +369,12 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
                 if (usesMapping)
                 {
                     var mappedResults = mapper.ProjectTo<M>(results.ToList().AsQueryable());
-                    return ResponseHelper.CreateJsonResponse(mappedResults);
+                    return ResponseHelper.CreateJsonResponse(mappedResults, jsonSettings);
                 }
                 else
                 {
 
-                    return ResponseHelper.CreateJsonResponse(results);
+                    return ResponseHelper.CreateJsonResponse(results, jsonSettings);
                 }
             }
         }
