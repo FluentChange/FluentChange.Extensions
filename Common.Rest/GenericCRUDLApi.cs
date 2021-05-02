@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace FluentChange.Extensions.Common.Rest
 {
-    public class WrappedGenericCRUDLApi<T> where T : class, IEntityWithId
+    public class WrappedGenericCRUDLApi<T> where T :  IEntityWithId, new()
     {
         private readonly IRestClient rest;
         private readonly string route;
