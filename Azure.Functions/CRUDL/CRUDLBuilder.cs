@@ -10,7 +10,8 @@ using System.Collections.Generic;
 using FluentChange.Extensions.Azure.Functions.Helper;
 using FluentChange.Extensions.Common.Rest;
 using System.Linq;
-using System.Net;
+using SystemNet = System.Net;
+
 
 namespace FluentChange.Extensions.Azure.Functions.CRUDL
 {
@@ -294,11 +295,11 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             {
                 var response = new Response();
                 response.Errors.Add(new ErrorInfo() { Message = ex.Message, FullMessage = ex.ToString() });
-                return ResponseHelper.CreateJsonResponse(response, HttpStatusCode.InternalServerError, jsonSettings);
+                return ResponseHelper.CreateJsonResponse(response, SystemNet.HttpStatusCode.InternalServerError, jsonSettings);
             }
             else
             {
-                return ResponseHelper.CreateJsonResponse(null, HttpStatusCode.InternalServerError, jsonSettings);
+                return ResponseHelper.CreateJsonResponse(null, SystemNet.HttpStatusCode.InternalServerError, jsonSettings);
             }
         }
         private HttpResponseMessage Respond()
