@@ -12,13 +12,13 @@ namespace FluentChange.Extensions.Common.Rest
         }
     }
 
-    public class SingleResponse<T> : Response where T : class
+    public class SingleResponse<T> : Response where T : new()
     {
         public T Result { get; set; }
 
     }
 
-    public class MultiResponse<T> : Response where T : class
+    public class MultiResponse<T> : Response where T : new()
     {
         public List<T> Results { get; set; }
 
