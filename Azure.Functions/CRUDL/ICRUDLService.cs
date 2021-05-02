@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace FluentChange.Extensions.Azure.Functions.CRUDL
 {
-    public interface ICRUDLService<T> where T : class
+    public interface ICRUDLService<T> where T : new()
     {
         T Create(T todo);
         void Delete(Guid id);
