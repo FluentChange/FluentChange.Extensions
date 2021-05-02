@@ -4,11 +4,11 @@ namespace FluentChange.Extensions.Common.Rest
 {
     public class Response
     {
-        public List<Error> Errors { get; set; }
+        public List<ErrorInfo> Errors { get; set; }
 
         public Response()
         {
-            Errors = new List<Error>();
+            Errors = new List<ErrorInfo>();
         }
     }
 
