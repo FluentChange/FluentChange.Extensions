@@ -6,8 +6,8 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
     public interface ICRUDService<T> where T : new()
     {
         T Create(T todo);
-        void Delete(Guid id);
-        T Read(Guid id);
+        void Delete();
+        T Read();
         T Update(T todo);
     }
        

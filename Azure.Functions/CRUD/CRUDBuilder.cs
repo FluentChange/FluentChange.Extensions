@@ -39,11 +39,11 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             return await ForEntityWithMapping<T, M>().UseInterface<S>().Handle(req, log, id);
         }
 
-        public CRUDBuilderEntityService<T, T, S> With<T, S>(Func<S, Func<T, T>> create, Func<S, Func<Guid, T>> read, Func<S, Func<T, T>> update, Func<S, Action<Guid>> delete) where T : new() where S : class
+        public CRUDBuilderEntityService<T, T, S> With<T, S>(Func<S, Func<T, T>> create, Func<S, Func<T>> read, Func<S, Func<T, T>> update, Func<S, Action> delete) where T : new() where S : class
         {
             return ForEntity<T>().Use<S>().With(create, read, update, delete);
         }
-        public CRUDBuilderEntityService<T, M, S> WithAndMap<T, M, S>(Func<S, Func<T, T>> create, Func<S, Func<Guid, T>> read, Func<S, Func<T, T>> update, Func<S, Action<Guid>> delete) where T : new() where S : class where M : new()
+        public CRUDBuilderEntityService<T, M, S> WithAndMap<T, M, S>(Func<S, Func<T, T>> create, Func<S, Func<T>> read, Func<S, Func<T, T>> update, Func<S, Action> delete) where T : new() where S : class where M : new()
         {
             return ForEntityWithMapping<T, M>().Use<S>().With(create, read, update, delete);
         }
@@ -127,11 +127,11 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         }
 
         private Func<S, Func<T, T>> createFunc;
-        private Func<S, Func<Guid, T>> readFunc;
+        private Func<S, Func<T>> readFunc;
         private Func<S, Func<T, T>> updateFunc;
-        private Func<S, Action<Guid>> deleteFunc;
+        private Func<S, Action> deleteFunc;
 
-        public CRUDBuilderEntityService<T, M, S> With(Func<S, Func<T, T>> create, Func<S, Func<Guid, T>> read, Func<S, Func<T, T>> update, Func<S, Action<Guid>> delete)
+        public CRUDBuilderEntityService<T, M, S> With(Func<S, Func<T, T>> create, Func<S, Func<T>> read, Func<S, Func<T, T>> update, Func<S, Action> delete)
         {
             createFunc = create;
             readFunc = read;
@@ -146,7 +146,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             createFunc = predicate;
             return this;
         }
-        public CRUDBuilderEntityService<T, M, S> Read(Func<S, Func<Guid, T>> predicate)
+        public CRUDBuilderEntityService<T, M, S> Read(Func<S, Func<T>> predicate)
         {
             readFunc = predicate;
             return this;
@@ -156,7 +156,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             updateFunc = predicate;
             return this;
         }
-        public CRUDBuilderEntityService<T, M, S> Delete(Func<S, Action<Guid>> predicate)
+        public CRUDBuilderEntityService<T, M, S> Delete(Func<S, Action> predicate)
         {
             deleteFunc = predicate;
             return this;
@@ -172,9 +172,8 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
                 if (req.Method == "GET")
                 {
 
-                    if (readFunc == null) throw new NotImplementedException();
-                    var idGuid = Guid.Parse(id);
-                    var read = readFunc.Invoke(service).Invoke(idGuid);
+                    if (readFunc == null) throw new NotImplementedException();                
+                    var read = readFunc.Invoke(service).Invoke();
 
                     return Respond(read);
 
@@ -201,11 +200,8 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
                 }
                 if (req.Method == "DELETE")
                 {
-                    if (deleteFunc == null) throw new NotImplementedException();
-                    if (String.IsNullOrEmpty(id)) throw new ArgumentNullException();
-                    var idGuid = Guid.Parse(id);
-
-                    deleteFunc.Invoke(service).Invoke(idGuid);
+                    if (deleteFunc == null) throw new NotImplementedException();           
+                    deleteFunc.Invoke(service).Invoke();
                     return Respond();
                 }
                 throw new NotImplementedException();
