@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace DemoCRUDLFunctions
 {
-    public class Functions : CRUDLFunction
+    public class Functions : AbstractFunction
     {
         public Functions(IServiceProvider provider) : base(provider)
         {

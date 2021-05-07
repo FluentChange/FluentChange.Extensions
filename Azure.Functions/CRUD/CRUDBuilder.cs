@@ -1,83 +1,78 @@
 ﻿using System;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
-using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
 using FluentChange.Extensions.Azure.Functions.Helper;
-using FluentChange.Extensions.Common.Rest;
-using System.Linq;
-using SystemNet = System.Net;
 
 
 namespace FluentChange.Extensions.Azure.Functions.CRUDL
 {
-    public class CRUDLBuilder
+    public class CRUDBuilder
     {
         private readonly IServiceProvider provider;
-        public CRUDLBuilder(IServiceProvider provider)
+        public CRUDBuilder(IServiceProvider provider)
         {
             this.provider = provider;
         }
 
-        public CRUDLBuilderEntity<T, T> ForEntity<T>() where T : new()
+        public CRUDBuilderEntity<T, T> ForEntity<T>() where T : new()
         {
-            var builder = new CRUDLBuilderEntity<T, T>(provider);
+            var builder = new CRUDBuilderEntity<T, T>(provider);
             return builder;
         }
-        public CRUDLBuilderEntity<T, M> ForEntityWithMapping<T, M>() where T : new() where M : new()
+        public CRUDBuilderEntity<T, M> ForEntityWithMapping<T, M>() where T : new() where M : new()
         {
-            var builder = new CRUDLBuilderEntity<T, M>(provider);
+            var builder = new CRUDBuilderEntity<T, M>(provider);
             return builder;
         }
 
-        public async Task<HttpResponseMessage> Handle<T, S>(HttpRequest req, ILogger log, string id) where T : new() where S : class, ICRUDLService<T>
+        public async Task<HttpResponseMessage> Handle<T, S>(HttpRequest req, ILogger log, string id) where T : new() where S : class, ICRUDService<T>
         {
             return await ForEntity<T>().UseInterface<S>().Handle(req, log, id);
         }
 
-        public async Task<HttpResponseMessage> HandleAndMap<T, M, S>(HttpRequest req, ILogger log, string id) where T : new() where M : new() where S : class, ICRUDLService<T>
+        public async Task<HttpResponseMessage> HandleAndMap<T, M, S>(HttpRequest req, ILogger log, string id) where T : new() where M : new() where S : class, ICRUDService<T>
         {
             return await ForEntityWithMapping<T, M>().UseInterface<S>().Handle(req, log, id);
         }
 
-        public CRUDLBuilderEntityService<T, T, S> With<T, S>(Func<S, Func<T, T>> create, Func<S, Func<Guid, T>> read, Func<S, Func<T, T>> update, Func<S, Action<Guid>> delete, Func<S, Func<IEnumerable<T>>> list) where T : new() where S : class
+        public CRUDBuilderEntityService<T, T, S> With<T, S>(Func<S, Func<T, T>> create, Func<S, Func<Guid, T>> read, Func<S, Func<T, T>> update, Func<S, Action<Guid>> delete) where T : new() where S : class
         {
-            return ForEntity<T>().Use<S>().With(create, read, update, delete, list);
+            return ForEntity<T>().Use<S>().With(create, read, update, delete);
         }
-        public CRUDLBuilderEntityService<T, M, S> WithAndMap<T, M, S>(Func<S, Func<T, T>> create, Func<S, Func<Guid, T>> read, Func<S, Func<T, T>> update, Func<S, Action<Guid>> delete, Func<S, Func<IEnumerable<T>>> list) where T : new() where S : class where M : new()
+        public CRUDBuilderEntityService<T, M, S> WithAndMap<T, M, S>(Func<S, Func<T, T>> create, Func<S, Func<Guid, T>> read, Func<S, Func<T, T>> update, Func<S, Action<Guid>> delete) where T : new() where S : class where M : new()
         {
-            return ForEntityWithMapping<T, M>().Use<S>().With(create, read, update, delete, list);
+            return ForEntityWithMapping<T, M>().Use<S>().With(create, read, update, delete);
         }
     }
 
 
-    public class CRUDLBuilderEntity<T, M> where T : new() where M : new()
+    public class CRUDBuilderEntity<T, M> where T : new() where M : new()
     {
         private readonly IServiceProvider provider;
         private readonly bool usesMapping;
 
-        public CRUDLBuilderEntity(IServiceProvider provider)
+        public CRUDBuilderEntity(IServiceProvider provider)
         {
             this.provider = provider;
             this.usesMapping = !(typeof(T).Equals(typeof(M)));
         }
 
-        public CRUDLBuilderEntityService<T, M, S> Use<S>() where S : class
+        public CRUDBuilderEntityService<T, M, S> Use<S>() where S : class
         {
             var service = provider.GetService<S>();
             var mapper = GetMapperService();
             if (service == null) throw new NullReferenceException(nameof(service));
             if (mapper == null) throw new NullReferenceException(nameof(mapper));
 
-            var builder = new CRUDLBuilderEntityService<T, M, S>(service, mapper);
+            var builder = new CRUDBuilderEntityService<T, M, S>(service, mapper);
             return builder;
         }
 
-        public CRUDLBuilderEntityInterfaceService<T, M, S> UseInterface<S>() where S : class, ICRUDLService<T>
+        public CRUDBuilderEntityInterfaceService<T, M, S> UseInterface<S>() where S : class, ICRUDService<T>
         {
             var service = provider.GetService<S>();
             var mapper = GetMapperService();
@@ -85,7 +80,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             if (service == null) throw new NullReferenceException(nameof(service));
             if (mapper == null) throw new NullReferenceException(nameof(mapper));
 
-            var builder = new CRUDLBuilderEntityInterfaceService<T, M, S>(service, mapper);
+            var builder = new CRUDBuilderEntityInterfaceService<T, M, S>(service, mapper);
             return builder;
         }
         private IEntityMapper GetMapperService()
@@ -103,16 +98,16 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
 
 
 
-    public class CRUDLBuilderEntityInterfaceService<T, M, S> where S : class, ICRUDLService<T> where M : new() where T : new()
+    public class CRUDBuilderEntityInterfaceService<T, M, S> where S : class, ICRUDService<T> where M : new() where T : new()
     {
-        private readonly CRUDLBuilderEntityService<T, M, S> internalBuilder;
-        public CRUDLBuilderEntityInterfaceService(S service, IEntityMapper mapper)
+        private readonly CRUDBuilderEntityService<T, M, S> internalBuilder;
+        public CRUDBuilderEntityInterfaceService(S service, IEntityMapper mapper)
         {
             if (service == null) throw new ArgumentNullException(nameof(service));
             if (mapper == null) throw new ArgumentNullException(nameof(mapper));
 
-            internalBuilder = new CRUDLBuilderEntityService<T, M, S>(service, mapper);
-            internalBuilder.With(s => s.Create, s => s.Read, s => s.Update, s => s.Delete, s => s.List);
+            internalBuilder = new CRUDBuilderEntityService<T, M, S>(service, mapper);
+            internalBuilder.With(s => s.Create, s => s.Read, s => s.Update, s => s.Delete);
         }
         public async Task<HttpResponseMessage> Handle(HttpRequest req, ILogger log, string id)
         {
@@ -120,83 +115,69 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         }
     }
 
-    public class CRUDLBuilderEntityService<T, M, S> : AbstractResponseHelpers<T, M> where S : class where T : new() where M : new()
+    public class CRUDBuilderEntityService<T, M, S> : AbstractResponseHelpers<T, M> where S : class where T : new() where M : new()
     {
-        private readonly S service;
+        private readonly S service;    
 
-        public CRUDLBuilderEntityService(S service, IEntityMapper mapper) : base(mapper)
+        public CRUDBuilderEntityService(S service, IEntityMapper mapper) : base(mapper)
         {
             if (service == null) throw new ArgumentNullException(nameof(service));
             if (mapper == null) throw new ArgumentNullException(nameof(mapper));
-            this.service = service;         
+            this.service = service;
         }
 
         private Func<S, Func<T, T>> createFunc;
         private Func<S, Func<Guid, T>> readFunc;
         private Func<S, Func<T, T>> updateFunc;
         private Func<S, Action<Guid>> deleteFunc;
-        private Func<S, Func<IEnumerable<T>>> listFunc;
 
-        public CRUDLBuilderEntityService<T, M, S> With(Func<S, Func<T, T>> create, Func<S, Func<Guid, T>> read, Func<S, Func<T, T>> update, Func<S, Action<Guid>> delete, Func<S, Func<IEnumerable<T>>> list)
+        public CRUDBuilderEntityService<T, M, S> With(Func<S, Func<T, T>> create, Func<S, Func<Guid, T>> read, Func<S, Func<T, T>> update, Func<S, Action<Guid>> delete)
         {
             createFunc = create;
             readFunc = read;
             updateFunc = update;
             deleteFunc = delete;
-            listFunc = list;
-            return this;
-        }
 
-     
-        public CRUDLBuilderEntityService<T, M, S> Create(Func<S, Func<T, T>> predicate)
+            return this;
+        }            
+
+        public CRUDBuilderEntityService<T, M, S> Create(Func<S, Func<T, T>> predicate)
         {
             createFunc = predicate;
             return this;
         }
-        public CRUDLBuilderEntityService<T, M, S> Read(Func<S, Func<Guid, T>> predicate)
+        public CRUDBuilderEntityService<T, M, S> Read(Func<S, Func<Guid, T>> predicate)
         {
             readFunc = predicate;
             return this;
         }
-        public CRUDLBuilderEntityService<T, M, S> Update(Func<S, Func<T, T>> predicate)
+        public CRUDBuilderEntityService<T, M, S> Update(Func<S, Func<T, T>> predicate)
         {
             updateFunc = predicate;
             return this;
         }
-        public CRUDLBuilderEntityService<T, M, S> Delete(Func<S, Action<Guid>> predicate)
+        public CRUDBuilderEntityService<T, M, S> Delete(Func<S, Action<Guid>> predicate)
         {
             deleteFunc = predicate;
             return this;
         }
-        public CRUDLBuilderEntityService<T, M, S> List(Func<S, Func<IEnumerable<T>>> predicate)
-        {
-            listFunc = predicate;
-            return this;
-        }
-                
+              
+
         public override async Task<HttpResponseMessage> Handle(HttpRequest req, ILogger log, string id)
         {
-            log.LogInformation("CRUDL Function " + req.Method.ToUpper() + " " + typeof(S).Name + "/" + typeof(T).Name);
+            log.LogInformation("CRUD Function " + req.Method.ToUpper() + " " + typeof(S).Name + "/" + typeof(T).Name);
 
             try
             {
                 if (req.Method == "GET")
                 {
 
-                    if (!String.IsNullOrEmpty(id))
-                    {
-                        if (readFunc == null) throw new NotImplementedException();
-                        var idGuid = Guid.Parse(id);
-                        var read = readFunc.Invoke(service).Invoke(idGuid);
+                    if (readFunc == null) throw new NotImplementedException();
+                    var idGuid = Guid.Parse(id);
+                    var read = readFunc.Invoke(service).Invoke(idGuid);
 
-                        return Respond(read);
-                    }
-                    else
-                    {
-                        if (listFunc == null) throw new NotImplementedException();
-                        var list = listFunc.Invoke(service).Invoke();
-                        return Respond(list);
-                    }
+                    return Respond(read);
+
                 }
                 if (req.Method == "POST")
                 {
@@ -236,6 +217,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
 
         }
 
-      
+
+
     }
 }
