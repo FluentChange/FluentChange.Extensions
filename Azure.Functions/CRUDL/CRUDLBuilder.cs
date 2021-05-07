@@ -1,16 +1,11 @@
 ﻿using System;
 using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
-using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using FluentChange.Extensions.Azure.Functions.Helper;
-using FluentChange.Extensions.Common.Rest;
-using System.Linq;
-using SystemNet = System.Net;
 
 
 namespace FluentChange.Extensions.Azure.Functions.CRUDL

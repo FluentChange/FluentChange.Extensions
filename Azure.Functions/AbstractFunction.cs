@@ -11,7 +11,6 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             this.CRUDL = new CRUDLBuilder(provider);
             this.CRUD = new CRUDBuilder(provider);
         }
-      
-     
+    
     }
 }
