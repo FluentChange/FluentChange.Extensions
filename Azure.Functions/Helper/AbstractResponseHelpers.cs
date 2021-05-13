@@ -48,13 +48,13 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
             {
                 if (usesMapping)
                 {
-                    var entityWrapped = JsonConvert.DeserializeObject<SingleRequest<M>>(requestBody);
+                    var entityWrapped = JsonConvert.DeserializeObject<SingleRequest<M>>(requestBody, jsonSettings);
                     var entityMapped = mapper.MapTo<T>(entityWrapped.Data);
                     return entityMapped;
                 }
                 else
                 {
-                    var entityWrapped = JsonConvert.DeserializeObject<SingleRequest<T>>(requestBody);
+                    var entityWrapped = JsonConvert.DeserializeObject<SingleRequest<T>>(requestBody, jsonSettings);
                     return entityWrapped.Data;
                 }
             }
@@ -62,13 +62,13 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
             {
                 if (usesMapping)
                 {
-                    var entity = JsonConvert.DeserializeObject<M>(requestBody);
+                    var entity = JsonConvert.DeserializeObject<M>(requestBody, jsonSettings);
                     var entityMapped = mapper.MapTo<T>(entity);
                     return entityMapped;
                 }
                 else
                 {
-                    var entity = JsonConvert.DeserializeObject<T>(requestBody);
+                    var entity = JsonConvert.DeserializeObject<T>(requestBody, jsonSettings);
                     return entity;
                 }
             }
