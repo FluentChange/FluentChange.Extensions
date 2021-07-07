@@ -1,4 +1,5 @@
-﻿using FluentChange.Extensions.Common.Rest;
+﻿using FluentChange.Extensions.Common.Models;
+using FluentChange.Extensions.Common.Rest;
 using System;
 
 namespace DemoCRUDLFunctions.Models

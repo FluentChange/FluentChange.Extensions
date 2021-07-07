@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using FluentChange.Extensions.Common.Models;
+using System.Collections.Generic;
 
 namespace FluentChange.Extensions.Common.Rest
 {

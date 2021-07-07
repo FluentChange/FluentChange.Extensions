@@ -1,4 +1,4 @@
-﻿namespace FluentChange.Extensions.Common.Rest
+﻿namespace FluentChange.Extensions.Common.Models
 {
     public class ErrorInfo
     {

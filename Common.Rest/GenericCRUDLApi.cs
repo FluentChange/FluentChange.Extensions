@@ -1,4 +1,5 @@
-﻿using FluentChange.Extensions.System.Helper;
+﻿using FluentChange.Extensions.Common.Models;
+using FluentChange.Extensions.System.Helper;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
