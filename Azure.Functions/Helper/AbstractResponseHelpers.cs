@@ -78,7 +78,7 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
             if (wrapRequestAndResponse)
             {
                 var response = new Response();
-                response.Errors.Add(new ErrorInfo() { Message = ex.Message, FullMessage = ex.ToString() });
+                response.Errors.Add(new Common.Models.ErrorInfo() { Message = ex.Message, FullMessage = ex.ToString() });
                 return ResponseHelper.CreateJsonResponse(response, SystemNet.HttpStatusCode.InternalServerError, jsonSettings);
             }
             else
