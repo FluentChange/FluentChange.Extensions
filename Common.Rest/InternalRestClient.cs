@@ -8,9 +8,7 @@ namespace FluentChange.Extensions.Common.Rest
 {
     public class InternalRestClient : AbstractInternalRestClient
     {
-        private string bearerToken;
         private readonly HttpClient http;
-
         public InternalRestClient(string endpoint) : base()
         {
             if (!endpoint.StartsWith("https://") && !endpoint.StartsWith("http://")) endpoint = "https://" + endpoint;
@@ -40,7 +38,7 @@ namespace FluentChange.Extensions.Common.Rest
             return http.DeleteAsync(route);
         }
 
-        protected override void SetHeader(string key, string value)
+        public override void SetHeader(string key, string value)
         {
             if (!http.DefaultRequestHeaders.Contains(key))
             {
@@ -53,12 +51,12 @@ namespace FluentChange.Extensions.Common.Rest
             }
         }
 
-        protected override void RemoveHeader(string key)
+        public override void RemoveHeader(string key)
         {
             http.DefaultRequestHeaders.Remove(key);
         }
 
-        protected override bool ExistHeader(string key)
+        public override bool ExistHeader(string key)
         {
             return http.DefaultRequestHeaders.Contains(key);
         }

@@ -105,14 +105,16 @@ namespace FluentChange.Extensions.Common.Rest
         }
 
 
+        // HHEADER stuff
+        public abstract bool ExistHeader(string key);
+        public abstract void SetHeader(string key, string value);
+        public abstract void RemoveHeader(string key);
+
         // AUTH stuff
 
         private string AUTH_KEY = "Authorization";
         public bool IsAuthenticated => ExistHeader(AUTH_KEY);
 
-        protected abstract bool ExistHeader(string key);
-        protected abstract void SetHeader(string key, string value);
-        protected abstract void RemoveHeader(string key);
         public void AuthorizeWithBearer(string token)
         {
             SetHeader(AUTH_KEY, string.Format("Bearer {0}", token));
