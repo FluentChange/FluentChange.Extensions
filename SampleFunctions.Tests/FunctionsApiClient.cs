@@ -17,9 +17,9 @@ namespace SampleFunctions.Tests
         public GenericCRUDLApi<Event> Sample5Events { get; private set; }
         public WrappedGenericCRUDLApi<Product> Sample6Products { get; private set; }
         public WrappedGenericCRUDLApi<ApiProduct> Sample7Products { get; private set; }
-        public FunctionsApiClient()
+        public FunctionsApiClient(IRestClient rest)
         {
-            rest = new InternalClient("http://localhost:7071");
+            this.rest = rest;
             Sample1Todos = new GenericCRUDLApi<Todo>(rest, "sample1/todos", new Dictionary<string, string>());
             Sample2Todos = new GenericCRUDLApi<Todo>(rest, "sample2/todos", new Dictionary<string, string>());
             Sample3Events = new GenericCRUDLApi<Event>(rest, "sample3/events", new Dictionary<string, string>());

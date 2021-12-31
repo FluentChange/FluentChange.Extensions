@@ -18,11 +18,11 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
 {
     public class DirectInvokeFunctionClient<T> : AbstractInternalRestClient where T : FunctionsStartup
     {
-        protected ILogger logger { get; set; }
-        private ServiceProvider serviceProvider { get; set; }
+        public ILogger Logger { get; private set; }
+        public ServiceProvider ServiceProvider { get; private set; }
         private Dictionary<string, string> headers = new Dictionary<string, string>();
 
-        private Dictionary<string, Dictionary<string, MethodInfo>> Mapping = new Dictionary<string, Dictionary<string, MethodInfo>>();
+        private Dictionary<string, Dictionary<string, MethodInfo>> routeMapping = new Dictionary<string, Dictionary<string, MethodInfo>>();
 
         public DirectInvokeFunctionClient()
         {
@@ -53,17 +53,17 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
                 {
                     foreach (var httpMethod in attribute.Methods)
                     {
-                        if (!Mapping.ContainsKey(httpMethod))
+                        if (!routeMapping.ContainsKey(httpMethod))
                         {
-                            Mapping.Add(httpMethod, new Dictionary<string, MethodInfo>());
+                            routeMapping.Add(httpMethod, new Dictionary<string, MethodInfo>());
                         }
-                        if (!Mapping[httpMethod].ContainsKey(attribute.Route))
+                        if (!routeMapping[httpMethod].ContainsKey(attribute.Route))
                         {
-                            Mapping[httpMethod].Add(attribute.Route, method);
+                            routeMapping[httpMethod].Add(attribute.Route, method);
                             if (attribute.Route.Contains("{id?}"))
                             {
                                 var replacedRoute = attribute.Route.Replace("{id?}", "{id}");
-                                Mapping[httpMethod].Add(replacedRoute, method);
+                                routeMapping[httpMethod].Add(replacedRoute, method);
                             }
                         }
                     }
@@ -72,33 +72,40 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
 
             }
 
-            serviceProvider = CreateNewServiceProvider(allTypesWithFunctions);
-            logger = new ListLogger();
+            ServiceProvider = CreateNewServiceProvider(allTypesWithFunctions);
+            Logger = new ListLogger();
         }
 
         private static ServiceProvider CreateNewServiceProvider(List<Type> functionClasses)
         {
+            var services = new ServiceCollection();
+
+            // Handle settings configuration
+
             var basePath = Directory.GetParent(AppContext.BaseDirectory).FullName;
             var fileName = "appsettings.json";
             var fullPath = Path.Combine(basePath, fileName);
+            var configFileExist = File.Exists(fullPath);
 
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(basePath)
-                .AddJsonFile(fileName, false)
-                .Build();
-
-            var envValues3 = configuration.AsEnumerable();
-            foreach (var envValue in envValues3.Where(v => v.Key.StartsWith("Values:")))
+            if (configFileExist)
             {
-                var variableName = envValue.Key.Replace("Values:", "");
-                Environment.SetEnvironmentVariable(variableName, envValue.Value);
+                var configuration = new ConfigurationBuilder()
+                    .SetBasePath(basePath)
+                    .AddJsonFile(fileName, false)
+                    .Build();
+
+                var envValues3 = configuration.AsEnumerable();
+                foreach (var envValue in envValues3.Where(v => v.Key.StartsWith("Values:")))
+                {
+                    var variableName = envValue.Key.Replace("Values:", "");
+                    Environment.SetEnvironmentVariable(variableName, envValue.Value);
+                }
+
+                // Add access to generic IConfigurationRoot
+                services.AddSingleton<IConfigurationRoot>(configuration);
+                services.AddSingleton<IConfiguration>(configuration);
             }
-
-            var services = new ServiceCollection();
-            // Add access to generic IConfigurationRoot
-            services.AddSingleton<IConfigurationRoot>(configuration);
-            services.AddSingleton<IConfiguration>(configuration);
-
+            
             services.AddLogging();
 
             var dummyHostBuilder = new DummyFunctionsHostBuilder(services);
@@ -119,7 +126,7 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
         protected async override Task<HttpResponseMessage> GetImplementation(string route, Dictionary<string, string> parameters)
         {
             var functionMethod = findFunctionMethod("get", route);
-            var functionClassInstance = serviceProvider.GetService(functionMethod.DeclaringType);
+            var functionClassInstance = ServiceProvider.GetService(functionMethod.DeclaringType);
             var functionParameters = await CreateFunctionParameters("get", route, parameters, functionMethod);
 
             return await (Task<HttpResponseMessage>)functionMethod.Invoke(functionClassInstance, functionParameters.ToArray());
@@ -128,7 +135,7 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
         protected async override Task<HttpResponseMessage> PostImplementation(string route, HttpContent content, Dictionary<string, string> parameters = null)
         {
             var functionMethod = findFunctionMethod("post", route);
-            var functionClassInstance = serviceProvider.GetService(functionMethod.DeclaringType);
+            var functionClassInstance = ServiceProvider.GetService(functionMethod.DeclaringType);
             var functionParameters = await CreateFunctionParameters("post", route, parameters, functionMethod, content);
 
             return await (Task<HttpResponseMessage>)functionMethod.Invoke(functionClassInstance, functionParameters.ToArray());
@@ -137,7 +144,7 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
         protected async override Task<HttpResponseMessage> PutImplementation(string route, HttpContent content, Dictionary<string, string> parameters = null)
         {
             var functionMethod = findFunctionMethod("put", route);
-            var functionClassInstance = serviceProvider.GetService(functionMethod.DeclaringType);
+            var functionClassInstance = ServiceProvider.GetService(functionMethod.DeclaringType);
             var functionParameters = await CreateFunctionParameters("put", route, parameters, functionMethod, content);
 
             return await (Task<HttpResponseMessage>)functionMethod.Invoke(functionClassInstance, functionParameters.ToArray());
@@ -146,7 +153,7 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
         protected async override Task<HttpResponseMessage> DeleteImplementation(string route, Dictionary<string, string> parameters)
         {
             var functionMethod = findFunctionMethod("delete", route);
-            var functionClass = serviceProvider.GetService(functionMethod.DeclaringType);
+            var functionClass = ServiceProvider.GetService(functionMethod.DeclaringType);
             var functionParameters = await CreateFunctionParameters("delete", route, parameters, functionMethod);
 
             return await (Task<HttpResponseMessage>)functionMethod.Invoke(functionClass, functionParameters.ToArray());
@@ -154,15 +161,15 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
 
         private MethodInfo findFunctionMethod(string method, string route)
         {
-            if (Mapping[method].ContainsKey(route))
+            if (routeMapping[method].ContainsKey(route))
             {
-                return Mapping[method][route];
+                return routeMapping[method][route];
             }
             else
             {
-                if (Mapping[method].ContainsKey(route + CRUDLHelper.Id))
+                if (routeMapping[method].ContainsKey(route + CRUDLHelper.Id))
                 {
-                    return Mapping[method][route + CRUDLHelper.Id];
+                    return routeMapping[method][route + CRUDLHelper.Id];
                 }
             }
 
@@ -183,7 +190,7 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
                 }
                 else if (definedParam.ParameterType == typeof(ILogger))
                 {
-                    functionParameters.Add(logger);
+                    functionParameters.Add(Logger);
                 }
                 else
                 {
