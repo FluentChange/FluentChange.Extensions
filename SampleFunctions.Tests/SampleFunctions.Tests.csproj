@@ -16,7 +16,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Azure.Functions.Sample\SampleFunctions.csproj" />
-    <ProjectReference Include="..\Common.Rest\Common.Rest.csproj" />
   </ItemGroup>
 
 </Project>
