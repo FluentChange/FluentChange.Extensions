@@ -75,15 +75,16 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
         }
         protected HttpResponseMessage RespondError(Exception ex)
         {
+            var errorInfo = new Common.Models.ErrorInfo() { Message = ex.Message, FullMessage = ex.ToString() };
             if (wrapRequestAndResponse)
             {
                 var response = new Response();
-                response.Errors.Add(new Common.Models.ErrorInfo() { Message = ex.Message, FullMessage = ex.ToString() });
+                response.Errors.Add(errorInfo);
                 return ResponseHelper.CreateJsonResponse(response, SystemNet.HttpStatusCode.InternalServerError, jsonSettings);
             }
             else
             {
-                return ResponseHelper.CreateJsonResponse(null, SystemNet.HttpStatusCode.InternalServerError, jsonSettings);
+                return ResponseHelper.CreateJsonResponse(errorInfo, SystemNet.HttpStatusCode.InternalServerError, jsonSettings);
             }
         }
         protected HttpResponseMessage Respond()
