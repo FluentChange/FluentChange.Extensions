@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using FluentChange.Extensions.Azure.Functions.CRUDL;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
@@ -8,7 +7,6 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -46,9 +44,6 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
             {
                 var parameters = method.GetParameters();
                 var parametersWithAtrribute = parameters.Where(p => p.GetCustomAttributes(typeof(HttpTriggerAttribute), false).Length > 0).ToList();
-                //var parameterInfo = parametersWithAtrribute.SelectMany(t => t.CustomAttributes);
-
-
 
                 var oneAndOnlyParameter = parametersWithAtrribute.Single();
                 var customeAttributes = oneAndOnlyParameter.GetCustomAttributes(typeof(HttpTriggerAttribute), false);
@@ -213,7 +208,6 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
             dummyHttpRequest.Method = method.ToUpper();
             dummyHttpRequest.Host = new HostString("https://localhost");
             dummyHttpRequest.Path = "/" + route;
-            //dummyHttpRequest.Headers.Add("Authorization", "Secret meowmeow6789");
             foreach (var header in headers)
             {
                 dummyHttpRequest.Headers.Add(header.Key, header.Value);
@@ -227,12 +221,12 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
             return dummyHttpRequest;
         }
 
-        protected override bool ExistHeader(string key)
+        public override bool ExistHeader(string key)
         {
             return headers.ContainsKey(key);
         }
 
-        protected override void SetHeader(string key, string value)
+        public override void SetHeader(string key, string value)
         {
             if (headers.ContainsKey(key))
             {
@@ -244,7 +238,7 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
             }
         }
 
-        protected override void RemoveHeader(string key)
+        public override void RemoveHeader(string key)
         {
             headers.Remove(key);
         }
