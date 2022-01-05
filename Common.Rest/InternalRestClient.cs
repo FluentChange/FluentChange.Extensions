@@ -41,25 +41,7 @@ namespace FluentChange.Extensions.Common.Rest
             return http.DeleteAsync(route);
         }
 
-        private static HttpContent SerializeContentIfNeeded(object requestBody)
-        {
-            var requestBodyType = requestBody.GetType();
-            HttpContent content;
-            if (requestBodyType == typeof(MultipartFormDataContent))
-            {
-                content = (MultipartFormDataContent)requestBody;
-            }
-            else if (requestBodyType == typeof(StringContent))
-            {
-                content = (StringContent)requestBody;
-            }
-            else
-            {
-                content = new StringContent(JsonConvert.SerializeObject(requestBody), Encoding.UTF8, "application/json");
-            }
 
-            return content;
-        }
 
         public override void SetHeader(string key, string value)
         {
