@@ -35,8 +35,8 @@ namespace FluentChange.Extensions.Common.Rest
             }
         }
 
-        protected abstract Task<HttpResponseMessage> PostImplementation(string route, HttpContent content, Dictionary<string, string> parameters);
-        protected async Task<T> PostInternal<T>(string route, HttpContent content, Dictionary<string, string> parameters = null)
+        protected abstract Task<HttpResponseMessage> PostImplementation(string route, object content, Dictionary<string, string> parameters);
+        protected async Task<T> PostInternal<T>(string route, object content, Dictionary<string, string> parameters = null)
         {
             var response = await PostImplementation(route, content, parameters);
             if (response.StatusCode == HttpStatusCode.OK)
@@ -51,9 +51,8 @@ namespace FluentChange.Extensions.Common.Rest
                 throw await HandleError(response);
             }
         }
-        public async Task<T> Post<T>(string route, object requestBody, Dictionary<string, string> parameters = null)
+        public async Task<T> Post<T>(string route, object content, Dictionary<string, string> parameters = null)
         {
-            var content = new StringContent(JsonConvert.SerializeObject(requestBody), Encoding.UTF8, "application/json");
             var response = await PostInternal<T>(route, content, parameters);
             return response;
         }
@@ -69,11 +68,10 @@ namespace FluentChange.Extensions.Common.Rest
             return await PostInternal<T>(route, content, parameters);
         }
 
-        protected abstract Task<HttpResponseMessage> PutImplementation(string route, HttpContent content, Dictionary<string, string> parameters);
+        protected abstract Task<HttpResponseMessage> PutImplementation(string route, object requestBody, Dictionary<string, string> parameters);
         public async Task<T> Put<T>(string route, object requestBody, Dictionary<string, string> parameters = null)
-        {
-            var content = new StringContent(JsonConvert.SerializeObject(requestBody), Encoding.UTF8, "application/json");
-            var response = await PutImplementation(route, content, parameters);
+        {        
+            var response = await PutImplementation(route, requestBody, parameters);
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 var data = await response.Content.ReadAsStringAsync();

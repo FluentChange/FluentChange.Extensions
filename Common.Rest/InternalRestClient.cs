@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace FluentChange.Extensions.Common.Rest
@@ -22,13 +23,15 @@ namespace FluentChange.Extensions.Common.Rest
             route = ReplaceParams(route, parameters);
             return http.GetAsync(route);
         }
-        protected override Task<HttpResponseMessage> PostImplementation(string route, HttpContent content, Dictionary<string, string> parameters)
+        protected override Task<HttpResponseMessage> PostImplementation(string route, object requestBody, Dictionary<string, string> parameters)
         {
+            var content = SerializeContentIfNeeded(requestBody);
             route = ReplaceParams(route, parameters);
             return http.PostAsync(route, content);
         }
-        protected override Task<HttpResponseMessage> PutImplementation(string route, HttpContent content, Dictionary<string, string> parameters)
+        protected override Task<HttpResponseMessage> PutImplementation(string route, object requestBody, Dictionary<string, string> parameters)
         {
+            var content = SerializeContentIfNeeded(requestBody);
             route = ReplaceParams(route, parameters);
             return http.PutAsync(route, content);
         }
@@ -36,6 +39,26 @@ namespace FluentChange.Extensions.Common.Rest
         {
             route = ReplaceParams(route, parameters);
             return http.DeleteAsync(route);
+        }
+
+        private static HttpContent SerializeContentIfNeeded(object requestBody)
+        {
+            var requestBodyType = requestBody.GetType();
+            HttpContent content;
+            if (requestBodyType == typeof(MultipartFormDataContent))
+            {
+                content = (MultipartFormDataContent)requestBody;
+            }
+            else if (requestBodyType == typeof(StringContent))
+            {
+                content = (StringContent)requestBody;
+            }
+            else
+            {
+                content = new StringContent(JsonConvert.SerializeObject(requestBody), Encoding.UTF8, "application/json");
+            }
+
+            return content;
         }
 
         public override void SetHeader(string key, string value)
@@ -61,6 +84,6 @@ namespace FluentChange.Extensions.Common.Rest
             return http.DefaultRequestHeaders.Contains(key);
         }
 
-    
+
     }
 }
