@@ -102,6 +102,25 @@ namespace FluentChange.Extensions.Common.Rest
             }
         }
 
+        protected static HttpContent SerializeContentIfNeeded(object requestBody)
+        {
+            var requestBodyType = requestBody.GetType();
+            HttpContent content;
+            if (requestBodyType == typeof(MultipartFormDataContent))
+            {
+                content = (MultipartFormDataContent)requestBody;
+            }
+            else if (requestBodyType == typeof(StringContent))
+            {
+                content = (StringContent)requestBody;
+            }
+            else
+            {
+                content = new StringContent(JsonConvert.SerializeObject(requestBody), Encoding.UTF8, "application/json");
+            }
+
+            return content;
+        }
 
         // HHEADER stuff
         public abstract bool ExistHeader(string key);
