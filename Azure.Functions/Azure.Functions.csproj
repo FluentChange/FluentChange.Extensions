@@ -7,7 +7,7 @@
     <Product>Azure Functions Extension</Product>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Version>0.0.20</Version>
+    <Version>0.0.21</Version>
     <Description>Azure functions extension for simple CRUD + List functions following the DRY principle.</Description>
     <PackageTags>Azure Functions CRUD List DRY</PackageTags>
     <PackageProjectUrl>https://github.com/FluentChange/FluentChange.Extensions/tree/master/AzureFunctions</PackageProjectUrl>
@@ -19,7 +19,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentChange.Extensions.Common.Rest" Version="0.0.20" />
+    <PackageReference Include="FluentChange.Extensions.Common.Rest" Version="0.0.22" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.Azure.WebJobs" Version="3.0.30" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Http" Version="3.0.12" />

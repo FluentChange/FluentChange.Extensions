@@ -132,7 +132,7 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
             return await (Task<HttpResponseMessage>)functionMethod.Invoke(functionClassInstance, functionParameters.ToArray());
         }
 
-        protected async override Task<HttpResponseMessage> PostImplementation(string route, HttpContent content, Dictionary<string, string> parameters = null)
+        protected async override Task<HttpResponseMessage> PostImplementation(string route, object content, Dictionary<string, string> parameters = null)
         {
             var functionMethod = findFunctionMethod("post", route);
             var functionClassInstance = ServiceProvider.GetService(functionMethod.DeclaringType);
@@ -141,7 +141,7 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
             return await (Task<HttpResponseMessage>)functionMethod.Invoke(functionClassInstance, functionParameters.ToArray());
         }
 
-        protected async override Task<HttpResponseMessage> PutImplementation(string route, HttpContent content, Dictionary<string, string> parameters = null)
+        protected async override Task<HttpResponseMessage> PutImplementation(string route, object content, Dictionary<string, string> parameters = null)
         {
             var functionMethod = findFunctionMethod("put", route);
             var functionClassInstance = ServiceProvider.GetService(functionMethod.DeclaringType);
@@ -176,12 +176,13 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
             throw new Exception("function method for route " + method + " " + route + " not found");
         }
 
-        private async Task<List<object>> CreateFunctionParameters(string method, string route, Dictionary<string, string> parameters, MethodInfo functionMethod, HttpContent content = null)
+        private async Task<List<object>> CreateFunctionParameters(string method, string route, Dictionary<string, string> parameters, MethodInfo functionMethod, object content = null)
         {
             route = ReplaceParams(route, parameters);
             var dummyHttpRequest = await CreateHttpRequest(method, route, content);
 
             var functionParameters = new List<object>();
+            var onlyOneComplexClassType = false;
             foreach (var definedParam in functionMethod.GetParameters())
             {
                 if (definedParam.ParameterType == typeof(HttpRequest))
@@ -192,7 +193,7 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
                 {
                     functionParameters.Add(Logger);
                 }
-                else
+                else if (definedParam.ParameterType.IsValueType || definedParam.ParameterType == typeof(string))
                 {
                     if (parameters.ContainsKey(definedParam.Name))
                     {
@@ -203,12 +204,18 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
                         functionParameters.Add(null);
                     }
                 }
+                else 
+                {
+                    if (onlyOneComplexClassType) throw new Exception("only one complex type as parameter binding ins possible");
+                    onlyOneComplexClassType = true;
+                    functionParameters.Add(content);
+                }
             }
 
             return functionParameters;
         }
 
-        private async Task<HttpRequest> CreateHttpRequest(string method, string route, HttpContent content = null)
+        private async Task<HttpRequest> CreateHttpRequest(string method, string route, object content = null)
         {
             var dummyHttpContext = new DefaultHttpContext();
             var dummyHttpRequest = dummyHttpContext.Request;
@@ -222,7 +229,8 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
 
             if (content != null)
             {
-                dummyHttpRequest.Body = await content.ReadAsStreamAsync();
+                var httpContent = SerializeContentIfNeeded(content);
+                dummyHttpRequest.Body = await httpContent.ReadAsStreamAsync();
             }
 
             return dummyHttpRequest;
