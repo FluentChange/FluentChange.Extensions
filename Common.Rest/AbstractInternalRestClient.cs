@@ -70,7 +70,7 @@ namespace FluentChange.Extensions.Common.Rest
 
         protected abstract Task<HttpResponseMessage> PutImplementation(string route, object requestBody, Dictionary<string, string> parameters);
         public async Task<T> Put<T>(string route, object requestBody, Dictionary<string, string> parameters = null)
-        {        
+        {
             var response = await PutImplementation(route, requestBody, parameters);
             if (response.StatusCode == HttpStatusCode.OK)
             {
@@ -189,17 +189,49 @@ namespace FluentChange.Extensions.Common.Rest
 
         protected string ReplaceParams(string route, Dictionary<string, string> parameters)
         {
+            //if (parameters != null)
+            //{
+            //    foreach (var param in parameters)
+            //    {
+            //        if (param.Key.StartsWith("{") && param.Key.EndsWith("}"))
+            //        {
+            //            route = route.Replace(param.Key, param.Value);
+            //        }
+            //        else
+            //        {
+            //            route = route.Replace("{" + param.Key + "}", param.Value);
+            //        }
+            //    }
+            //}
+
+            //return route;
+            Dictionary<string, string> dictionary;
+            var result = ReplaceParams(route, parameters, out dictionary);
+            return result;
+        }
+
+        protected string ReplaceParams(string route, Dictionary<string, string> parameters, out Dictionary<string, string> routevalues)
+        {
+            routevalues = new Dictionary<string, string>();
             if (parameters != null)
             {
                 foreach (var param in parameters)
                 {
                     if (param.Key.StartsWith("{") && param.Key.EndsWith("}"))
                     {
-                        route = route.Replace(param.Key, param.Value);
+                        if (route.Contains(param.Key))
+                        {
+                            route = route.Replace(param.Key, param.Value);
+                            routevalues.Add(param.Key, param.Value);
+                        }
                     }
                     else
                     {
-                        route = route.Replace("{" + param.Key + "}", param.Value);
+                        if (route.Contains("{" + param.Key + "}"))
+                        {
+                            route = route.Replace("{" + param.Key + "}", param.Value);
+                            routevalues.Add(param.Key, param.Value);
+                        }
                     }
                 }
             }
