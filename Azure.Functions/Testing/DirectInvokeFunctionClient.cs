@@ -178,8 +178,14 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
 
         private async Task<List<object>> CreateFunctionParameters(string method, string route, Dictionary<string, string> parameters, MethodInfo functionMethod, object content = null)
         {
-            route = ReplaceParams(route, parameters);
+            var routeValues = new Dictionary<string, string>();
+            route = ReplaceParams(route, parameters, out routeValues);
             var dummyHttpRequest = await CreateHttpRequest(method, route, content);
+            
+            foreach(var entry in routeValues)
+            {
+                dummyHttpRequest.RouteValues.Add(entry.Key, entry.Value);
+            }
 
             var functionParameters = new List<object>();
             var onlyOneComplexClassType = false;
