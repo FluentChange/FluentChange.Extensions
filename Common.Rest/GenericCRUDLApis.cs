@@ -171,15 +171,6 @@ namespace FluentChange.Extensions.Common.Rest
         {
         }
 
-        public async Task<SingleResponse<T>> Create(T entity)
-        {
-            var request = new SingleRequest<T>();
-            request.Data = entity;
-            var paramsDic = routeParams.Copy();
-
-            return await rest.Post<SingleResponse<T>>(route, request, paramsDic);
-        }
-
         public async Task<SingleResponse<T>> Read(Guid id)
         {
             var paramsDic = routeParams.Copy();
@@ -196,20 +187,19 @@ namespace FluentChange.Extensions.Common.Rest
 
             return await rest.Put<SingleResponse<T>>(route, request, paramsDic);
         }
+
+        public async Task<Response> Delete(Guid id)
+        {
+            var paramsDic = routeParams.Copy();
+            paramsDic.Add(Routes.ParamNameId, id.ToString());
+
+            return await rest.Delete<Response>(route + Routes.PatternId, paramsDic);
+        }
     }
     public class WrappedGenericRUDWithoutIdApi<T> : BaseAbstractApi<T> where T : new()
     {
         public WrappedGenericRUDWithoutIdApi(IRestClient rest, string route, Dictionary<string, object> routeParams) : base(rest, route, routeParams)
         {
-        }
-
-        public async Task<SingleResponse<T>> Create(T entity)
-        {
-            var request = new SingleRequest<T>();
-            request.Data = entity;
-            var paramsDic = routeParams.Copy();
-
-            return await rest.Post<SingleResponse<T>>(route, request, paramsDic);
         }
 
         public async Task<SingleResponse<T>> Read()
@@ -226,6 +216,12 @@ namespace FluentChange.Extensions.Common.Rest
             var paramsDic = routeParams.Copy();
 
             return await rest.Put<SingleResponse<T>>(route, request, paramsDic);
+        }
+
+        public async Task<Response> Delete()
+        {
+            var paramsDic = routeParams.Copy();
+            return await rest.Delete<Response>(route + Routes.PatternId, paramsDic);
         }
     }
 
