@@ -15,5 +15,14 @@ namespace FluentChange.Extensions.System.Helper
             }
             return copy;
         }
+        public static Dictionary<string, object> Copy(this Dictionary<string, object> routeParams)
+        {
+            var copy = new Dictionary<string, object>();
+            foreach (var p in routeParams)
+            {
+                copy.Add(p.Key, p.Value);
+            }
+            return copy;
+        }
     }
 }
