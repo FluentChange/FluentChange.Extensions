@@ -20,7 +20,7 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
     public class DirectInvokeFunctionClient<T> : AbstractInternalRestClient where T : FunctionsStartup
     {
         public ILogger Logger { get; private set; }
-        public ServiceProvider ServiceProvider { get; private set; }
+        public ServiceProvider GlobalServiceProvider { get; private set; }
         private Dictionary<string, string> headers = new Dictionary<string, string>();
 
         private Dictionary<string, Dictionary<string, MethodInfo>> routeMapping = new Dictionary<string, Dictionary<string, MethodInfo>>();
@@ -73,7 +73,7 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
 
             }
 
-            ServiceProvider = CreateNewServiceProvider(allTypesWithFunctions);
+            GlobalServiceProvider = CreateNewServiceProvider(allTypesWithFunctions);
             Logger = new ListLogger();
         }
 
@@ -126,38 +126,50 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
 
         protected async override Task<HttpResponseMessage> GetImplementation(string route, Dictionary<string, object> parameters)
         {
-            var functionMethod = findFunctionMethod("get", route);
-            var functionClassInstance = ServiceProvider.GetService(functionMethod.DeclaringType);
-            var functionParameters = await CreateFunctionParameters("get", route, parameters, functionMethod);
+            using (var scope = GlobalServiceProvider.CreateScope())
+            {
+                var functionMethod = findFunctionMethod("get", route);
+                var functionClassInstance = scope.ServiceProvider.GetService(functionMethod.DeclaringType);
+                var functionParameters = await CreateFunctionParameters("get", route, parameters, functionMethod);
 
-            return await (Task<HttpResponseMessage>)functionMethod.Invoke(functionClassInstance, functionParameters.ToArray());
+                return await (Task<HttpResponseMessage>)functionMethod.Invoke(functionClassInstance, functionParameters.ToArray());
+            }
         }
 
         protected async override Task<HttpResponseMessage> PostImplementation(string route, object content, Dictionary<string, object> parameters = null)
         {
-            var functionMethod = findFunctionMethod("post", route);
-            var functionClassInstance = ServiceProvider.GetService(functionMethod.DeclaringType);
-            var functionParameters = await CreateFunctionParameters("post", route, parameters, functionMethod, content);
+            using (var scope = GlobalServiceProvider.CreateScope())
+            {
+                var functionMethod = findFunctionMethod("post", route);
+                var functionClassInstance = scope.ServiceProvider.GetService(functionMethod.DeclaringType);
+                var functionParameters = await CreateFunctionParameters("post", route, parameters, functionMethod, content);
 
-            return await (Task<HttpResponseMessage>)functionMethod.Invoke(functionClassInstance, functionParameters.ToArray());
+                return await (Task<HttpResponseMessage>)functionMethod.Invoke(functionClassInstance, functionParameters.ToArray());
+            }
         }
 
         protected async override Task<HttpResponseMessage> PutImplementation(string route, object content, Dictionary<string, object> parameters = null)
         {
-            var functionMethod = findFunctionMethod("put", route);
-            var functionClassInstance = ServiceProvider.GetService(functionMethod.DeclaringType);
-            var functionParameters = await CreateFunctionParameters("put", route, parameters, functionMethod, content);
+            using (var scope = GlobalServiceProvider.CreateScope())
+            {
+                var functionMethod = findFunctionMethod("put", route);
+                var functionClassInstance = scope.ServiceProvider.GetService(functionMethod.DeclaringType);
+                var functionParameters = await CreateFunctionParameters("put", route, parameters, functionMethod, content);
 
-            return await (Task<HttpResponseMessage>)functionMethod.Invoke(functionClassInstance, functionParameters.ToArray());
+                return await (Task<HttpResponseMessage>)functionMethod.Invoke(functionClassInstance, functionParameters.ToArray());
+            }
         }
 
         protected async override Task<HttpResponseMessage> DeleteImplementation(string route, Dictionary<string, object> parameters)
         {
-            var functionMethod = findFunctionMethod("delete", route);
-            var functionClass = ServiceProvider.GetService(functionMethod.DeclaringType);
-            var functionParameters = await CreateFunctionParameters("delete", route, parameters, functionMethod);
+            using (var scope = GlobalServiceProvider.CreateScope())
+            {
+                var functionMethod = findFunctionMethod("delete", route);
+                var functionClass = scope.ServiceProvider.GetService(functionMethod.DeclaringType);
+                var functionParameters = await CreateFunctionParameters("delete", route, parameters, functionMethod);
 
-            return await (Task<HttpResponseMessage>)functionMethod.Invoke(functionClass, functionParameters.ToArray());
+                return await (Task<HttpResponseMessage>)functionMethod.Invoke(functionClass, functionParameters.ToArray());
+            }
         }
 
         private MethodInfo findFunctionMethod(string method, string route)
