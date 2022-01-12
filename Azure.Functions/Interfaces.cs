@@ -31,10 +31,11 @@ namespace FluentChange.Extensions.Azure.Functions.Interfaces
     public interface ICRUDLServiceWithId<T> : ICLService<T>, IRUDServiceWithId<T> where T : new()
     {
     }
-    public interface ICRUDLServiceWithoutId<T> : ICLService<T>, IRUDServiceWithoutId<T> where T : new()
+  
+    public interface ICRUDServiceWithoutId<T> : ICService<T>, IRUDServiceWithoutId<T> where T : new()
     {
     }
-    public interface ICRUDServiceWithoutId<T> : ICService<T>, IRUDServiceWithoutId<T> where T : new()
+    public interface ICRUDServiceWithId<T> : ICService<T>, IRUDServiceWithId<T> where T : new()
     {
     }
 }

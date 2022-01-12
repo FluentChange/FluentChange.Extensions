@@ -8,6 +8,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         protected readonly RUDBuilderWithId RUDwithId;
         protected readonly RUDBuilderWithoutId RUDwithoutId;
         protected readonly CRUDBuilderWithoutId CRUDwithoutId;
+        protected readonly CRUDBuilderWithId CRUDwithId;
         protected readonly CRUDLBuilderWithId CRUDLwithId;
 
         public AbstractFunction(IServiceProvider provider)
@@ -16,9 +17,8 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             this.RUDwithId = new RUDBuilderWithId(provider);
             this.RUDwithoutId = new RUDBuilderWithoutId(provider);
             this.CRUDwithoutId = new CRUDBuilderWithoutId(provider);
-            this.CRUDLwithId = new CRUDLBuilderWithId(provider);
-
-          
+            this.CRUDwithId = new CRUDBuilderWithId(provider);
+            this.CRUDLwithId = new CRUDLBuilderWithId(provider);          
         }
     
     }
