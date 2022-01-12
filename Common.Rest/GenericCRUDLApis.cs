@@ -221,7 +221,7 @@ namespace FluentChange.Extensions.Common.Rest
         public async Task<Response> Delete()
         {
             var paramsDic = routeParams.Copy();
-            return await rest.Delete<Response>(route + Routes.PatternId, paramsDic);
+            return await rest.Delete<Response>(route, paramsDic);
         }
     }
 
