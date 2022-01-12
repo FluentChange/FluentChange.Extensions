@@ -19,8 +19,8 @@ namespace FluentChange.Extensions.Common.Rest
         }
 
 
-        protected abstract Task<HttpResponseMessage> GetImplementation(string route, Dictionary<string, string> parameters);
-        public async Task<T> Get<T>(string route, Dictionary<string, string> parameters = null)
+        protected abstract Task<HttpResponseMessage> GetImplementation(string route, Dictionary<string, object> parameters);
+        public async Task<T> Get<T>(string route, Dictionary<string, object> parameters = null)
         {
             var response = await GetImplementation(route, parameters);
             if (response.StatusCode == HttpStatusCode.OK)
@@ -35,8 +35,8 @@ namespace FluentChange.Extensions.Common.Rest
             }
         }
 
-        protected abstract Task<HttpResponseMessage> PostImplementation(string route, object content, Dictionary<string, string> parameters);
-        protected async Task<T> PostInternal<T>(string route, object content, Dictionary<string, string> parameters = null)
+        protected abstract Task<HttpResponseMessage> PostImplementation(string route, object content, Dictionary<string, object> parameters);
+        protected async Task<T> PostInternal<T>(string route, object content, Dictionary<string, object> parameters = null)
         {
             var response = await PostImplementation(route, content, parameters);
             if (response.StatusCode == HttpStatusCode.OK)
@@ -51,12 +51,12 @@ namespace FluentChange.Extensions.Common.Rest
                 throw await HandleError(response);
             }
         }
-        public async Task<T> Post<T>(string route, object content, Dictionary<string, string> parameters = null)
+        public async Task<T> Post<T>(string route, object content, Dictionary<string, object> parameters = null)
         {
             var response = await PostInternal<T>(route, content, parameters);
             return response;
         }
-        public async Task<T> PostFile<T>(string route, string filePath, Dictionary<string, string> parameters = null)
+        public async Task<T> PostFile<T>(string route, string filePath, Dictionary<string, object> parameters = null)
         {
             var content = new MultipartFormDataContent();
 
@@ -68,8 +68,8 @@ namespace FluentChange.Extensions.Common.Rest
             return await PostInternal<T>(route, content, parameters);
         }
 
-        protected abstract Task<HttpResponseMessage> PutImplementation(string route, object requestBody, Dictionary<string, string> parameters);
-        public async Task<T> Put<T>(string route, object requestBody, Dictionary<string, string> parameters = null)
+        protected abstract Task<HttpResponseMessage> PutImplementation(string route, object requestBody, Dictionary<string, object> parameters);
+        public async Task<T> Put<T>(string route, object requestBody, Dictionary<string, object> parameters = null)
         {
             var response = await PutImplementation(route, requestBody, parameters);
             if (response.StatusCode == HttpStatusCode.OK)
@@ -85,8 +85,8 @@ namespace FluentChange.Extensions.Common.Rest
             }
         }
 
-        protected abstract Task<HttpResponseMessage> DeleteImplementation(string route, Dictionary<string, string> parameters);
-        public async Task<T> Delete<T>(string route, Dictionary<string, string> parameters = null)
+        protected abstract Task<HttpResponseMessage> DeleteImplementation(string route, Dictionary<string, object> parameters);
+        public async Task<T> Delete<T>(string route, Dictionary<string, object> parameters = null)
         {
             var response = await DeleteImplementation(route, parameters);
             if (response.StatusCode == HttpStatusCode.OK)
@@ -104,11 +104,13 @@ namespace FluentChange.Extensions.Common.Rest
 
         protected static HttpContent SerializeContentIfNeeded(object requestBody)
         {
+
             var requestBodyType = requestBody.GetType();
             HttpContent content;
             if (requestBodyType == typeof(MultipartFormDataContent))
             {
-                content = (MultipartFormDataContent)requestBody;
+                var multiPartContent = (MultipartFormDataContent)requestBody;
+                content = multiPartContent;
             }
             else if (requestBodyType == typeof(StringContent))
             {
@@ -121,6 +123,7 @@ namespace FluentChange.Extensions.Common.Rest
 
             return content;
         }
+
 
         // HHEADER stuff
         public abstract bool ExistHeader(string key);
@@ -187,7 +190,7 @@ namespace FluentChange.Extensions.Common.Rest
             return exception;
         }
 
-        protected string ReplaceParams(string route, Dictionary<string, string> parameters)
+        protected string ReplaceParams(string route, Dictionary<string, object> parameters)
         {
             //if (parameters != null)
             //{
@@ -210,7 +213,7 @@ namespace FluentChange.Extensions.Common.Rest
             return result;
         }
 
-        protected string ReplaceParams(string route, Dictionary<string, string> parameters, out Dictionary<string, string> routevalues)
+        protected string ReplaceParams(string route, Dictionary<string, object> parameters, out Dictionary<string, string> routevalues)
         {
             routevalues = new Dictionary<string, string>();
             if (parameters != null)
@@ -221,16 +224,16 @@ namespace FluentChange.Extensions.Common.Rest
                     {
                         if (route.Contains(param.Key))
                         {
-                            route = route.Replace(param.Key, param.Value);
-                            routevalues.Add(param.Key, param.Value);
+                            route = route.Replace(param.Key, param.Value.ToString());
+                            routevalues.Add(param.Key, param.Value.ToString());
                         }
                     }
                     else
                     {
                         if (route.Contains("{" + param.Key + "}"))
                         {
-                            route = route.Replace("{" + param.Key + "}", param.Value);
-                            routevalues.Add(param.Key, param.Value);
+                            route = route.Replace("{" + param.Key + "}", param.Value.ToString());
+                            routevalues.Add(param.Key, param.Value.ToString());
                         }
                     }
                 }

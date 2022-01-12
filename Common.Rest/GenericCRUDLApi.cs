@@ -11,9 +11,9 @@ namespace FluentChange.Extensions.Common.Rest
     {
         protected readonly IRestClient rest;
         protected readonly string route;
-        protected Dictionary<string, string> routeParams;
+        protected Dictionary<string, object> routeParams;
 
-        public BaseAbstractApi(IRestClient rest, string route, Dictionary<string, string> routeParams)
+        public BaseAbstractApi(IRestClient rest, string route, Dictionary<string, object> routeParams)
         {
             this.rest = rest;
             this.route = route;
@@ -23,7 +23,7 @@ namespace FluentChange.Extensions.Common.Rest
 
     public class WrappedGenericCLApi<T> : BaseAbstractApi<T> where T : IEntityWithId, new()
     {
-        public WrappedGenericCLApi(IRestClient rest, string route, Dictionary<string, string> routeParams) : base(rest, route, routeParams)
+        public WrappedGenericCLApi(IRestClient rest, string route, Dictionary<string, object> routeParams) : base(rest, route, routeParams)
         {
         }
 
@@ -45,7 +45,7 @@ namespace FluentChange.Extensions.Common.Rest
     }
     public class WrappedGenericRUDApi<T> : BaseAbstractApi<T> where T : new()
     {
-        public WrappedGenericRUDApi(IRestClient rest, string route, Dictionary<string, string> routeParams) : base(rest, route, routeParams)
+        public WrappedGenericRUDApi(IRestClient rest, string route, Dictionary<string, object> routeParams) : base(rest, route, routeParams)
         {
         }
 
@@ -76,7 +76,7 @@ namespace FluentChange.Extensions.Common.Rest
     }
     public class WrappedGenericCRUDApi<T> : BaseAbstractApi<T> where T : new()
     {
-        public WrappedGenericCRUDApi(IRestClient rest, string route, Dictionary<string, string> routeParams) : base(rest, route, routeParams)
+        public WrappedGenericCRUDApi(IRestClient rest, string route, Dictionary<string, object> routeParams) : base(rest, route, routeParams)
         {
         }
 
@@ -113,7 +113,7 @@ namespace FluentChange.Extensions.Common.Rest
     }
     public class WrappedGenericCRUDLApi<T> : BaseAbstractApi<T> where T : IEntityWithId, new()
     {
-        public WrappedGenericCRUDLApi(IRestClient rest, string route, Dictionary<string, string> routeParams) : base(rest, route, routeParams)
+        public WrappedGenericCRUDLApi(IRestClient rest, string route, Dictionary<string, object> routeParams) : base(rest, route, routeParams)
         {
         }
 
@@ -162,7 +162,7 @@ namespace FluentChange.Extensions.Common.Rest
 
     public class GenericCLApi<T> : BaseAbstractApi<T> where T : IEntityWithId, new()
     {
-        public GenericCLApi(IRestClient rest, string route, Dictionary<string, string> routeParams) : base(rest, route, routeParams)
+        public GenericCLApi(IRestClient rest, string route, Dictionary<string, object> routeParams) : base(rest, route, routeParams)
         {
         }
 
@@ -180,7 +180,7 @@ namespace FluentChange.Extensions.Common.Rest
     }
     public class GenericRUDApi<T> : BaseAbstractApi<T> where T : new()
     {
-        public GenericRUDApi(IRestClient rest, string route, Dictionary<string, string> routeParams) : base(rest, route, routeParams)
+        public GenericRUDApi(IRestClient rest, string route, Dictionary<string, object> routeParams) : base(rest, route, routeParams)
         {
         }
 
@@ -205,7 +205,7 @@ namespace FluentChange.Extensions.Common.Rest
     }
     public class GenericCRUDApi<T> : BaseAbstractApi<T> where T : new()
     {
-        public GenericCRUDApi(IRestClient rest, string route, Dictionary<string, string> routeParams) : base(rest, route, routeParams)
+        public GenericCRUDApi(IRestClient rest, string route, Dictionary<string, object> routeParams) : base(rest, route, routeParams)
         {  
         }
 
@@ -236,7 +236,7 @@ namespace FluentChange.Extensions.Common.Rest
     }
     public class GenericCRUDLApi<T> : BaseAbstractApi<T> where T : IEntityWithId, new()
     {
-        public GenericCRUDLApi(IRestClient rest, string route, Dictionary<string, string> routeParams) : base(rest, route, routeParams)
+        public GenericCRUDLApi(IRestClient rest, string route, Dictionary<string, object> routeParams) : base(rest, route, routeParams)
         {
         }
 

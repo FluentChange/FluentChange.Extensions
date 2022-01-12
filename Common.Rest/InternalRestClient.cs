@@ -18,30 +18,28 @@ namespace FluentChange.Extensions.Common.Rest
             http = new HttpClient() { BaseAddress = new Uri(endpoint) };
         }
 
-        protected override Task<HttpResponseMessage> GetImplementation(string route, Dictionary<string, string> parameters)
+        protected override Task<HttpResponseMessage> GetImplementation(string route, Dictionary<string, object> parameters)
         {
             route = ReplaceParams(route, parameters);
             return http.GetAsync(route);
         }
-        protected override Task<HttpResponseMessage> PostImplementation(string route, object requestBody, Dictionary<string, string> parameters)
+        protected override Task<HttpResponseMessage> PostImplementation(string route, object requestBody, Dictionary<string, object> parameters)
         {
             var content = SerializeContentIfNeeded(requestBody);
             route = ReplaceParams(route, parameters);
             return http.PostAsync(route, content);
         }
-        protected override Task<HttpResponseMessage> PutImplementation(string route, object requestBody, Dictionary<string, string> parameters)
+        protected override Task<HttpResponseMessage> PutImplementation(string route, object requestBody, Dictionary<string, object> parameters)
         {
             var content = SerializeContentIfNeeded(requestBody);
             route = ReplaceParams(route, parameters);
             return http.PutAsync(route, content);
         }
-        protected override Task<HttpResponseMessage> DeleteImplementation(string route, Dictionary<string, string> parameters)
+        protected override Task<HttpResponseMessage> DeleteImplementation(string route, Dictionary<string, object> parameters)
         {
             route = ReplaceParams(route, parameters);
             return http.DeleteAsync(route);
         }
-
-
 
         public override void SetHeader(string key, string value)
         {
@@ -65,7 +63,5 @@ namespace FluentChange.Extensions.Common.Rest
         {
             return http.DefaultRequestHeaders.Contains(key);
         }
-
-
     }
 }
