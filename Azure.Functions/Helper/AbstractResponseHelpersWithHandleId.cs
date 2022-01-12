@@ -1,4 +1,5 @@
-﻿using FluentChange.Extensions.Common.Rest;
+﻿using FluentChange.Extensions.Common.Models.Rest;
+using FluentChange.Extensions.Common.Rest;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;

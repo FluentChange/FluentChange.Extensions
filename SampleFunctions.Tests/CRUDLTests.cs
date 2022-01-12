@@ -1,5 +1,6 @@
 using DemoCRUDLFunctions.Models;
 using FluentChange.Extensions.Azure.Functions.Testing;
+using FluentChange.Extensions.Common.Models.Rest;
 using FluentChange.Extensions.Common.Rest;
 using NUnit.Framework;
 using System;
