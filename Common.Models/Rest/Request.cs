@@ -1,4 +1,4 @@
-﻿namespace FluentChange.Extensions.Common.Rest
+﻿namespace FluentChange.Extensions.Common.Models.Rest
 {
     public class Request
     {

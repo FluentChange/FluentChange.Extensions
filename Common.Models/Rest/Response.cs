@@ -1,7 +1,6 @@
-﻿using FluentChange.Extensions.Common.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace FluentChange.Extensions.Common.Rest
+namespace FluentChange.Extensions.Common.Models.Rest
 {
     public class Response
     {

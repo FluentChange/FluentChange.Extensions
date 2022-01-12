@@ -1,4 +1,5 @@
-﻿using MimeKit;
+﻿using FluentChange.Extensions.Common.Models.Rest;
+using MimeKit;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
