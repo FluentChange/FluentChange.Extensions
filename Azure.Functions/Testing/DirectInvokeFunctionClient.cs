@@ -180,9 +180,9 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
             }
             else
             {
-                if (routeMapping[method].ContainsKey(route + CRUDLHelper.Id))
+                if (routeMapping[method].ContainsKey(route + RouteHelper.Id))
                 {
-                    return routeMapping[method][route + CRUDLHelper.Id];
+                    return routeMapping[method][route + RouteHelper.Id];
                 }
             }
 

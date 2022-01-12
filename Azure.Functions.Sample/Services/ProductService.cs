@@ -1,12 +1,13 @@
 ﻿using DemoCRUDLFunctions.Models;
 using FluentChange.Extensions.Azure.Functions.CRUDL;
+using FluentChange.Extensions.Azure.Functions.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace DemoCRUDLFunctions.Services
 {
-    public class ProductService : ICRUDLService<Product>
+    public class ProductService : ICRUDLServiceWithId<Product>
     {
         private List<Product> products;
         public ProductService()

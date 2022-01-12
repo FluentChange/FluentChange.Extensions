@@ -19,7 +19,7 @@ namespace DemoCRUDLFunctions
         }
 
         [FunctionName("Sample1TodoCL")]
-        public async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample1/todos" + CRUDLHelper.Id)] HttpRequest req, string id, ILogger log)
+        public async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample1/todos" + RouteHelper.Id)] HttpRequest req, string id, ILogger log)
         {
 
             return await CL
@@ -28,7 +28,7 @@ namespace DemoCRUDLFunctions
         }
 
         [FunctionName("Sample2TodoCL")]
-        public async Task<HttpResponseMessage> Run2([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample2/todos" + CRUDLHelper.Id)] HttpRequest req, string id, ILogger log)
+        public async Task<HttpResponseMessage> Run2([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample2/todos" + RouteHelper.Id)] HttpRequest req, string id, ILogger log)
         {
 
             return await CL
@@ -39,7 +39,7 @@ namespace DemoCRUDLFunctions
         }
 
         [FunctionName("Sample3EventCL")]
-        public async Task<HttpResponseMessage> Run3([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample3/events" + CRUDLHelper.Id)] HttpRequest req, string id, ILogger log)
+        public async Task<HttpResponseMessage> Run3([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample3/events" + RouteHelper.Id)] HttpRequest req, string id, ILogger log)
         {
 
             return await CL
@@ -49,7 +49,7 @@ namespace DemoCRUDLFunctions
         }
 
         [FunctionName("Sample4EventCL")]
-        public async Task<HttpResponseMessage> Run4([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample4/events" + CRUDLHelper.Id)] HttpRequest req, string id, ILogger log)
+        public async Task<HttpResponseMessage> Run4([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample4/events" + RouteHelper.Id)] HttpRequest req, string id, ILogger log)
         {
 
             return await CL
@@ -61,7 +61,7 @@ namespace DemoCRUDLFunctions
         }
 
         [FunctionName("Sample5EventCL")]
-        public async Task<HttpResponseMessage> Run5([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample5/events" + CRUDLHelper.Id)] HttpRequest req, string id, ILogger log)
+        public async Task<HttpResponseMessage> Run5([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample5/events" + RouteHelper.Id)] HttpRequest req, string id, ILogger log)
         {
 
             return await CL
@@ -74,7 +74,7 @@ namespace DemoCRUDLFunctions
         }
 
         [FunctionName("Sample6ProductCL")]
-        public async Task<HttpResponseMessage> Run6([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample6/products" + CRUDLHelper.Id)] HttpRequest req, string id, ILogger log)
+        public async Task<HttpResponseMessage> Run6([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample6/products" + RouteHelper.Id)] HttpRequest req, string id, ILogger log)
         {
 
             return await CL
@@ -88,7 +88,7 @@ namespace DemoCRUDLFunctions
 
 
         [FunctionName("Sample7ProductMappingCL")]
-        public async Task<HttpResponseMessage> Run7([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample7/products" + CRUDLHelper.Id)] HttpRequest req, string id, ILogger log)
+        public async Task<HttpResponseMessage> Run7([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample7/products" + RouteHelper.Id)] HttpRequest req, string id, ILogger log)
         {
             try
             {

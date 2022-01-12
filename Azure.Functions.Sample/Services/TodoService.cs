@@ -1,12 +1,13 @@
 ﻿using DemoCRUDLFunctions.Models;
 using FluentChange.Extensions.Azure.Functions.CRUDL;
+using FluentChange.Extensions.Azure.Functions.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace DemoCRUDLFunctions.Services
 {
-    public class TodoService : ICRUDLService<Todo>
+    public class TodoService : ICRUDLServiceWithId<Todo>
     {
         private List<Todo> todos;
         public TodoService()

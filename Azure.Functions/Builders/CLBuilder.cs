@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using FluentChange.Extensions.Azure.Functions.Helper;
-
+using FluentChange.Extensions.Azure.Functions.Interfaces;
 
 namespace FluentChange.Extensions.Azure.Functions.CRUDL
 {

@@ -4,16 +4,21 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
 {
     public abstract class AbstractFunction
     {
-        protected readonly RUDBuilder RUD;
         protected readonly CLBuilder CL;
-        protected readonly CRUDBuilder CRUD;
-        protected readonly CRUDLBuilder CRUDL;
+        protected readonly RUDBuilderWithId RUDwithId;
+        protected readonly RUDBuilderWithoutId RUDwithoutId;
+        protected readonly CRUDBuilderWithoutId CRUDwithoutId;
+        protected readonly CRUDLBuilderWithId CRUDLwithId;
+
         public AbstractFunction(IServiceProvider provider)
-        {       
-            this.CRUDL = new CRUDLBuilder(provider);
-            this.CRUD = new CRUDBuilder(provider);
+        {
             this.CL = new CLBuilder(provider);
-            this.RUD = new RUDBuilder(provider);
+            this.RUDwithId = new RUDBuilderWithId(provider);
+            this.RUDwithoutId = new RUDBuilderWithoutId(provider);
+            this.CRUDwithoutId = new CRUDBuilderWithoutId(provider);
+            this.CRUDLwithId = new CRUDLBuilderWithId(provider);
+
+          
         }
     
     }
