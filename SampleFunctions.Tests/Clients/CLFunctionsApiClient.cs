@@ -20,13 +20,13 @@ namespace SampleFunctions.Tests
         public CLFunctionsApiClient(IRestClient rest)
         {
             this.rest = rest;
-            Sample1Todos = new GenericCLApi<Todo>(rest, "cl/sample1/todos", new Dictionary<string, string>());
-            Sample2Todos = new GenericCLApi<Todo>(rest, "cl/sample2/todos", new Dictionary<string, string>());
-            Sample3Events = new GenericCLApi<Event>(rest, "cl/sample3/events", new Dictionary<string, string>());
-            Sample4Events = new GenericCLApi<Event>(rest, "cl/sample4/events", new Dictionary<string, string>());
-            Sample5Events = new GenericCLApi<Event>(rest, "cl/sample5/events", new Dictionary<string, string>());
-            Sample6Products = new WrappedGenericCLApi<Product>(rest, "cl/sample6/products", new Dictionary<string, string>());  
-            Sample7Products = new WrappedGenericCLApi<ApiProduct>(rest, "cl/sample7/products", new Dictionary<string, string>());
+            Sample1Todos = new GenericCLApi<Todo>(rest, "cl/sample1/todos", new Dictionary<string, object>());
+            Sample2Todos = new GenericCLApi<Todo>(rest, "cl/sample2/todos", new Dictionary<string, object>());
+            Sample3Events = new GenericCLApi<Event>(rest, "cl/sample3/events", new Dictionary<string, object>());
+            Sample4Events = new GenericCLApi<Event>(rest, "cl/sample4/events", new Dictionary<string, object>());
+            Sample5Events = new GenericCLApi<Event>(rest, "cl/sample5/events", new Dictionary<string, object>());
+            Sample6Products = new WrappedGenericCLApi<Product>(rest, "cl/sample6/products", new Dictionary<string, object>());  
+            Sample7Products = new WrappedGenericCLApi<ApiProduct>(rest, "cl/sample7/products", new Dictionary<string, object>());
      
         }
 

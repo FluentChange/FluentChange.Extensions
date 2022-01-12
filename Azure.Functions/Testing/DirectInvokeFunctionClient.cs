@@ -13,6 +13,7 @@ using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
 using FluentChange.Extensions.Common.Rest;
+using Microsoft.Extensions.Primitives;
 
 namespace FluentChange.Extensions.Azure.Functions.Testing
 {
@@ -123,7 +124,7 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
         }
 
 
-        protected async override Task<HttpResponseMessage> GetImplementation(string route, Dictionary<string, string> parameters)
+        protected async override Task<HttpResponseMessage> GetImplementation(string route, Dictionary<string, object> parameters)
         {
             var functionMethod = findFunctionMethod("get", route);
             var functionClassInstance = ServiceProvider.GetService(functionMethod.DeclaringType);
@@ -132,7 +133,7 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
             return await (Task<HttpResponseMessage>)functionMethod.Invoke(functionClassInstance, functionParameters.ToArray());
         }
 
-        protected async override Task<HttpResponseMessage> PostImplementation(string route, object content, Dictionary<string, string> parameters = null)
+        protected async override Task<HttpResponseMessage> PostImplementation(string route, object content, Dictionary<string, object> parameters = null)
         {
             var functionMethod = findFunctionMethod("post", route);
             var functionClassInstance = ServiceProvider.GetService(functionMethod.DeclaringType);
@@ -141,7 +142,7 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
             return await (Task<HttpResponseMessage>)functionMethod.Invoke(functionClassInstance, functionParameters.ToArray());
         }
 
-        protected async override Task<HttpResponseMessage> PutImplementation(string route, object content, Dictionary<string, string> parameters = null)
+        protected async override Task<HttpResponseMessage> PutImplementation(string route, object content, Dictionary<string, object> parameters = null)
         {
             var functionMethod = findFunctionMethod("put", route);
             var functionClassInstance = ServiceProvider.GetService(functionMethod.DeclaringType);
@@ -150,7 +151,7 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
             return await (Task<HttpResponseMessage>)functionMethod.Invoke(functionClassInstance, functionParameters.ToArray());
         }
 
-        protected async override Task<HttpResponseMessage> DeleteImplementation(string route, Dictionary<string, string> parameters)
+        protected async override Task<HttpResponseMessage> DeleteImplementation(string route, Dictionary<string, object> parameters)
         {
             var functionMethod = findFunctionMethod("delete", route);
             var functionClass = ServiceProvider.GetService(functionMethod.DeclaringType);
@@ -176,12 +177,14 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
             throw new Exception("function method for route " + method + " " + route + " not found");
         }
 
-        private async Task<List<object>> CreateFunctionParameters(string method, string route, Dictionary<string, string> parameters, MethodInfo functionMethod, object content = null)
+        private async Task<List<object>> CreateFunctionParameters(string method, string route, Dictionary<string, object> parameters, MethodInfo functionMethod, object content = null)
         {
             var routeValues = new Dictionary<string, string>();
             route = ReplaceParams(route, parameters, out routeValues);
             var dummyHttpRequest = await CreateHttpRequest(method, route, content);
             
+
+            // ADD Routevalues
             foreach(var entry in routeValues)
             {
                 dummyHttpRequest.RouteValues.Add(entry.Key, entry.Value);
@@ -203,7 +206,16 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
                 {
                     if (parameters.ContainsKey(definedParam.Name))
                     {
-                        functionParameters.Add(parameters[definedParam.Name]);
+                        var parameterValue = parameters[definedParam.Name];
+                        if (definedParam.ParameterType == parameterValue.GetType())
+                        {
+                            functionParameters.Add(parameterValue);
+                        }
+                        else
+                        {
+                            throw new Exception("paramter missmatch");
+                        }
+                     
                     }
                     else
                     {
@@ -236,7 +248,13 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
             if (content != null)
             {
                 var httpContent = SerializeContentIfNeeded(content);
-                dummyHttpRequest.Body = await httpContent.ReadAsStreamAsync();
+                var stream = await httpContent.ReadAsStreamAsync();
+                dummyHttpRequest.Body = stream;
+                foreach(var header in httpContent.Headers)
+                {
+                    var sv = new StringValues(header.Value.ToArray());
+                    dummyHttpRequest.Headers.Add(header.Key, sv);
+                }            
             }
 
             return dummyHttpRequest;

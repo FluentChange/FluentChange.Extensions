@@ -20,16 +20,13 @@ namespace SampleFunctions.Tests
         public CRUDLFunctionsApiClient(IRestClient rest)
         {
             this.rest = rest;
-            Sample1Todos = new GenericCRUDLApi<Todo>(rest, "crudl/sample1/todos", new Dictionary<string, string>());
-            Sample2Todos = new GenericCRUDLApi<Todo>(rest, "crudl/sample2/todos", new Dictionary<string, string>());
-            Sample3Events = new GenericCRUDLApi<Event>(rest, "crudl/sample3/events", new Dictionary<string, string>());
-            Sample4Events = new GenericCRUDLApi<Event>(rest, "crudl/sample4/events", new Dictionary<string, string>());
-            Sample5Events = new GenericCRUDLApi<Event>(rest, "crudl/sample5/events", new Dictionary<string, string>());
-            Sample6Products = new WrappedGenericCRUDLApi<Product>(rest, "crudl/sample6/products", new Dictionary<string, string>());  
-            Sample7Products = new WrappedGenericCRUDLApi<ApiProduct>(rest, "crudl/sample7/products", new Dictionary<string, string>());
-     
+            Sample1Todos = new GenericCRUDLApi<Todo>(rest, "crudl/sample1/todos", new Dictionary<string, object>());
+            Sample2Todos = new GenericCRUDLApi<Todo>(rest, "crudl/sample2/todos", new Dictionary<string, object>());
+            Sample3Events = new GenericCRUDLApi<Event>(rest, "crudl/sample3/events", new Dictionary<string, object>());
+            Sample4Events = new GenericCRUDLApi<Event>(rest, "crudl/sample4/events", new Dictionary<string, object>());
+            Sample5Events = new GenericCRUDLApi<Event>(rest, "crudl/sample5/events", new Dictionary<string, object>());
+            Sample6Products = new WrappedGenericCRUDLApi<Product>(rest, "crudl/sample6/products", new Dictionary<string, object>());  
+            Sample7Products = new WrappedGenericCRUDLApi<ApiProduct>(rest, "crudl/sample7/products", new Dictionary<string, object>());     
         }
-
-
     }
 }
