@@ -12,14 +12,14 @@ using System.Threading.Tasks;
 
 namespace DemoCRUDLFunctions
 {
-    public class Functions : AbstractFunction
+    public class CRUDLFunctions : AbstractFunction
     {
-        public Functions(IServiceProvider provider) : base(provider)
+        public CRUDLFunctions(IServiceProvider provider) : base(provider)
         {
         }
 
         [FunctionName("Sample1TodoCRUDL")]
-        public async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", "put", "delete", Route = "sample1/todos" + CRUDLHelper.Id)] HttpRequest req, string id, ILogger log)
+        public async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", "put", "delete", Route = "crudl/sample1/todos" + CRUDLHelper.Id)] HttpRequest req, string id, ILogger log)
         {
 
             return await CRUDL
@@ -28,9 +28,8 @@ namespace DemoCRUDLFunctions
         }
 
         [FunctionName("Sample2TodoCRUDL")]
-        public async Task<HttpResponseMessage> Run2([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", "put", "delete", Route = "sample2/todos" + CRUDLHelper.Id)] HttpRequest req, string id, ILogger log)
+        public async Task<HttpResponseMessage> Run2([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", "put", "delete", Route = "crudl/sample2/todos" + CRUDLHelper.Id)] HttpRequest req, string id, ILogger log)
         {
-
             return await CRUDL
                 .ForEntity<Todo>()
                 .UseInterface<TodoService>()
@@ -39,7 +38,7 @@ namespace DemoCRUDLFunctions
         }
 
         [FunctionName("Sample3EventCRUDL")]
-        public async Task<HttpResponseMessage> Run3([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", "put", "delete", Route = "sample3/events" + CRUDLHelper.Id)] HttpRequest req, string id, ILogger log)
+        public async Task<HttpResponseMessage> Run3([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", "put", "delete", Route = "crudl/sample3/events" + CRUDLHelper.Id)] HttpRequest req, string id, ILogger log)
         {
 
             return await CRUDL
@@ -49,7 +48,7 @@ namespace DemoCRUDLFunctions
         }
 
         [FunctionName("Sample4EventCRUDL")]
-        public async Task<HttpResponseMessage> Run4([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", "put", "delete", Route = "sample4/events" + CRUDLHelper.Id)] HttpRequest req, string id, ILogger log)
+        public async Task<HttpResponseMessage> Run4([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", "put", "delete", Route = "crudl/sample4/events" + CRUDLHelper.Id)] HttpRequest req, string id, ILogger log)
         {
 
             return await CRUDL
@@ -61,7 +60,7 @@ namespace DemoCRUDLFunctions
         }
 
         [FunctionName("Sample5EventCRUDL")]
-        public async Task<HttpResponseMessage> Run5([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", "put", "delete", Route = "sample5/events" + CRUDLHelper.Id)] HttpRequest req, string id, ILogger log)
+        public async Task<HttpResponseMessage> Run5([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", "put", "delete", Route = "crudl/sample5/events" + CRUDLHelper.Id)] HttpRequest req, string id, ILogger log)
         {
 
             return await CRUDL
@@ -73,11 +72,10 @@ namespace DemoCRUDLFunctions
                 .Delete(s => s.Remove)
                 .List(s => s.All)
                 .Handle(req, log, id);
-
         }
 
         [FunctionName("Sample6ProductCRUDL")]
-        public async Task<HttpResponseMessage> Run6([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", "put", "delete", Route = "sample6/products" + CRUDLHelper.Id)] HttpRequest req, string id, ILogger log)
+        public async Task<HttpResponseMessage> Run6([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", "put", "delete", Route = "crudl/sample6/products" + CRUDLHelper.Id)] HttpRequest req, string id, ILogger log)
         {
 
             return await CRUDL
@@ -91,7 +89,7 @@ namespace DemoCRUDLFunctions
 
 
         [FunctionName("Sample7ProductMappingCRUDL")]
-        public async Task<HttpResponseMessage> Run7([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", "put", "delete", Route = "sample7/products" + CRUDLHelper.Id)] HttpRequest req, string id, ILogger log)
+        public async Task<HttpResponseMessage> Run7([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", "put", "delete", Route = "crudl/sample7/products" + CRUDLHelper.Id)] HttpRequest req, string id, ILogger log)
         {
             try
             {

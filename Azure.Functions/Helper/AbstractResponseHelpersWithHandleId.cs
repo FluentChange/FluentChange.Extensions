@@ -13,6 +13,7 @@ using SystemNet = System.Net;
 
 namespace FluentChange.Extensions.Azure.Functions.Helper
 {
+
     public abstract class AbstractResponseHelpers<T, M> where T : new() where M : new()
     {
         protected bool wrapRequestAndResponse;
@@ -26,17 +27,7 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
             this.usesMapping = !(typeof(T).Equals(typeof(M)));
         }
 
-        public AbstractResponseHelpers<T, M> WithJson(JsonSerializerSettings settings)
-        {
-            this.jsonSettings = settings;
-            return this;
-        }
-
-        public AbstractResponseHelpers<T, M> WrapRequestAndResponse()
-        {
-            wrapRequestAndResponse = true;
-            return this;
-        }
+    
 
         protected async Task<T> GetRequestBody(HttpRequest req)
         {
@@ -166,8 +157,45 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
             }
         }
 
+    }
+
+    public abstract class AbstractResponseHelpersWithHandle<T, M> : AbstractResponseHelpers<T, M> where T : new() where M : new()
+    {
+        protected AbstractResponseHelpersWithHandle(IEntityMapper mapper) : base(mapper)
+        {
+        }
+
+        public AbstractResponseHelpersWithHandle<T, M> WithJson(JsonSerializerSettings settings)
+        {
+            this.jsonSettings = settings;
+            return this;
+        }
+
+        public AbstractResponseHelpersWithHandle<T, M> WrapRequestAndResponse()
+        {
+            wrapRequestAndResponse = true;
+            return this;
+        }
+
+        public abstract Task<HttpResponseMessage> Handle(HttpRequest req, ILogger log);
+    }
+
+    public abstract class AbstractResponseHelpersWithHandleId<T, M> : AbstractResponseHelpers<T, M> where T : new() where M : new()
+    {
+        protected AbstractResponseHelpersWithHandleId(IEntityMapper mapper) : base(mapper)
+        {
+        }
+        public AbstractResponseHelpersWithHandleId<T, M> WithJson(JsonSerializerSettings settings)
+        {
+            this.jsonSettings = settings;
+            return this;
+        }
+
+        public AbstractResponseHelpersWithHandleId<T, M> WrapRequestAndResponse()
+        {
+            wrapRequestAndResponse = true;
+            return this;
+        }
         public abstract Task<HttpResponseMessage> Handle(HttpRequest req, ILogger log, string id);
-
-
     }
 }

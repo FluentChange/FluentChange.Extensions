@@ -14,7 +14,7 @@ namespace SampleFunctions.Tests
         public async Task Sample7ProductsCRUDLviaRest()
         {
             var restClient = new InternalRestClient("http://localhost:7071");
-            var rest = new FunctionsApiClient(restClient);
+            var rest = new CRUDLFunctionsApiClient(restClient);
 
             var list = await rest.Sample7Products.List();
             Assert.AreEqual(2, list.Results.Count);
@@ -59,7 +59,7 @@ namespace SampleFunctions.Tests
         public async Task Sample7ProductsCRUDLdirect()
         {
             var dummyRestClient = new DirectInvokeFunctionClient<DemoCRUDLFunctions.Startup>();
-            var rest = new FunctionsApiClient(dummyRestClient);
+            var rest = new CRUDLFunctionsApiClient(dummyRestClient);
 
             var list = await rest.Sample7Products.List();
             Assert.AreEqual(2, list.Results.Count);
@@ -104,7 +104,7 @@ namespace SampleFunctions.Tests
         public void DirectRestRequest()
         {
             var rest = new RestSharp.RestClient("http://localhost:7071/api/");
-            var request = new RestSharp.RestRequest("sample7/products/66bc54bf-9e0c-494d-84ad-cc239837f543", RestSharp.Method.GET);
+            var request = new RestSharp.RestRequest("crudl/sample7/products/66bc54bf-9e0c-494d-84ad-cc239837f543", RestSharp.Method.GET);
 
             var response = rest.Execute<SingleResponse<ApiProduct>>(request);
             Assert.IsNotNull(response.Data);

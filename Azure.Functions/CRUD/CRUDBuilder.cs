@@ -28,12 +28,12 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             return builder;
         }
 
-        public async Task<HttpResponseMessage> Handle<T, S>(HttpRequest req, ILogger log, string id) where T : new() where S : class, ICRUDService<T>
+        public async Task<HttpResponseMessage> Handle<T, S>(HttpRequest req, ILogger log, string id) where T : new() where S : class, ICRUDServiceOld<T>
         {
             return await ForEntity<T>().UseInterface<S>().Handle(req, log, id);
         }
 
-        public async Task<HttpResponseMessage> HandleAndMap<T, M, S>(HttpRequest req, ILogger log, string id) where T : new() where M : new() where S : class, ICRUDService<T>
+        public async Task<HttpResponseMessage> HandleAndMap<T, M, S>(HttpRequest req, ILogger log, string id) where T : new() where M : new() where S : class, ICRUDServiceOld<T>
         {
             return await ForEntityWithMapping<T, M>().UseInterface<S>().Handle(req, log, id);
         }
@@ -71,7 +71,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             return builder;
         }
 
-        public CRUDBuilderEntityInterfaceService<T, M, S> UseInterface<S>() where S : class, ICRUDService<T>
+        public CRUDBuilderEntityInterfaceService<T, M, S> UseInterface<S>() where S : class, ICRUDServiceOld<T>
         {
             var service = provider.GetService<S>();
             var mapper = GetMapperService();
@@ -97,7 +97,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
 
 
 
-    public class CRUDBuilderEntityInterfaceService<T, M, S> where S : class, ICRUDService<T> where M : new() where T : new()
+    public class CRUDBuilderEntityInterfaceService<T, M, S> where S : class, ICRUDServiceOld<T> where M : new() where T : new()
     {
         private readonly CRUDBuilderEntityService<T, M, S> internalBuilder;
         public CRUDBuilderEntityInterfaceService(S service, IEntityMapper mapper)
@@ -114,7 +114,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         }
     }
 
-    public class CRUDBuilderEntityService<T, M, S> : AbstractResponseHelpers<T, M> where S : class where T : new() where M : new()
+    public class CRUDBuilderEntityService<T, M, S> : AbstractResponseHelpersWithHandleId<T, M> where S : class where T : new() where M : new()
     {
         private readonly S service;    
 

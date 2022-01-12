@@ -258,11 +258,9 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
                 headers.Add(key, value);
             }
         }
-
         public override void RemoveHeader(string key)
         {
             headers.Remove(key);
         }
-
     }
 }
