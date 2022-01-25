@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FluentChange.Extensions.Common.Database
 {
-    public interface IxRepository<T, E> where T : E
+    public interface IRepository<T, E> where T : E where E : AbstractIdEntity
     {
         IQueryable<T> All();
 
@@ -30,11 +30,11 @@ namespace FluentChange.Extensions.Common.Database
         bool Exist(Guid id);
         Task<bool> ExistAsync(Guid id);
     }
-    public interface ITrackedRepository<T> : IxRepository<T, AbstractTrackedEntity> where T : AbstractTrackedEntity
+    public interface ITrackedRepository<T> : IRepository<T, AbstractTrackedEntity> where T : AbstractTrackedEntity
     {
 
     }
-    public interface IUserTrackedRepository<T> : IxRepository<T, AbstractUserTrackedEntity> where T : AbstractUserTrackedEntity
+    public interface IUserTrackedRepository<T> : IRepository<T, AbstractUserTrackedEntity> where T : AbstractUserTrackedEntity
     {
 
     }
