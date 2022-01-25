@@ -7,7 +7,7 @@
     <Product>Common Database Extension</Product>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Version>0.0.2</Version>
+    <Version>0.0.3</Version>
     <Description>Common classes and models for sql database</Description>
     <PackageTags>Common Database Repositories SQL</PackageTags>
     <PackageProjectUrl>https://github.com/FluentChange/FluentChange.Extensions/tree/master/Common.Database</PackageProjectUrl>
@@ -22,6 +22,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.5" />
     <PackageReference Include="EFCore.BulkExtensions" Version="3.1.6" />
+    <PackageReference Include="Microsoft.Azure.Management.Fluent" Version="1.37.1" />
+    <PackageReference Include="Microsoft.Azure.Management.Sql.Fluent" Version="1.37.1" />
   </ItemGroup>
   
   <ItemGroup>
