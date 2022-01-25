@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Authors>Frank Mühlschlegel</Authors>
+    <Company>Fluent Change</Company>
+    <Product>Common Database Extension</Product>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Version>0.0.1</Version>
+    <Description>Common classes and models for sql database</Description>
+    <PackageTags>Common Database Repositories SQL</PackageTags>
+    <PackageProjectUrl>https://github.com/FluentChange/FluentChange.Extensions/tree/master/Common.Database</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/FluentChange/FluentChange.Extensions</RepositoryUrl>
+    <RepositoryType>GitHub</RepositoryType>
+    <PackageId>FluentChange.Extensions.Common.Database</PackageId>
+    <AssemblyName>FluentChange.Extensions.Common.Database</AssemblyName>
+    <RootNamespace>FluentChange.Extensions.Common.Database</RootNamespace>
+
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.5" />
+    <PackageReference Include="EFCore.BulkExtensions" Version="3.1.6" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\Common.Models\Common.Models.csproj" />
+  </ItemGroup>
+</Project>

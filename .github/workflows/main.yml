@@ -41,6 +41,10 @@ jobs:
         working-directory: ./Azure.Functions
         run: dotnet pack Azure.Functions.csproj --configuration Release --no-build --no-restore 
 
+      - name: Pack nuget Common.Database
+        working-directory: ./Common.Database
+        run: dotnet pack Common.Database.csproj --configuration Release --no-build --no-restore 
+
       - name: Pack nuget Common.Rest
         working-directory: ./Common.Rest
         run: dotnet pack Common.Rest.csproj --configuration Release --no-build --no-restore 
@@ -63,6 +67,7 @@ jobs:
           name: nuget
           path: |
             ./Azure.Functions/bin/Release/
+            ./Common.Database/bin/Release/
             ./Common.Rest/bin/Release/
             ./Common.Models/bin/Release/
             ./Blazor/bin/Release/
