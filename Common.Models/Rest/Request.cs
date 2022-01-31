@@ -5,7 +5,7 @@
 
     }
 
-    public class SingleRequest<T> : Request where T : new()
+    public class SingleRequest<T> : Request 
     {
         public T Data { get; set; }
 

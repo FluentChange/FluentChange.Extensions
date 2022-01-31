@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace FluentChange.Extensions.Common.Models.Rest
 {
@@ -12,13 +13,20 @@ namespace FluentChange.Extensions.Common.Models.Rest
         }
     }
 
-    public class SingleResponse<T> : Response where T : new()
+    public class NewResponse<T> : Response 
+    {
+        public T Data { get; set; }
+
+    }
+    [Obsolete("Please use NewResponse")]
+    public class SingleResponse<T> : Response where T : class
     {
         public T Result { get; set; }
 
     }
 
-    public class MultiResponse<T> : Response where T : new()
+    [Obsolete("Please use NewResponse")]
+    public class MultiResponse<T> : Response where T : class
     {
         public List<T> Results { get; set; }
 
@@ -28,4 +36,14 @@ namespace FluentChange.Extensions.Common.Models.Rest
         }
 
     }
+
+    //public class MultiResponseNew<T> : Response where T : class
+    //{
+    //    public T Results { get; set; }
+
+    //    public MultiResponseNew() : base()
+    //    {
+    //    }
+
+    //}
 }
