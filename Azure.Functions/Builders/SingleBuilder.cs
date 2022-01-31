@@ -1,16 +1,13 @@
 ﻿using FluentChange.Extensions.Azure.Functions.Helper;
 using FluentChange.Extensions.Common.Models.Rest;
-using FluentChange.Extensions.System.Helper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
-using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using SystemNet = System.Net;
-
 
 namespace FluentChange.Extensions.Azure.Functions.CRUDL
 {
@@ -20,45 +17,29 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         public ILogger Logger { get; set; }
     }
 
-    public class ServiceBuilder<TService, TServiceInput>
-    {
-        private readonly IServiceProvider provider;
-        public ServiceBuilder(IServiceProvider provider)
-        {
-            this.provider = provider;
-        }
-
-        public void With<TServiceOutput>(Func<TService, Func<TServiceInput, TServiceOutput>> update)
-        {
-
-        }
-
-
-    }
-
-    public class SingleBuilderWithId
+    public class SingleBuilder
     {
         private readonly IServiceProvider provider;
         protected BuilderConfig config;
-        public SingleBuilderWithId(IServiceProvider provider)
+        public SingleBuilder(IServiceProvider provider)
         {
             this.provider = provider;
             this.config = new BuilderConfig();
         }
 
-        public SingleBuilderWithId Config(JsonSerializerSettings jsonSettings)
+        public SingleBuilder Config(JsonSerializerSettings jsonSettings)
         {
             this.config.JsonSettings = jsonSettings;
             return this;
         }
 
-        public SingleBuilderWithId Config(ILogger logger)
+        public SingleBuilder Config(ILogger logger)
         {
             this.config.Logger = logger;
             return this;
         }
 
-        public SingleBuilderWithId Config(JsonSerializerSettings jsonSettings, ILogger logger)
+        public SingleBuilder Config(JsonSerializerSettings jsonSettings, ILogger logger)
         {
             this.config.JsonSettings = jsonSettings;
             this.config.Logger = logger;

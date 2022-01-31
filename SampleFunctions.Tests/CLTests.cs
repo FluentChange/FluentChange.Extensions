@@ -4,6 +4,7 @@ using FluentChange.Extensions.Common.Models.Rest;
 using FluentChange.Extensions.Common.Rest;
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -19,7 +20,7 @@ namespace SampleFunctions.Tests
             var rest = new CLFunctionsApiClient(restClient);
 
             var list = await rest.Sample7ProductsCL.List();
-            Assert.AreEqual(2, list.Results.Count);
+            Assert.AreEqual(2, list.Data.Count());
 
             var newProduct = new ApiProduct()
             {
@@ -30,12 +31,12 @@ namespace SampleFunctions.Tests
 
             var created = await rest.Sample7ProductsCL.Create(newProduct);
 
-            Assert.IsNotNull(created.Result);
-            Assert.IsNotNull(created.Result.Id);
-            Assert.AreEqual("New Product 1", created.Result.Name);
+            Assert.IsNotNull(created.Data);
+            Assert.IsNotNull(created.Data.Id);
+            Assert.AreEqual("New Product 1", created.Data.Name);
 
             var listNewAfterCreate = await rest.Sample7ProductsCL.List();
-            Assert.AreEqual(3, listNewAfterCreate.Results.Count);
+            Assert.AreEqual(3, listNewAfterCreate.Data.Count());
         }
 
         [Test]
@@ -45,7 +46,7 @@ namespace SampleFunctions.Tests
             var rest = new CLFunctionsApiClient(dummyRestClient);
 
             var list = await rest.Sample7ProductsCL.List();
-            Assert.AreEqual(2, list.Results.Count);
+            Assert.AreEqual(2, list.Data.Count());
 
             var newProduct = new ApiProduct()
             {
@@ -56,12 +57,12 @@ namespace SampleFunctions.Tests
 
             var created = await rest.Sample7ProductsCL.Create(newProduct);
 
-            Assert.IsNotNull(created.Result);
-            Assert.IsNotNull(created.Result.Id);
-            Assert.AreEqual("New Product 1", created.Result.Name);
+            Assert.IsNotNull(created.Data);
+            Assert.IsNotNull(created.Data.Id);
+            Assert.AreEqual("New Product 1", created.Data.Name);
 
             var listNewAfterCreate = await rest.Sample7ProductsCL.List();
-            Assert.AreEqual(3, listNewAfterCreate.Results.Count);
+            Assert.AreEqual(3, listNewAfterCreate.Data.Count());
         }
 
 
@@ -73,11 +74,11 @@ namespace SampleFunctions.Tests
             var rest = new RestSharp.RestClient("http://localhost:7071/api/");
             var request = new RestSharp.RestRequest("cl/sample7/products", RestSharp.Method.GET);
 
-            var response = rest.Execute<MultiResponse<ApiProduct>>(request);
+            var response = rest.Execute<NewResponse<IEnumerable<ApiProduct>>>(request);
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
             Assert.IsNotNull(response.Data);
-            Assert.IsNotNull(response.Data.Results);
-            Assert.AreEqual("Test Product 1", response.Data.Results.First().Name);
+            Assert.IsNotNull(response.Data.Data);
+            Assert.AreEqual("Test Product 1", response.Data.Data.First().Name);
         }
     }
 }

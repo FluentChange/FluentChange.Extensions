@@ -21,7 +21,7 @@ namespace DemoCRUDLFunctions
         [FunctionName("SingleFunctions")]
         public async Task<HttpResponseMessage> Run7([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "single/products")] HttpRequest req, ILogger log)
         {
-            return await Handler
+            return await Handler()
                 .Config(log)
                 .Use<ProductService>()
                 .Execute<IEnumerable<Product>>(service => service.List)

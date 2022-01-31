@@ -432,9 +432,9 @@ namespace FluentChange.Extensions.Common.Rest
             return await Read<NewResponse<T>>(id, data);
         }
 
-        public async Task<NewResponse<T>> ReadMutliple(Guid? id = null, T data = null)
+        public async Task<NewResponse<IEnumerable<T>>> ReadMutliple(Guid? id = null, T data = null)
         {
-            return await Read<NewResponse<T>>(id, data);
+            return await Read<NewResponse<IEnumerable<T>>>(id, data);
         }
 
         private async Task<R> Read<R>(Guid? id = null, T data = null)

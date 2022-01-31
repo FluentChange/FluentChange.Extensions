@@ -33,7 +33,7 @@ namespace SampleFunctions.Tests
 
             var provider = services.BuildServiceProvider();
 
-            var Single = new SingleBuilderWithId(provider);
+            var Single = new SingleBuilder(provider);
 
             var settings = new Newtonsoft.Json.JsonSerializerSettings();
 

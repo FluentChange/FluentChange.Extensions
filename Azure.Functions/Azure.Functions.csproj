@@ -18,13 +18,15 @@
     <RootNamespace>FluentChange.Extensions.Azure.Functions</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="FluentChange.Extensions.Common.Rest" Version="0.0.31" />
     <PackageReference Include="Microsoft.Azure.WebJobs" Version="3.0.31" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Http" Version="3.0.12" />
     <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.1.0" />
   </ItemGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common.Rest\Common.Rest.csproj" />
   </ItemGroup>
 
 </Project>
