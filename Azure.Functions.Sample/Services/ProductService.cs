@@ -4,6 +4,7 @@ using FluentChange.Extensions.Azure.Functions.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace DemoCRUDLFunctions.Services
 {
@@ -49,6 +50,15 @@ namespace DemoCRUDLFunctions.Services
             products.Add(product);
             return product;
         }
+
+        public async Task<Product> UpdateAsync(Product product)
+        {
+            await Task.Delay(1000);
+            if (product.Id == Guid.Empty) throw new ArgumentException();
+            Delete(product.Id);
+            products.Add(product);
+            return product;
+        }
         public void Delete(Guid id)
         {
             if (id == Guid.Empty) throw new ArgumentException();
@@ -59,6 +69,10 @@ namespace DemoCRUDLFunctions.Services
         public IEnumerable<Product> List()
         {
             return products;
+        }
+
+        public void Nothing()
+        {
         }
     }
 }

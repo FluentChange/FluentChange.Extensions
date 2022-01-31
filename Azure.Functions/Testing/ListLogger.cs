@@ -28,6 +28,31 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
         }
     }
 
+    public class ConsoleListLogger : ILogger
+    {
+        public IList<string> Logs;
+
+        public IDisposable BeginScope<TState>(TState state) => NullScope.Instance;
+
+        public bool IsEnabled(LogLevel logLevel) => false;
+
+        public ConsoleListLogger()
+        {
+            this.Logs = new List<string>();
+        }
+
+        public void Log<TState>(LogLevel logLevel,
+                                EventId eventId,
+                                TState state,
+                                Exception exception,
+                                Func<TState, Exception, string> formatter)
+        {
+            string message = formatter(state, exception);
+            this.Logs.Add(message);
+            Console.WriteLine(logLevel + ": " + message);
+        }
+    }
+
     public class NullScope : IDisposable
     {
         public static NullScope Instance { get; } = new NullScope();

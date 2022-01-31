@@ -18,39 +18,39 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             this.provider = provider;
         }
 
-        public CLBuilderEntity<T, T> ForEntity<T>() where T : new()
+        public CLBuilderEntity<T, T> ForEntity<T>() where T : class
         {
             var builder = new CLBuilderEntity<T, T>(provider);
             return builder;
         }
-        public CLBuilderEntity<T, M> ForEntityWithMapping<T, M>() where T : new() where M : new()
+        public CLBuilderEntity<T, M> ForEntityWithMapping<T, M>() where T : class where M : class
         {
             var builder = new CLBuilderEntity<T, M>(provider);
             return builder;
         }
 
-        public async Task<HttpResponseMessage> Handle<T, S>(HttpRequest req, ILogger log) where T : new() where S : class, ICLService<T>
+        public async Task<HttpResponseMessage> Handle<T, S>(HttpRequest req, ILogger log) where T : class where S : class, ICLService<T>
         {
             return await ForEntity<T>().UseInterface<S>().Handle(req, log);
         }
 
-        public async Task<HttpResponseMessage> HandleAndMap<T, M, S>(HttpRequest req, ILogger log) where T : new() where M : new() where S : class, ICLService<T>
+        public async Task<HttpResponseMessage> HandleAndMap<T, M, S>(HttpRequest req, ILogger log) where T : class where M : class where S : class, ICLService<T>
         {
             return await ForEntityWithMapping<T, M>().UseInterface<S>().Handle(req, log);
         }
 
-        public CLBuilderEntityService<T, T, S> With<T, S>(Func<S, Func<T, T>> create, Func<S, Func<IEnumerable<T>>> list) where T : new() where S : class
+        public CLBuilderEntityService<T, T, S> With<T, S>(Func<S, Func<T, T>> create, Func<S, Func<IEnumerable<T>>> list) where T : class where S : class
         {
             return ForEntity<T>().Use<S>().With(create, list);
         }
-        public CLBuilderEntityService<T, M, S> WithAndMap<T, M, S>(Func<S, Func<T, T>> create, Func<S, Func<IEnumerable<T>>> list) where T : new() where S : class where M : new()
+        public CLBuilderEntityService<T, M, S> WithAndMap<T, M, S>(Func<S, Func<T, T>> create, Func<S, Func<IEnumerable<T>>> list) where T : class where S : class where M : class
         {
             return ForEntityWithMapping<T, M>().Use<S>().With(create, list);
         }
     }
 
 
-    public class CLBuilderEntity<T, M> where T : new() where M : new()
+    public class CLBuilderEntity<T, M> where T : class where M : class
     {
         private readonly IServiceProvider provider;
         private readonly bool usesMapping;
@@ -98,7 +98,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
 
 
 
-    public class CLBuilderEntityInterfaceService<T, M, S> where S : class, ICLService<T> where M : new() where T : new()
+    public class CLBuilderEntityInterfaceService<T, M, S> where S : class, ICLService<T> where M : class where T : class
     {
         private readonly CLBuilderEntityService<T, M, S> internalBuilder;
         public CLBuilderEntityInterfaceService(S service, IEntityMapper mapper)
@@ -115,7 +115,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         }
     }
 
-    public class CLBuilderEntityService<T, M, S> : AbstractResponseHelpersWithHandle<T, M> where S : class where T : new() where M : new()
+    public class CLBuilderEntityService<T, M, S> : AbstractResponseHelpersWithHandle<T, M> where S : class where T : class where M : class
     {
         private readonly S service;
 

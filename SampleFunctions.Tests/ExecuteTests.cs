@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace SampleFunctions.Tests
 {
-    public class CLTests
+    public class ExecuteTests
     {
         [Test]
         public async Task Sample7ProductsCLviaRest()
@@ -39,39 +39,33 @@ namespace SampleFunctions.Tests
         }
 
         [Test]
-        public async Task Sample7ProductsCLdirect()
+        public async Task ProductsDirect()
         {
             var dummyRestClient = new DirectInvokeFunctionClient<DemoCRUDLFunctions.Startup>();
             var rest = new CLFunctionsApiClient(dummyRestClient);
 
-            var list = await rest.Sample7ProductsCL.List();
-            Assert.AreEqual(2, list.Results.Count);
+            var list = await rest.ExecuteReadProducts.ReadMutliple();
+            Assert.AreEqual(2, list.Results.Count);         
+        }
 
-            var newProduct = new ApiProduct()
-            {
-                Name = "New Product 1",
-                Text = "Description New Product 1",
-                Price = 555.5
-            };
+        [Test]
+        public async Task ProductDirect()
+        {
+            var dummyRestClient = new DirectInvokeFunctionClient<DemoCRUDLFunctions.Startup>();
+            var rest = new CLFunctionsApiClient(dummyRestClient);
 
-            var created = await rest.Sample7ProductsCL.Create(newProduct);
-
-            Assert.IsNotNull(created.Result);
-            Assert.IsNotNull(created.Result.Id);
-            Assert.AreEqual("New Product 1", created.Result.Name);
-
-            var listNewAfterCreate = await rest.Sample7ProductsCL.List();
-            Assert.AreEqual(3, listNewAfterCreate.Results.Count);
+            var response = await rest.ExecuteReadProduct.ReadSingle(Guid.Parse("66bc54bf-9e0c-494d-84ad-cc239837f543"));
+            Assert.IsNotNull(response);
+            Assert.IsNotNull(response.Result);
+            Assert.AreEqual("Test Product 1", response.Result.Name);
         }
 
 
-
-
         [Test]
-        public void DirectRestReadRequest()
+        public void DirectRestListRequest()
         {
             var rest = new RestSharp.RestClient("http://localhost:7071/api/");
-            var request = new RestSharp.RestRequest("cl/sample7/products", RestSharp.Method.GET);
+            var request = new RestSharp.RestRequest("exe/products", RestSharp.Method.GET);
 
             var response = rest.Execute<MultiResponse<ApiProduct>>(request);
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);

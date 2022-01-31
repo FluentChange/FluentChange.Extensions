@@ -1,5 +1,4 @@
 ﻿using FluentChange.Extensions.Common.Models.Rest;
-using FluentChange.Extensions.Common.Rest;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -15,7 +14,7 @@ using SystemNet = System.Net;
 namespace FluentChange.Extensions.Azure.Functions.Helper
 {
 
-    public abstract class AbstractResponseHelpers<T, M> where T : new() where M : new()
+    public abstract class AbstractResponseHelpers<TServiceModel, TOutputModel> where TServiceModel : class where TOutputModel : class
     {
         protected bool wrapRequestAndResponse;
         protected readonly bool usesMapping;
@@ -25,12 +24,12 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
         {
             this.mapper = mapper;
             this.wrapRequestAndResponse = false;
-            this.usesMapping = !(typeof(T).Equals(typeof(M)));
+            this.usesMapping = !(typeof(TServiceModel).Equals(typeof(TOutputModel)));
         }
 
     
 
-        protected async Task<T> GetRequestBody(HttpRequest req)
+        protected async Task<TServiceModel> GetRequestBody(HttpRequest req)
         {
             if (req.Body == null) throw new ArgumentNullException();
             if (req.Body.Length == 0) throw new ArgumentNullException();
@@ -40,13 +39,13 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
             {
                 if (usesMapping)
                 {
-                    var entityWrapped = JsonConvert.DeserializeObject<SingleRequest<M>>(requestBody, jsonSettings);
-                    var entityMapped = mapper.MapTo<T>(entityWrapped.Data);
+                    var entityWrapped = JsonConvert.DeserializeObject<SingleRequest<TOutputModel>>(requestBody, jsonSettings);
+                    var entityMapped = mapper.MapTo<TServiceModel>(entityWrapped.Data);
                     return entityMapped;
                 }
                 else
                 {
-                    var entityWrapped = JsonConvert.DeserializeObject<SingleRequest<T>>(requestBody, jsonSettings);
+                    var entityWrapped = JsonConvert.DeserializeObject<SingleRequest<TServiceModel>>(requestBody, jsonSettings);
                     return entityWrapped.Data;
                 }
             }
@@ -54,17 +53,18 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
             {
                 if (usesMapping)
                 {
-                    var entity = JsonConvert.DeserializeObject<M>(requestBody, jsonSettings);
-                    var entityMapped = mapper.MapTo<T>(entity);
+                    var entity = JsonConvert.DeserializeObject<TOutputModel>(requestBody, jsonSettings);
+                    var entityMapped = mapper.MapTo<TServiceModel>(entity);
                     return entityMapped;
                 }
                 else
                 {
-                    var entity = JsonConvert.DeserializeObject<T>(requestBody, jsonSettings);
+                    var entity = JsonConvert.DeserializeObject<TServiceModel>(requestBody, jsonSettings);
                     return entity;
                 }
             }
         }
+      
         protected HttpResponseMessage RespondError(Exception ex)
         {
             var errorInfo = new Common.Models.ErrorInfo() { Message = ex.Message, FullMessage = ex.ToString() };
@@ -91,22 +91,21 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
                 return ResponseHelper.CreateJsonResponse(null, jsonSettings);
             }
         }
-
-        protected HttpResponseMessage Respond(T result)
+        protected HttpResponseMessage Respond(TServiceModel result)
         {
             if (wrapRequestAndResponse)
             {
                 if (usesMapping)
                 {
-                    var mappedResult = mapper.MapTo<M>(result);
-                    var response = new SingleResponse<M>();
-                    response.Result = mappedResult;
+                    var mappedResult = mapper.MapTo<TOutputModel>(result);
+                    var response = new NewResponse<TOutputModel>();
+                    response.Data = mappedResult;
                     return ResponseHelper.CreateJsonResponse(response, jsonSettings);
                 }
                 else
                 {
-                    var response = new SingleResponse<T>();
-                    response.Result = result;
+                    var response = new NewResponse<TServiceModel>();
+                    response.Data = result;
                     return ResponseHelper.CreateJsonResponse(response, jsonSettings);
                 }
 
@@ -115,7 +114,7 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
             {
                 if (usesMapping)
                 {
-                    var mappedResult = mapper.MapTo<M>(result);
+                    var mappedResult = mapper.MapTo<TOutputModel>(result);
                     return ResponseHelper.CreateJsonResponse(mappedResult, jsonSettings);
                 }
                 else
@@ -124,22 +123,21 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
                 }
             }
         }
-
-        protected HttpResponseMessage Respond(IEnumerable<T> results)
+        protected HttpResponseMessage Respond(IEnumerable<TServiceModel> results)
         {
             if (wrapRequestAndResponse)
             {
                 if (usesMapping)
                 {
-                    var mappedResults = mapper.ProjectTo<M>(results.ToList().AsQueryable());
-                    var response = new MultiResponse<M>();
-                    response.Results = mappedResults.ToList();
+                    var mappedResults = mapper.ProjectTo<TOutputModel>(results.ToList().AsQueryable());
+                    var response = new NewResponse<IEnumerable<TOutputModel>>();
+                    response.Data = mappedResults.ToList();
                     return ResponseHelper.CreateJsonResponse(response, jsonSettings);
                 }
                 else
                 {
-                    var response = new MultiResponse<T>();
-                    response.Results = results.ToList();
+                    var response = new NewResponse<IEnumerable<TServiceModel>>();
+                    response.Data = results.ToList();
                     return ResponseHelper.CreateJsonResponse(response, jsonSettings);
                 }
             }
@@ -147,7 +145,7 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
             {
                 if (usesMapping)
                 {
-                    var mappedResults = mapper.ProjectTo<M>(results.ToList().AsQueryable());
+                    var mappedResults = mapper.ProjectTo<TOutputModel>(results.ToList().AsQueryable());
                     return ResponseHelper.CreateJsonResponse(mappedResults, jsonSettings);
                 }
                 else
@@ -160,7 +158,7 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
 
     }
 
-    public abstract class AbstractResponseHelpersWithHandle<T, M> : AbstractResponseHelpers<T, M> where T : new() where M : new()
+    public abstract class AbstractResponseHelpersWithHandle<T, M> : AbstractResponseHelpers<T, M> where T : class where M : class
     {
         protected AbstractResponseHelpersWithHandle(IEntityMapper mapper) : base(mapper)
         {
@@ -181,7 +179,7 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
         public abstract Task<HttpResponseMessage> Handle(HttpRequest req, ILogger log);
     }
 
-    public abstract class AbstractResponseHelpersWithHandleId<T, M> : AbstractResponseHelpers<T, M> where T : new() where M : new()
+    public abstract class AbstractResponseHelpersWithHandleId<T, M> : AbstractResponseHelpers<T, M> where T : class where M : class
     {
         protected AbstractResponseHelpersWithHandleId(IEntityMapper mapper) : base(mapper)
         {

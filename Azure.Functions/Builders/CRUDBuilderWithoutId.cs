@@ -17,39 +17,39 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             this.provider = provider;
         }
 
-        public CRUDBuilderWithoutIdEntity<T, T> ForEntity<T>() where T : new()
+        public CRUDBuilderWithoutIdEntity<T, T> ForEntity<T>() where T : class
         {
             var builder = new CRUDBuilderWithoutIdEntity<T, T>(provider);
             return builder;
         }
-        public CRUDBuilderWithoutIdEntity<T, M> ForEntityWithMapping<T, M>() where T : new() where M : new()
+        public CRUDBuilderWithoutIdEntity<T, M> ForEntityWithMapping<T, M>() where T : class where M : class
         {
             var builder = new CRUDBuilderWithoutIdEntity<T, M>(provider);
             return builder;
         }
 
-        public async Task<HttpResponseMessage> Handle<T, S>(HttpRequest req, ILogger log) where T : new() where S : class, ICRUDServiceWithoutId<T>
+        public async Task<HttpResponseMessage> Handle<T, S>(HttpRequest req, ILogger log) where T : class where S : class, ICRUDServiceWithoutId<T>
         {
             return await ForEntity<T>().UseInterface<S>().Handle(req, log);
         }
 
-        public async Task<HttpResponseMessage> HandleAndMap<T, M, S>(HttpRequest req, ILogger log) where T : new() where M : new() where S : class, ICRUDServiceWithoutId<T>
+        public async Task<HttpResponseMessage> HandleAndMap<T, M, S>(HttpRequest req, ILogger log) where T : class where M : class where S : class, ICRUDServiceWithoutId<T>
         {
             return await ForEntityWithMapping<T, M>().UseInterface<S>().Handle(req, log);
         }
 
-        public CRUDBuilderWithoutIdEntityService<T, T, S> With<T, S>(Func<S, Func<T, T>> create, Func<S, Func<T>> read, Func<S, Func<T, T>> update, Func<S, Action> delete) where T : new() where S : class
+        public CRUDBuilderWithoutIdEntityService<T, T, S> With<T, S>(Func<S, Func<T, T>> create, Func<S, Func<T>> read, Func<S, Func<T, T>> update, Func<S, Action> delete) where T : class where S : class
         {
             return ForEntity<T>().Use<S>().With(create, read, update, delete);
         }
-        public CRUDBuilderWithoutIdEntityService<T, M, S> WithAndMap<T, M, S>(Func<S, Func<T, T>> create, Func<S, Func<T>> read, Func<S, Func<T, T>> update, Func<S, Action> delete) where T : new() where S : class where M : new()
+        public CRUDBuilderWithoutIdEntityService<T, M, S> WithAndMap<T, M, S>(Func<S, Func<T, T>> create, Func<S, Func<T>> read, Func<S, Func<T, T>> update, Func<S, Action> delete) where T : class where S : class where M : class
         {
             return ForEntityWithMapping<T, M>().Use<S>().With(create, read, update, delete);
         }
     }
 
 
-    public class CRUDBuilderWithoutIdEntity<T, M> where T : new() where M : new()
+    public class CRUDBuilderWithoutIdEntity<T, M> where T : class where M : class
     {
         private readonly IServiceProvider provider;
         private readonly bool usesMapping;
@@ -97,7 +97,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
 
 
 
-    public class CRUDBuilderWithoutIdEntityInterfaceService<T, M, S> where S : class, ICRUDServiceWithoutId<T> where M : new() where T : new()
+    public class CRUDBuilderWithoutIdEntityInterfaceService<T, M, S> where S : class, ICRUDServiceWithoutId<T> where M : class where T : class
     {
         private readonly CRUDBuilderWithoutIdEntityService<T, M, S> internalBuilder;
         public CRUDBuilderWithoutIdEntityInterfaceService(S service, IEntityMapper mapper)
@@ -114,7 +114,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         }
     }
 
-    public class CRUDBuilderWithoutIdEntityService<T, M, S> : AbstractResponseHelpersWithHandle<T, M> where S : class where T : new() where M : new()
+    public class CRUDBuilderWithoutIdEntityService<T, M, S> : AbstractResponseHelpersWithHandle<T, M> where S : class where T : class where M : class
     {
         private readonly S service;    
 

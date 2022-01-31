@@ -4,6 +4,7 @@ using FluentChange.Extensions.Common.Models.Rest;
 using FluentChange.Extensions.Common.Rest;
 using NUnit.Framework;
 using System;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace SampleFunctions.Tests
@@ -108,6 +109,7 @@ namespace SampleFunctions.Tests
             var request = new RestSharp.RestRequest("crudl/sample7/products/66bc54bf-9e0c-494d-84ad-cc239837f543", RestSharp.Method.GET);
 
             var response = rest.Execute<SingleResponse<ApiProduct>>(request);
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
             Assert.IsNotNull(response.Data);
             Assert.IsNotNull(response.Data.Result);
             Assert.AreEqual("Test Product 1", response.Data.Result.Name);
