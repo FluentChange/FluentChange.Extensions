@@ -7,7 +7,7 @@
     <Product>Common Rest Extension</Product>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Version>0.0.31</Version>
+    <Version>0.0.32</Version>
     <Description>Common classes and models for rest and json api</Description>
     <PackageTags>Common Rest Json Reponse Request Client Api</PackageTags>
     <PackageProjectUrl>https://github.com/FluentChange/FluentChange.Extensions/tree/master/Common.Rest</PackageProjectUrl>

@@ -36,10 +36,10 @@ namespace FluentChange.Extensions.Common.Rest
             return await rest.Post<NewResponse<T>>(route, request, paramsDic);
         }
 
-        public async Task<NewResponse<T>> List()
+        public async Task<NewResponse<IEnumerable<T>>> List()
         {
             var paramsDic = routeParams.Copy();
-            return await rest.Get<NewResponse<T>>(route, paramsDic);
+            return await rest.Get<NewResponse<IEnumerable<T>>>(route, paramsDic);
         }
 
     }
@@ -160,10 +160,10 @@ namespace FluentChange.Extensions.Common.Rest
             return await rest.Delete<Response>(route + Routes.PatternId, paramsDic);
         }
 
-        public async Task<NewResponse<T>> List()
+        public async Task<NewResponse<IEnumerable<T>>> List()
         {
             var paramsDic = routeParams.Copy();
-            return await rest.Get<NewResponse<T>>(route, paramsDic);
+            return await rest.Get<NewResponse<IEnumerable<T>>>(route, paramsDic);
         }
     }
     public class WrappedGenericRUDWithIdApi<T> : BaseAbstractApi<T> where T : class
