@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using NUnit.Framework;
+using SampleFunctions.Services;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -62,6 +63,7 @@ namespace SampleFunctions.Tests
             var wrappedApiProdReq3 = await CreateDummyRequestWithBody(wrapped);
             var wrappedApiProdReq4 = await CreateDummyRequestWithBody(wrapped);
 
+
             var handlerInputGuidWithConfig = await Single
                .Config(settings, logger)
                .WithInput(() => Guid.NewGuid())
@@ -80,8 +82,8 @@ namespace SampleFunctions.Tests
                 .WrapOutput()
                 .Respond();
 
-            var handlerInputProduct = await Single
-                .Config(logger)
+            var handlerInputProduct = await Single       
+                .Config(logger)               
                 .WithInput(updatedProd)
                 .Use<ProductService>()
                 .Execute<Product>(service => service.Update)
@@ -108,6 +110,7 @@ namespace SampleFunctions.Tests
 
             var handler7a = await Single
                 .Config(logger)
+                .With<ContextCreationService>(wrappedApiProdReq)
                 .WithUnwrappingAndMapping<ApiProduct, Product>(wrappedApiProdReq)
                 .Use<ProductService>()
                 .Execute<Product>(service => service.Update)
@@ -161,6 +164,7 @@ namespace SampleFunctions.Tests
             Assert.AreEqual(HttpStatusCode.OK, handlerAsync.StatusCode);
             Assert.AreEqual(HttpStatusCode.OK, handlerList.StatusCode);
         }
+
 
         private static async Task<HttpRequest> CreateDummyRequestWithBody(object bodyData)
         {

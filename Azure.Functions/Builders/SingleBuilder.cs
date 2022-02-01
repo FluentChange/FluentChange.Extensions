@@ -1,4 +1,5 @@
 ﻿using FluentChange.Extensions.Azure.Functions.Helper;
+using FluentChange.Extensions.Azure.Functions.Interfaces;
 using FluentChange.Extensions.Common.Models.Rest;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +16,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
     {
         public JsonSerializerSettings JsonSettings { get; set; }
         public ILogger Logger { get; set; }
+        public Func<Task> ContextCreationFunc { get; set; }
     }
 
     public class SingleBuilder
@@ -46,6 +48,18 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             return this;
         }
 
+        public SingleBuilder With<TContextService>(HttpRequest req) where TContextService: IContextCreationService
+        {
+            
+            this.config.ContextCreationFunc = async () =>
+            {
+                if (config.Logger != null) config.Logger.LogInformation("Create context with " + typeof(TContextService).Name);
+                var contextCreationService = provider.GetService<TContextService>();
+                await contextCreationService.Create(req);
+            };
+            return this;
+        }
+
         public SingleBuilderWithApiInput<TApiInput> WithBody<TApiInput>(HttpRequest request)
         {
             var builder = new SingleBuilderWithApiInput<TApiInput>(provider, () => GetBody<TApiInput>(request), config);
@@ -66,6 +80,9 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             var builder = new SingleBuilderWithApiInput<TInput>(provider, () => Task.FromResult(input), config);
             return builder;
         }
+
+        
+
         public SingleBuilderWithApiInput<TInput> WithInput<TInput>(Func<TInput> inputFunc)
         {
             var builder = new SingleBuilderWithApiInput<TInput>(provider, () => Task.FromResult(inputFunc.Invoke()), config);
