@@ -471,6 +471,11 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
 
             try
             {
+                if (config.ContextCreationFunc != null)
+                {
+                    if (config.Logger != null) config.Logger.LogInformation("Context Creation");
+                    await config.ContextCreationFunc.Invoke();
+                }
                 var service = provider.GetService<TService>();
 
                 if (serviceFuncAsync == null) throw new NotImplementedException();
