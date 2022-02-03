@@ -19,5 +19,10 @@ namespace FluentChange.Extensions.Common.Database.Services
         {
             if (!CurrentUserId.HasValue || CurrentUserId.Value == Guid.Empty) throw new Exception("User is not set. Try to set user id in UserContext service");
         }
+
+        public void ClearUser()
+        {
+            CurrentUserId = null;
+        }
     }
 }

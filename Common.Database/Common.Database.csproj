@@ -7,7 +7,7 @@
     <Product>Common Database Extension</Product>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Version>0.0.5</Version>
+    <Version>0.0.6</Version>
     <Description>Common classes and models for sql database</Description>
     <PackageTags>Common Database Repositories SQL</PackageTags>
     <PackageProjectUrl>https://github.com/FluentChange/FluentChange.Extensions/tree/master/Common.Database</PackageProjectUrl>
