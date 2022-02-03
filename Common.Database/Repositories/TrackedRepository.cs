@@ -14,10 +14,12 @@ namespace FluentChange.Extensions.Common.Database
         protected readonly D database;
         private DbSet<E> dbSet;
         string errorMessage = string.Empty;
-        public TrackedRepository(D database)
+        private bool allowInsertWithNewId = false;
+        public TrackedRepository(D database, bool allowInsertWithNewId = false)
         {
             this.database = database;
             dbSet = database.Set<E>();
+            this.allowInsertWithNewId = allowInsertWithNewId;
         }
 
         public virtual IQueryable<E> All()
@@ -38,7 +40,7 @@ namespace FluentChange.Extensions.Common.Database
         {
 
             if (entity == null) throw new ArgumentNullException("entity");
-            if (entity.Id != Guid.Empty) throw new Exception("Can not add existing entity.");
+            if (!allowInsertWithNewId && entity.Id != Guid.Empty) throw new Exception("Can not add existing entity.");
             var now = DateTime.UtcNow;
             entity.CreatedUtc = now;
             entity.UpdatedUtc = now;
@@ -50,7 +52,7 @@ namespace FluentChange.Extensions.Common.Database
             if (entities == null) throw new ArgumentNullException("entities");
             foreach (var entity in entities)
             {
-                if (entity.Id != Guid.Empty) throw new Exception("Can not add existing entity.");
+                if (!allowInsertWithNewId && entity.Id != Guid.Empty) throw new Exception("Can not add existing entity.");
                 var now = DateTime.UtcNow;
                 entity.CreatedUtc = now;
                 entity.UpdatedUtc = now;
@@ -62,7 +64,7 @@ namespace FluentChange.Extensions.Common.Database
         public virtual async Task InsertAsync(E entity)
         {
             if (entity == null) throw new ArgumentNullException("entity");
-            if (entity.Id != Guid.Empty) throw new Exception("Can not add existing entity.");
+            if (!allowInsertWithNewId && entity.Id != Guid.Empty) throw new Exception("Can not add existing entity.");
             var now = DateTime.UtcNow;
             entity.CreatedUtc = now;
             entity.UpdatedUtc = now;
@@ -77,7 +79,7 @@ namespace FluentChange.Extensions.Common.Database
             var tasks = new List<ValueTask>();
             foreach (var entity in entities)
             {
-                if (entity.Id != Guid.Empty) throw new Exception("Can not add existing entity.");
+                if (!allowInsertWithNewId && entity.Id != Guid.Empty) throw new Exception("Can not add existing entity.");
                 var now = DateTime.UtcNow;
                 entity.CreatedUtc = now;
                 entity.UpdatedUtc = now;
