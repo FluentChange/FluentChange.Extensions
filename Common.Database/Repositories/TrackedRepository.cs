@@ -43,7 +43,7 @@ namespace FluentChange.Extensions.Common.Database
             if (!allowInsertWithNewId && entity.Id != Guid.Empty) throw new Exception("Can not add existing entity.");
             var now = DateTime.UtcNow;
             entity.CreatedUtc = now;
-            entity.UpdatedUtc = now;
+            //entity.UpdatedUtc = now;
             dbSet.Add(entity);
             database.SaveChanges();
         }
@@ -55,7 +55,7 @@ namespace FluentChange.Extensions.Common.Database
                 if (!allowInsertWithNewId && entity.Id != Guid.Empty) throw new Exception("Can not add existing entity.");
                 var now = DateTime.UtcNow;
                 entity.CreatedUtc = now;
-                entity.UpdatedUtc = now;
+                //entity.UpdatedUtc = now;
                 //    dbSet.Add(entity);
             }
             database.BulkInsert(entities.ToList());
@@ -67,7 +67,7 @@ namespace FluentChange.Extensions.Common.Database
             if (!allowInsertWithNewId && entity.Id != Guid.Empty) throw new Exception("Can not add existing entity.");
             var now = DateTime.UtcNow;
             entity.CreatedUtc = now;
-            entity.UpdatedUtc = now;
+            //entity.UpdatedUtc = now;
 
             await dbSet.AddAsync(entity);
             await database.SaveChangesAsync();
@@ -82,7 +82,7 @@ namespace FluentChange.Extensions.Common.Database
                 if (!allowInsertWithNewId && entity.Id != Guid.Empty) throw new Exception("Can not add existing entity.");
                 var now = DateTime.UtcNow;
                 entity.CreatedUtc = now;
-                entity.UpdatedUtc = now;
+                //entity.UpdatedUtc = now;
                 //    await dbSet.AddAsync(entity);
             }
             await database.BulkInsertAsync(entities.ToList());
