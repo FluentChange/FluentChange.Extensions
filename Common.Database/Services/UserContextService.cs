@@ -10,7 +10,7 @@ namespace FluentChange.Extensions.Common.Database.Services
 
         public void SetUser(Guid userId)
         {
-            if (userId != Guid.Empty) throw new ArgumentOutOfRangeException();
+            if (userId == Guid.Empty) throw new ArgumentOutOfRangeException();
 
             CurrentUserId = userId;
         }
