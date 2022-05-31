@@ -45,7 +45,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common.Models", "Common.Mod
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests", "Tests\Tests.csproj", "{2C4A1493-166E-4787-9921-791F8BA1F5E2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Database", "Common.Database\Common.Database.csproj", "{C8F52260-C1EF-4B26-AF6D-BD1437DC3EAA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common.Database", "Common.Database\Common.Database.csproj", "{C8F52260-C1EF-4B26-AF6D-BD1437DC3EAA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
