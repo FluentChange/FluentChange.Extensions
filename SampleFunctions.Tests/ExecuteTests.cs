@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using RestSharp;
 
 namespace SampleFunctions.Tests
 {
@@ -66,9 +67,9 @@ namespace SampleFunctions.Tests
         public void DirectRestListRequest()
         {
             var rest = new RestSharp.RestClient("http://localhost:7071/api/");
-            var request = new RestSharp.RestRequest("exe/products", RestSharp.Method.GET);
+            var request = new RestSharp.RestRequest("exe/products", RestSharp.Method.Get);
 
-            var response = rest.Execute<NewResponse<IEnumerable<ApiProduct>>>(request);
+            var response = rest.ExecuteAsync<NewResponse<IEnumerable<ApiProduct>>>(request).Result;
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
             Assert.IsNotNull(response.Data);
             Assert.IsNotNull(response.Data.Data);

@@ -3,6 +3,7 @@ using FluentChange.Extensions.Azure.Functions.Testing;
 using FluentChange.Extensions.Common.Models.Rest;
 using FluentChange.Extensions.Common.Rest;
 using NUnit.Framework;
+using RestSharp;
 using System;
 using System.Linq;
 using System.Net;
@@ -107,16 +108,16 @@ namespace SampleFunctions.Tests
         public void DirectRestRequest()
         {
             var rest = new RestSharp.RestClient("http://localhost:7071/api/");
-            var request = new RestSharp.RestRequest("crudl/sample7/products/66bc54bf-9e0c-494d-84ad-cc239837f543", RestSharp.Method.GET);
+            var request = new RestSharp.RestRequest("crudl/sample7/products/66bc54bf-9e0c-494d-84ad-cc239837f543", RestSharp.Method.Get);
 
-            var response = rest.Execute<NewResponse<ApiProduct>>(request);
+            var response = rest.ExecuteAsync<NewResponse<ApiProduct>>(request).Result;
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
             Assert.IsNotNull(response.Data);
             Assert.IsNotNull(response.Data.Data);
             Assert.AreEqual("Test Product 1", response.Data.Data.Name);
         }
 
-      
+
     }
 
 
