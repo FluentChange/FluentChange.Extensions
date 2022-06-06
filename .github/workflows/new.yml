@@ -27,6 +27,8 @@ jobs:
           filters: |
             common_models:
             - 'Common.Models/**'
+            common_rest:
+            - 'Common.Rest/**'
 
       - uses: ./.github/workflows/shared.yml
         if: steps.filter.outputs.common_models == 'true'
@@ -37,3 +39,7 @@ jobs:
       - name: workflow tests
         if: steps.filter.outputs.common_models == 'true'
         run: echo "common_models file"
+
+      - name: workflow tests
+        if: steps.filter.outputs.common_rest == 'true'
+        run: echo "common_rest file"
