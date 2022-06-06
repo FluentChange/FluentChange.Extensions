@@ -30,7 +30,7 @@ jobs:
             common_rest:
             - 'Common.Rest/**'
 
-      - uses: ./.github/workflows/deploy
+      - uses: ./.github/workflows/dodepl.yml
         #if: steps.filter.outputs.common_models == 'true'
         with:
           project_file: Common.Models.csproj
