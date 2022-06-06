@@ -22,6 +22,7 @@ jobs:
     with:
       project_file: Common.Models.csproj
       project_folder: Common.Models
+    secrets:
       nuget_api_key: ${{secrets.NUGET_API_KEY}}
 
   #build:
