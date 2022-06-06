@@ -41,6 +41,10 @@ jobs:
             git config --local user.email "github@fluentchange.com"
             git config --local user.name "FluentChange GitHub"   
 
+        
+      - name: Get color
+        run: echo "The selected color is ${{ inputs.project_folder }}"
+
       - name: Increment version
         working-directory: ./${{ inputs.project_folder }}
         run: dotnet version -m 'Auto increment version of ${inputs.project_folder} to v$newVer by CI/CD pipeline' patch
