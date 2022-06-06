@@ -8,6 +8,6 @@
 
     public class Dummy
     {
-        public int pppp { get; set; }
+        public int ppps { get; set; }
     }
 }
