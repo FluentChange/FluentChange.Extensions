@@ -43,7 +43,7 @@ jobs:
 
       - name: Increment version
         working-directory: ./${{ inputs.project_folder }}
-        run: dotnet version -m 'Auto increment version of {{ inputs.project_folder }} to v\$newVer by CI/CD pipeline' patch
+        run: dotnet version -m 'Auto increment version of $inputs.project_folder to v$newVer by CI/CD pipeline' patch
 
       - name: Install dependencies
         run: dotnet restore FluentChange.Extensions.sln
