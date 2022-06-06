@@ -8,6 +8,6 @@
 
     public class Dummy
     {
-        public int xxx { get; set; }
+        public int hhh { get; set; }
     }
 }

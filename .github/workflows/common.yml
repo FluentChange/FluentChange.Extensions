@@ -43,7 +43,7 @@ jobs:
         run: dotnet restore FluentChange.Extensions.sln
 
       - name: Build
-        run: dotnet build FluentChange.Extensions.sln --configuration Release --restore
+        run: dotnet build FluentChange.Extensions.sln --configuration Release
 
       - name: Pack & push nuget
         working-directory: ${{ env.PROJECT_FOLDER }}
