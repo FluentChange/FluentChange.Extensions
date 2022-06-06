@@ -2,7 +2,7 @@ name: Common Models
 env:
   OUTPUT_PATH: ${{ github.workspace }}/.output
   DOTNET_VERSION: "3.1"
-  PROJECT_FILE: Api.Client.csproj
+  PROJECT_FILE: Common.Models.csproj
   PROJECT_FOLDER: ./Common.Models
 
 on:
@@ -36,13 +36,13 @@ jobs:
             git config --local user.name "FluentChange GitHub"   
 
       - name: Increment version
-        working-directory: ${{PROJECT_FOLDER}}
+        working-directory: ${{ env.PROJECT_FOLDER }}
         run: dotnet version -m "Auto increment version to v\$newVer by CI/CD pipeline" patch
 
       - name: Pack & push nuget
-        working-directory: ${{PROJECT_FOLDER}}
+        working-directory: ${{ env.PROJECT_FOLDER }}
         run: |
-            dotnet pack ${{PROJECT_FILE}} --configuration Release --restore
+            dotnet pack ${{ env.PROJECT_FILE }} --configuration Release --restore
             dotnet nuget push bin/Release/*.nupkg --skip-duplicate --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
 
       - name: Git push changes back to repo
