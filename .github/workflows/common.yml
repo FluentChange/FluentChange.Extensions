@@ -2,14 +2,14 @@ name: Common Models
 env:
   OUTPUT_PATH: ${{ github.workspace }}/.output
   DOTNET_VERSION: "3.1"
-  PROJECT_FILE: "Api.Client.csproj"
-  PROJECT_FOLDER: "./Common.Models"
+  PROJECT_FILE: Api.Client.csproj
+  PROJECT_FOLDER: ./Common.Models
 
 on:
   push:
     branches: [ master ]
-    #paths: 
-    #  - 'Common.Models/**'
+    paths: 
+      - 'Common.Models/**'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -36,7 +36,7 @@ jobs:
             git config --local user.name "FluentChange GitHub"   
 
       - name: Increment version
-        working-directory: ./FluentChange.Core.Api.Client
+        working-directory: ${{PROJECT_FOLDER}}
         run: dotnet version -m "Auto increment version to v\$newVer by CI/CD pipeline" patch
 
       - name: Pack & push nuget
