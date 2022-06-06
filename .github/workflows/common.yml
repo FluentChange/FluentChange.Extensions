@@ -2,6 +2,7 @@ name: Common Models
 env:
   OUTPUT_PATH: ${{ github.workspace }}/.output
   DOTNET_VERSION: "3.1"
+  DOTNET_VERSION_2: "5.0"
   PROJECT_FILE: Common.Models.csproj
   PROJECT_FOLDER: ./Common.Models
 
@@ -26,6 +27,12 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
             dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Setup Dotnet ${{ env.DOTNET_VERSION_2 }}
+        uses: actions/setup-dotnet@v1
+        with:
+            dotnet-version: ${{ env.DOTNET_VERSION_2 }}
+
 
       - name: Setup Tool for Version
         run: dotnet tool install -g dotnet-version-cli
