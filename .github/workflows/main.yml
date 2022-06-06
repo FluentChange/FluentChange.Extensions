@@ -6,7 +6,7 @@ env:
 
 on:
   push:
-    branches: [ master ]
+    branches: [ masterX ]
     paths-ignore:
       - 'Common.Models/**'
   pull_request:

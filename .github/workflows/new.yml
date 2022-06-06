@@ -1,0 +1,39 @@
+name: New CI
+env:
+  OUTPUT_PATH: ${{ github.workspace }}/.output
+  DOTNET_VERSION: "3.1"
+  DOTNET_VERSION_2: "5.0"
+  PROJECT_FILE: Common.Models.csproj
+  PROJECT_FOLDER: Common.Models
+
+on:
+  push:
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v2
+      
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            common_models:
+            - 'Common.Models/**'
+
+      - uses: ./.github/workflows/shared.yml
+        if: steps.filter.outputs.common_models == 'true'
+        with:
+          project_file: Common.Models.csproj
+          project_folder: Common.Models
+
+      - name: workflow tests
+        if: steps.filter.outputs.common_models == 'true'
+        run: echo "common_models file"
