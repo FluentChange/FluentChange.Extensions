@@ -42,7 +42,7 @@ jobs:
       - name: Pack & push nuget
         working-directory: ${{ env.PROJECT_FOLDER }}
         run: |
-            dotnet pack ${{ env.PROJECT_FILE }} --configuration Release --restore
+            dotnet pack ${{ env.PROJECT_FILE }} --configuration Release
             dotnet nuget push bin/Release/*.nupkg --skip-duplicate --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
 
       - name: Git push changes back to repo
