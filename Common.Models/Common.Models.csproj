@@ -7,7 +7,7 @@
     <Product>Common Models</Product>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Version>0.0.8</Version>
+    <Version>0.0.9</Version>
     <Description>Common Models </Description>
     <PackageTags>Common Models</PackageTags>
     <PackageProjectUrl>https://github.com/FluentChange/FluentChange.Extensions/tree/master/Common.Models</PackageProjectUrl>
