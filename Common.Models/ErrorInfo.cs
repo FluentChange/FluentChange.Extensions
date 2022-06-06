@@ -5,4 +5,9 @@
         public string Message { get; set; }
         public string FullMessage { get; set; }
     }
+
+    public class Dummy
+    {
+        public int MyProperty { get; set; }
+    }
 }
