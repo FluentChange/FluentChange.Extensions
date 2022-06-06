@@ -17,64 +17,54 @@ on:
 
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: "Checkout"
-        uses: actions/checkout@v2
+  call-workflow-2-in-local-repo:
+    uses: ./.github/workflows/shared.yml
+    with:
+      project_file: Common.Models.csproj
+      project_folder: Common.Models
 
-      - name: Setup Dotnet ${{ env.DOTNET_VERSION }}
-        uses: actions/setup-dotnet@v1
-        with:
-            dotnet-version: ${{ env.DOTNET_VERSION }}
+  #build:
+  #  runs-on: ubuntu-latest
+  #  steps:
+  #    - name: "Checkout"
+  #      uses: actions/checkout@v2
 
-      - name: Setup Dotnet ${{ env.DOTNET_VERSION_2 }}
-        uses: actions/setup-dotnet@v1
-        with:
-            dotnet-version: ${{ env.DOTNET_VERSION_2 }}
+  #    - name: Setup Dotnet ${{ env.DOTNET_VERSION }}
+  #      uses: actions/setup-dotnet@v1
+  #      with:
+  #          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+  #    - name: Setup Dotnet ${{ env.DOTNET_VERSION_2 }}
+  #      uses: actions/setup-dotnet@v1
+  #      with:
+  #          dotnet-version: ${{ env.DOTNET_VERSION_2 }}
 
 
-      - name: Setup Tool for Version
-        run: dotnet tool install -g dotnet-version-cli
+  #    - name: Setup Tool for Version
+  #      run: dotnet tool install -g dotnet-version-cli
 
-      - name: Git config
-        run: |
-            git config --local user.email "github@fluentchange.com"
-            git config --local user.name "FluentChange GitHub"   
+  #    - name: Git config
+  #      run: |
+  #          git config --local user.email "github@fluentchange.com"
+  #          git config --local user.name "FluentChange GitHub"   
 
-      - name: Increment version
-        working-directory: ./${{ env.PROJECT_FOLDER }}
-        run: dotnet version -m "Auto increment version of {{ env.PROJECT_FOLDER }} to v\$newVer by CI/CD pipeline" patch
+  #    - name: Increment version
+  #      working-directory: ./${{ env.PROJECT_FOLDER }}
+  #      run: dotnet version -m "Auto increment version of {{ env.PROJECT_FOLDER }} to v\$newVer by CI/CD pipeline" patch
 
-      - name: Install dependencies
-        run: dotnet restore FluentChange.Extensions.sln
+  #    - name: Install dependencies
+  #      run: dotnet restore FluentChange.Extensions.sln
 
-      - name: Build
-        run: dotnet build FluentChange.Extensions.sln --configuration Release
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: workingdirectory
-          path: ./
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: [build]
-    steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v1
-        with:
-          name: workingdirectory
-          path: ./
+  #    - name: Build
+  #      run: dotnet build FluentChange.Extensions.sln --configuration Release
       
-      - name: Pack & push nuget
-        working-directory: ./${{ env.PROJECT_FOLDER }}
-        run: |
-            dotnet pack ${{ env.PROJECT_FILE }} --configuration Release
-            dotnet nuget push bin/Release/*.nupkg --skip-duplicate --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
+  #    - name: Pack & push nuget
+  #      working-directory: ./${{ env.PROJECT_FOLDER }}
+  #      run: |
+  #          dotnet pack ${{ env.PROJECT_FILE }} --configuration Release
+  #          dotnet nuget push bin/Release/*.nupkg --skip-duplicate --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
 
-      - name: Git push changes back to repo
-        run: |
-            git push
-            git push --tags
+  #    - name: Git push changes back to repo
+  #      run: |
+  #          git push
+  #          git push --tags

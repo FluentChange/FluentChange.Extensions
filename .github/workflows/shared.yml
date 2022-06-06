@@ -1,0 +1,62 @@
+name: Reusable workflow example
+
+env:
+  OUTPUT_PATH: ${{ github.workspace }}/.output
+  DOTNET_VERSION: "3.1"
+  DOTNET_VERSION_2: "5.0"
+
+on:
+  workflow_call:
+    inputs:
+      project_file:
+        required: true
+        type: string
+      project_folder:
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v2
+
+      - name: Setup Dotnet ${{ env.DOTNET_VERSION }}
+        uses: actions/setup-dotnet@v1
+        with:
+            dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Setup Dotnet ${{ env.DOTNET_VERSION_2 }}
+        uses: actions/setup-dotnet@v1
+        with:
+            dotnet-version: ${{ env.DOTNET_VERSION_2 }}
+
+      - name: Setup Tool for Version
+        run: dotnet tool install -g dotnet-version-cli
+
+      - name: Git config
+        run: |
+            git config --local user.email "github@fluentchange.com"
+            git config --local user.name "FluentChange GitHub"   
+
+      - name: Increment version
+        working-directory: ./${{ inputs.PROJECT_FOLDER }}
+        run: dotnet version -m "Auto increment version of {{ inputs.PROJECT_FOLDER }} to v\$newVer by CI/CD pipeline" patch
+
+      - name: Install dependencies
+        run: dotnet restore FluentChange.Extensions.sln
+
+      - name: Build
+        run: dotnet build FluentChange.Extensions.sln --configuration Release
+      
+      - name: Pack & push nuget
+        working-directory: ./${{ inputs.PROJECT_FOLDER }}
+        run: |
+            dotnet pack ${{ inputs.PROJECT_FILE }} --configuration Release
+            dotnet nuget push bin/Release/*.nupkg --skip-duplicate --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
+
+      - name: Git push changes back to repo
+        run: |
+            git push
+            git push --tags
