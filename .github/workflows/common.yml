@@ -39,6 +39,9 @@ jobs:
         working-directory: ${{ env.PROJECT_FOLDER }}
         run: dotnet version -m "Auto increment version to v\$newVer by CI/CD pipeline" patch
 
+      - name: Build
+        run: dotnet build FluentChange.Extensions.sln --configuration Release --restore
+
       - name: Pack & push nuget
         working-directory: ${{ env.PROJECT_FOLDER }}
         run: |
