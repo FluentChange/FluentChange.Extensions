@@ -1,7 +1,6 @@
-name: Build, Increment Version and Deploy to Nuget
+name: Reusable workflow example
 
 env:
-  OUTPUT_PATH: ${{ github.workspace }}/.output
   DOTNET_VERSION: "3.1"
   DOTNET_VERSION_2: "5.0"
 
@@ -42,7 +41,7 @@ jobs:
 
       - name: Increment version
         working-directory: ./${{ inputs.project_folder }}
-        run: dotnet version -m "Auto increment version of {{ inputs.PROJECT_FOLDER }} to v\$newVer by CI/CD pipeline" patch
+        run: dotnet version -m "Auto increment version of {{ inputs.project_folder }} to v\$newVer by CI/CD pipeline" patch
 
       - name: Install dependencies
         run: dotnet restore FluentChange.Extensions.sln
@@ -50,11 +49,13 @@ jobs:
       - name: Build
         run: dotnet build FluentChange.Extensions.sln --configuration Release
       
-      - name: Pack & push nuget
+      - name: Pack nuget
         working-directory: ./${{ inputs.project_folder }}
-        run: |
-            dotnet pack ${{ inputs.project_file }} --configuration Release
-            dotnet nuget push bin/Release/*.nupkg --skip-duplicate --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
+        run: dotnet pack ${{ inputs.project_file }} --configuration Release
+
+      - name: Push nuget
+        working-directory: ./${{ inputs.project_folder }}
+        run: dotnet nuget push bin/Release/*.nupkg --skip-duplicate --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
 
       - name: Git push changes back to repo
         run: |
