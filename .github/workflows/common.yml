@@ -1,14 +1,8 @@
 name: Common Models
-env:
-  OUTPUT_PATH: ${{ github.workspace }}/.output
-  DOTNET_VERSION: "3.1"
-  DOTNET_VERSION_2: "5.0"
-  PROJECT_FILE: Common.Models.csproj
-  PROJECT_FOLDER: Common.Models
 
 on:
   push:
-    branches: [ masterX ]
+    branches: [ master ]
     paths: 
       - 'Common.Models/**'
 
