@@ -1,7 +1,7 @@
 name: New CI
 env:
   OUTPUT_PATH: ${{ github.workspace }}/.output
-  DOTNET_VERSION: "3.1"
+  DOTNET_VERSION_1: "3.1"
   DOTNET_VERSION_2: "5.0"
   
 on:
