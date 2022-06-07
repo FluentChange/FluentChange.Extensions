@@ -7,5 +7,7 @@ namespace FluentChange.Extensions.Common.Rest
         public const string ParamNameId = "id";
         public const string PatternId = "/{" + ParamNameId + "}";
         public const string OptionalId = "/{" + ParamNameId + "?}";
+
+        public const string dummy = "/{" + ParamNameId + "?}";
     }
 }
