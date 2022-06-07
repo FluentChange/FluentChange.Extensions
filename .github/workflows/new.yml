@@ -79,7 +79,7 @@ jobs:
       - name: Increment version Common.Models
         if: steps.filter.outputs.common_models == 'true'
         working-directory: ./Common.Models
-        run: dotnet version -t 'Common.Models.$newVer' -m 'Auto increment version of Common.Models to v$newVer by CI/CD pipeline' patch
+        run: dotnet version --skip-vcs -t 'Common.Models.$newVer' -m 'Auto increment version of Common.Models to v$newVer by CI/CD pipeline' patch
 
       - name: Increment version Common.Rest
         if: steps.filter.outputs.common_rest == 'true'
