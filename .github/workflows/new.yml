@@ -61,7 +61,6 @@ jobs:
         run: dotnet build ${{ env.SOLUTION_FILE }} --configuration Release --no-restore
 
       - name: Pack nuget AzureFunctions
-        working-directory: ./Azure.Functions
         run: dotnet pack ${{ env.SOLUTION_FILE }} --configuration Release --no-build --no-restore 
      
       - name: Upload artifacts
