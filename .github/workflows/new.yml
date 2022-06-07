@@ -3,6 +3,7 @@ env:
   OUTPUT_PATH: ${{ github.workspace }}/.output
   DOTNET_VERSION_1: "3.1"
   DOTNET_VERSION_2: "5.0"
+  SOLUTION_FILE: "FluentChange.Extensions.sln"
   
 on:
   push:
@@ -54,14 +55,14 @@ jobs:
         run: dotnet version -m 'Auto increment version of ${{ inputs.project_folder }} to v$newVer by CI/CD pipeline' patch
 
       - name: Install dependencies
-        run: dotnet restore FluentChange.Extensions.sln
+        run: dotnet restore ${{ env.SOLUTION_FILE }}
       
       - name: Build
-        run: dotnet build FluentChange.Extensions.sln --configuration Release --no-restore
+        run: dotnet build ${{ env.SOLUTION_FILE }} --configuration Release --no-restore
 
       - name: Pack nuget AzureFunctions
         working-directory: ./Azure.Functions
-        run: dotnet pack luentChange.Extensions.sln --configuration Release --no-build --no-restore 
+        run: dotnet pack ${{ env.SOLUTION_FILE }} --configuration Release --no-build --no-restore 
      
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
