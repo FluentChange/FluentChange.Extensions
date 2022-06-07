@@ -2,7 +2,7 @@ name: Common Models
 
 on:
   push:
-    branches: [ master ]
+    branches: [ masterX ]
     paths: 
       - 'Common.Models/**'
 
