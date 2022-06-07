@@ -17,11 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Blazor.Web", "Blazor
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{308D47E7-4BDF-407A-AC64-5EF9AE199630}"
 	ProjectSection(SolutionItems) = preProject
-		.github\workflows\common.yml = .github\workflows\common.yml
 		.github\workflows\main.yml = .github\workflows\main.yml
-		.github\workflows\new.yml = .github\workflows\new.yml
 		README.md = README.md
-		.github\workflows\shared.yml = .github\workflows\shared.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests", "Blazor.Tests\Tests.csproj", "{0DB3EEF4-3E5D-483F-8B2E-2E218424E072}"

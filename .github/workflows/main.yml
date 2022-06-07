@@ -1,14 +1,13 @@
-name: CI
+name: CI/CD & Deployment
 env:
   OUTPUT_PATH: ${{ github.workspace }}/.output
   DOTNET_VERSION_1: "3.1"
   DOTNET_VERSION_2: "5.0"
-
+  SOLUTION_FILE: "FluentChange.Extensions.sln"
+  
 on:
   push:
-    branches: [ masterX ]
-    paths-ignore:
-      - 'Common.Models/**'
+    branches: [ master ]
   pull_request:
     branches: [ master ]
 
@@ -32,55 +31,98 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
             dotnet-version: ${{ env.DOTNET_VERSION_2 }}
-            
+
+      - name: Setup Tool for Version
+        run: dotnet tool install -g dotnet-version-cli
+
+      - name: Git config
+        run: |
+            git config --local user.email "github@fluentchange.com"
+            git config --local user.name "FluentChange GitHub"
+
       - name: Install dependencies
-        run: dotnet restore FluentChange.Extensions.sln
+        run: dotnet restore ${{ env.SOLUTION_FILE }}
+
+      - name: Run Tests
+        run: dotnet test Tests/Tests.csproj --no-restore
+
+
+
+      - name: Analyze changes
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            azure_functions:
+            - 'Azure.Functions/**'
+            blazor:
+            - 'Blazor/**'
+            common_models:
+            - 'Common.Models/**'
+            common_rest:
+            - 'Common.Rest/**'
+            common_database:
+            - 'Common.Database/**'
+            system:
+            - 'System/**'
+
+      - name: Increment version Azure Functions
+        if: steps.filter.outputs.azure_functions == 'true'
+        working-directory: ./Azure.Functions
+        run: dotnet version -t 'Azure.Functions.$newVer' -m 'Auto increment version of Azure.Functions to v$newVer by CI/CD pipeline' patch
+ 
+      - name: Increment version Blazor
+        if: steps.filter.outputs.blazor == 'true'
+        working-directory: ./Blazor
+        run: dotnet version -t 'Blazor.$newVer' -m 'Auto increment version of Blazor to v$newVer by CI/CD pipeline' patch
+
+      - name: Increment version Common.Models
+        if: steps.filter.outputs.common_models == 'true'
+        working-directory: ./Common.Models
+        run: dotnet version -t 'Common.Models.$newVer' -m 'Auto increment version of Common.Models to v$newVer by CI/CD pipeline' patch
+
+      - name: Increment version Common.Rest
+        if: steps.filter.outputs.common_rest == 'true'
+        working-directory: ./Common.Rest
+        run: dotnet version -t 'Common.Rest.$newVer' -m 'Auto increment version of Common.Rest to v$newVer by CI/CD pipeline' patch
+
+      - name: Increment version Common.Database
+        if: steps.filter.outputs.common_database == 'true'
+        working-directory: ./Common.Database
+        run: dotnet version -t 'Common.Database.$newVer' -m 'Auto increment version of Common.Database to v$newVer by CI/CD pipeline' patch
+
+      - name: Increment version System
+        if: steps.filter.outputs.system == 'true'
+        working-directory: ./System
+        run: dotnet version -t 'System.$newVer' -m 'Auto increment version of System to v$newVer by CI/CD pipeline' patch
+
+        
       
       - name: Build
-        run: dotnet build FluentChange.Extensions.sln --configuration Release --no-restore
+        run: dotnet build ${{ env.SOLUTION_FILE }} --configuration Release --no-restore
 
-      - name: Pack nuget AzureFunctions
-        working-directory: ./Azure.Functions
-        run: dotnet pack Azure.Functions.csproj --configuration Release --no-build --no-restore 
+      - name: Pack nuget
+        run: dotnet pack ${{ env.SOLUTION_FILE }} --configuration Release --no-build --no-restore 
+      
+      - name: Git push version changes back to repo
+        run: |
+            git push
+            git push --tags
 
-      - name: Pack nuget Common.Database
-        working-directory: ./Common.Database
-        run: dotnet pack Common.Database.csproj --configuration Release --no-build --no-restore 
-
-      - name: Pack nuget Common.Rest
-        working-directory: ./Common.Rest
-        run: dotnet pack Common.Rest.csproj --configuration Release --no-build --no-restore 
-
-      - name: Pack nuget Common.Models
-        working-directory: ./Common.Models
-        run: dotnet pack Common.Models.csproj --configuration Release --no-build --no-restore 
-
-      - name: Pack nuget Blazor
-        working-directory: ./Blazor
-        run: dotnet pack Blazor.csproj --configuration Release --no-build --no-restore 
-
-      - name: Pack nuget System
-        working-directory: ./System
-        run: dotnet pack System.csproj --configuration Release --no-build --no-restore 
-
-      - name: Upload artifacts
+      - name: Upload nuget artifacts
         uses: actions/upload-artifact@v2
         with:
           name: nuget
-          path: |
-            ./Azure.Functions/bin/Release/
-            ./Common.Database/bin/Release/
-            ./Common.Rest/bin/Release/
-            ./Common.Models/bin/Release/
-            ./Blazor/bin/Release/
-            ./System/bin/Release/
+          path: ./**/bin/Release/
+
+
 
 
   deploy:
     runs-on: ubuntu-latest
     needs: [build]
     steps:
-      - name: Download artifacts
+      - name: Download nuget artifacts
         uses: actions/download-artifact@v1
         with:
           name: nuget

@@ -6,8 +6,4 @@
         public string FullMessage { get; set; }
     }
 
-    public class Dummy
-    {
-        public int cccc { get; set; }
-    }
 }
