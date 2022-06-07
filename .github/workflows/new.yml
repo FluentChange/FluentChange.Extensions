@@ -69,12 +69,12 @@ jobs:
       - name: Increment version Azure Functions
         if: steps.filter.outputs.azure_functions == 'true'
         working-directory: ./Azure.Functions
-        run: dotnet version -t 'Azure.Functions.$newVer' -m 'Auto increment version of Azure.Functions to v$newVer by CI/CD pipeline' patch
+        run: dotnet version --skip-vcs -t 'Azure.Functions.$newVer' -m 'Auto increment version of Azure.Functions to v$newVer by CI/CD pipeline' patch
  
       - name: Increment version Blazor
         if: steps.filter.outputs.blazor == 'true'
         working-directory: ./Blazor
-        run: dotnet version -t 'Blazor.$newVer' -m 'Auto increment version of Blazor to v$newVer by CI/CD pipeline' patch
+        run: dotnet version --skip-vcs -t 'Blazor.$newVer' -m 'Auto increment version of Blazor to v$newVer by CI/CD pipeline' patch
 
       - name: Increment version Common.Models
         if: steps.filter.outputs.common_models == 'true'
@@ -84,17 +84,17 @@ jobs:
       - name: Increment version Common.Rest
         if: steps.filter.outputs.common_rest == 'true'
         working-directory: ./Common.Rest
-        run: dotnet version -t 'Common.Rest.$newVer' -m 'Auto increment version of Common.Rest to v$newVer by CI/CD pipeline' patch
+        run: dotnet version --skip-vcs -t 'Common.Rest.$newVer' -m 'Auto increment version of Common.Rest to v$newVer by CI/CD pipeline' patch
 
       - name: Increment version Common.Database
         if: steps.filter.outputs.common_database == 'true'
         working-directory: ./Common.Database
-        run: dotnet version -t 'Common.Database.$newVer' -m 'Auto increment version of Common.Database to v$newVer by CI/CD pipeline' patch
+        run: dotnet version --skip-vcs -t 'Common.Database.$newVer' -m 'Auto increment version of Common.Database to v$newVer by CI/CD pipeline' patch
 
       - name: Increment version System
         if: steps.filter.outputs.system == 'true'
         working-directory: ./System
-        run: dotnet version -t 'System.$newVer' -m 'Auto increment version of System to v$newVer by CI/CD pipeline' patch
+        run: dotnet version --skip-vcs -t 'System.$newVer' -m 'Auto increment version of System to v$newVer by CI/CD pipeline' patch
 
 
 
@@ -109,7 +109,7 @@ jobs:
       
       - name: Git push version changes back to repo
         run: |
-            git rebase
+            git commit -m 'Auto increment of version(s) by CI/CD pipeline'
             git push
             git push --tags
 
