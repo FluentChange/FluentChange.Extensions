@@ -55,20 +55,20 @@ namespace FluentChange.Extensions.Common.Database.Repositories
         }
 
 
-        public override void Update(E entity)
+        public override void UpdateSave(E entity)
         {
             context.EnsureUser();
             if (entity.UpdatedById != Guid.Empty && entity.UpdatedById != context.CurrentUserId.Value) throw new ArgumentException("UserId should not be set or same as current user");
             entity.UpdatedById = context.CurrentUserId.Value;
-            base.Update(entity);
+            base.UpdateSave(entity);
         }
 
-        public override async Task UpdateAsync(E entity)
+        public override async Task UpdateSaveAsync(E entity)
         {
             context.EnsureUser();
             if (entity.UpdatedById != Guid.Empty && entity.UpdatedById != context.CurrentUserId.Value) throw new ArgumentException("UserId should not be set or same as current user");
             entity.UpdatedById = context.CurrentUserId.Value;
-            await base.UpdateAsync(entity);
+            await base.UpdateSaveAsync(entity);
         }
 
     }

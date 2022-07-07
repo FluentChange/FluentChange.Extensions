@@ -91,8 +91,11 @@ namespace FluentChange.Extensions.Common.Database
 
         }
 
-
         public virtual void Update(E entity)
+        {
+            UpdateSave(entity);
+        }
+        public virtual void UpdateSave(E entity)
         {
             // for direct calls i.e. in unit tests without rest we need to detach 
             Detach(entity);
@@ -103,8 +106,11 @@ namespace FluentChange.Extensions.Common.Database
             var result = dbSet.Update(entity);
             database.SaveChanges();
         }
-
         public virtual async Task UpdateAsync(E entity)
+        {
+           await UpdateSaveAsync(entity);
+        }
+        public virtual async Task UpdateSaveAsync(E entity)
         {
             // for direct calls i.e. in unit tests without rest we need to detach 
             Detach(entity);
@@ -166,12 +172,11 @@ namespace FluentChange.Extensions.Common.Database
         {
             database.Entry(entity).Reload();
         }
-
         public virtual async Task ReloadAsync(E entity, CancellationToken cancellationToken)
         {
             await database.Entry(entity).ReloadAsync(cancellationToken);
         }        
-
+ 
         public void Detach(E entity)
         {
             var localTrackedEntity = database.Set<E>().Local.FirstOrDefault(entry => entry.Id.Equals(entity.Id));

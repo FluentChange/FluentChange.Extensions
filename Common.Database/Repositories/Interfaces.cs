@@ -10,7 +10,6 @@ namespace FluentChange.Extensions.Common.Database
     public interface IRepository<T, E> where T : E where E : AbstractIdEntity
     {
         IQueryable<T> All();
-
         T GetById(Guid id);
         Task<T> GetByIdAsync(Guid id);
 
@@ -19,8 +18,13 @@ namespace FluentChange.Extensions.Common.Database
         void InsertBulk(IEnumerable<T> entity);
         Task InsertBulkAsync(IEnumerable<T> entity);
 
+        [Obsolete("use UpdateSave")]
         void Update(T entity);
+        [Obsolete("use UpdateuSaveAsync")]
         Task UpdateAsync(T entity);
+
+        void UpdateSave(T entity);
+        Task UpdateSaveAsync(T entity);
 
         void Delete(Guid id);
         void Delete(T entity);
@@ -35,6 +39,8 @@ namespace FluentChange.Extensions.Common.Database
         Task ReloadAsync(T entity, CancellationToken cancellationToken);
 
         void Detach(T entity);
+
+        X GetOldValue<X>(T entity, string propertyName);
     }
     public interface ITrackedRepository<T> : IRepository<T, AbstractTrackedEntity> where T : AbstractTrackedEntity
     {
