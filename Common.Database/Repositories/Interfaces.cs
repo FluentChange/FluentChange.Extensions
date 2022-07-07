@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FluentChange.Extensions.Common.Database
@@ -29,6 +30,11 @@ namespace FluentChange.Extensions.Common.Database
 
         bool Exist(Guid id);
         Task<bool> ExistAsync(Guid id);
+
+        void Reload(T entity);
+        Task ReloadAsync(T entity, CancellationToken cancellationToken);
+
+        void Detach(T entity);
     }
     public interface ITrackedRepository<T> : IRepository<T, AbstractTrackedEntity> where T : AbstractTrackedEntity
     {

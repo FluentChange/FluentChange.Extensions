@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FluentChange.Extensions.Common.Database
@@ -94,11 +95,7 @@ namespace FluentChange.Extensions.Common.Database
         public virtual void Update(E entity)
         {
             // for direct calls i.e. in unit tests without rest we need to detach 
-            var localTrackedEntity = database.Set<E>().Local.FirstOrDefault(entry => entry.Id.Equals(entity.Id));
-            if (localTrackedEntity != null)
-            {
-                database.Entry(localTrackedEntity).State = EntityState.Detached;
-            }
+            Detach(entity);
 
             if (entity == null) throw new ArgumentNullException("entity");
             entity.UpdatedUtc = DateTime.UtcNow;
@@ -110,11 +107,7 @@ namespace FluentChange.Extensions.Common.Database
         public virtual async Task UpdateAsync(E entity)
         {
             // for direct calls i.e. in unit tests without rest we need to detach 
-            var localTrackedEntity = database.Set<E>().Local.FirstOrDefault(entry => entry.Id.Equals(entity.Id));
-            if (localTrackedEntity != null)
-            {
-                database.Entry(localTrackedEntity).State = EntityState.Detached;
-            }
+            Detach(entity);
 
             if (entity == null) throw new ArgumentNullException("entity");
             entity.UpdatedUtc = DateTime.UtcNow;
@@ -168,5 +161,33 @@ namespace FluentChange.Extensions.Common.Database
             if (id == null || id == Guid.Empty) throw new ArgumentNullException("id");
             return await dbSet.AnyAsync(e => e.Id == id);
         }
+
+        public void Reload(E entity)
+        {
+            database.Entry(entity).Reload();
+        }
+
+        public virtual async Task ReloadAsync(E entity, CancellationToken cancellationToken)
+        {
+            await database.Entry(entity).ReloadAsync(cancellationToken);
+        }        
+
+        public void Detach(E entity)
+        {
+            var localTrackedEntity = database.Set<E>().Local.FirstOrDefault(entry => entry.Id.Equals(entity.Id));
+            if (localTrackedEntity != null)
+            {
+                database.Entry(localTrackedEntity).State = EntityState.Detached;
+            }
+        }
+
+        public X GetOldValue<X>(E entity, string propertyName)
+        {
+            var allChanges = database.ChangeTracker.Entries<E>();
+            var original = allChanges.Single(x => x.Entity.Id == entity.Id);
+            var originalValue = original.Property<X>(propertyName).OriginalValue;
+            return originalValue;
+        }
+
     }
 }
