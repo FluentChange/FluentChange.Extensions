@@ -43,6 +43,81 @@ namespace FluentChange.Extensions.Common.Rest
         }
 
     }
+
+
+    public class WrappedGenericRUWithIdApi<T> : BaseAbstractApi<T> where T : class
+    {
+        public WrappedGenericRUWithIdApi(IRestClient rest, string route, Dictionary<string, object> routeParams) : base(rest, route, routeParams)
+        {
+        }
+
+        public async Task<NewResponse<T>> Read(Guid id)
+        {
+            var paramsDic = routeParams.Copy();
+            paramsDic.Add(Routes.ParamNameId, id.ToString());
+            var read = rest.Get<NewResponse<T>>(route, paramsDic);
+            return await read;
+        }
+
+        public async Task<NewResponse<T>> Update(T entity)
+        {
+            var request = new SingleRequest<T>();
+            request.Data = entity;
+            var paramsDic = routeParams.Copy();
+
+            return await rest.Put<NewResponse<T>>(route, request, paramsDic);
+        }     
+    }
+    public class WrappedGenericRUDWithIdApi<T> : WrappedGenericRUWithIdApi<T> where T : class
+    {
+        public WrappedGenericRUDWithIdApi(IRestClient rest, string route, Dictionary<string, object> routeParams) : base(rest, route, routeParams)
+        {
+        }
+
+        public async Task<Response> Delete(Guid id)
+        {
+            var paramsDic = routeParams.Copy();
+            paramsDic.Add(Routes.ParamNameId, id.ToString());
+
+            return await rest.Delete<Response>(route + Routes.PatternId, paramsDic);
+        }
+    }
+
+    public class WrappedGenericRUWithoutIdApi<T> : BaseAbstractApi<T> where T : class
+    {
+        public WrappedGenericRUWithoutIdApi(IRestClient rest, string route, Dictionary<string, object> routeParams) : base(rest, route, routeParams)
+        {
+        }
+
+        public async Task<NewResponse<T>> Read()
+        {
+            var paramsDic = routeParams.Copy();
+            var read = rest.Get<NewResponse<T>>(route, paramsDic);
+            return await read;
+        }
+
+        public async Task<NewResponse<T>> Update(T entity)
+        {
+            var request = new SingleRequest<T>();
+            request.Data = entity;
+            var paramsDic = routeParams.Copy();
+
+            return await rest.Put<NewResponse<T>>(route, request, paramsDic);
+        }      
+    }
+    public class WrappedGenericRUDWithoutIdApi<T> : WrappedGenericRUWithoutIdApi<T> where T : class
+    {
+        public WrappedGenericRUDWithoutIdApi(IRestClient rest, string route, Dictionary<string, object> routeParams) : base(rest, route, routeParams)
+        {
+        }
+
+        public async Task<Response> Delete()
+        {
+            var paramsDic = routeParams.Copy();
+            return await rest.Delete<Response>(route, paramsDic);
+        }
+    }
+
     public class WrappedGenericCRUDWithIdApi<T> : BaseAbstractApi<T> where T : class
     {
         public WrappedGenericCRUDWithIdApi(IRestClient rest, string route, Dictionary<string, object> routeParams) : base(rest, route, routeParams)
@@ -166,65 +241,7 @@ namespace FluentChange.Extensions.Common.Rest
             return await rest.Get<NewResponse<IEnumerable<T>>>(route, paramsDic);
         }
     }
-    public class WrappedGenericRUDWithIdApi<T> : BaseAbstractApi<T> where T : class
-    {
-        public WrappedGenericRUDWithIdApi(IRestClient rest, string route, Dictionary<string, object> routeParams) : base(rest, route, routeParams)
-        {
-        }
 
-        public async Task<NewResponse<T>> Read(Guid id)
-        {
-            var paramsDic = routeParams.Copy();
-            paramsDic.Add(Routes.ParamNameId, id.ToString());
-            var read = rest.Get<NewResponse<T>>(route, paramsDic);
-            return await read;
-        }
-
-        public async Task<NewResponse<T>> Update(T entity)
-        {
-            var request = new SingleRequest<T>();
-            request.Data = entity;
-            var paramsDic = routeParams.Copy();
-
-            return await rest.Put<NewResponse<T>>(route, request, paramsDic);
-        }
-
-        public async Task<Response> Delete(Guid id)
-        {
-            var paramsDic = routeParams.Copy();
-            paramsDic.Add(Routes.ParamNameId, id.ToString());
-
-            return await rest.Delete<Response>(route + Routes.PatternId, paramsDic);
-        }
-    }
-    public class WrappedGenericRUDWithoutIdApi<T> : BaseAbstractApi<T> where T : class
-    {
-        public WrappedGenericRUDWithoutIdApi(IRestClient rest, string route, Dictionary<string, object> routeParams) : base(rest, route, routeParams)
-        {
-        }
-
-        public async Task<NewResponse<T>> Read()
-        {
-            var paramsDic = routeParams.Copy();
-            var read = rest.Get<NewResponse<T>>(route, paramsDic);
-            return await read;
-        }
-
-        public async Task<NewResponse<T>> Update(T entity)
-        {
-            var request = new SingleRequest<T>();
-            request.Data = entity;
-            var paramsDic = routeParams.Copy();
-
-            return await rest.Put<NewResponse<T>>(route, request, paramsDic);
-        }
-
-        public async Task<Response> Delete()
-        {
-            var paramsDic = routeParams.Copy();
-            return await rest.Delete<Response>(route, paramsDic);
-        }
-    }
 
 
     public class GenericCLApi<T> : BaseAbstractApi<T> where T : class, IEntityWithId
