@@ -245,9 +245,10 @@ namespace FluentChange.Extensions.Common.Rest
             return await rest.Get<IEnumerable<T>>(route, paramsDic);
         }
     }
-    public class GenericRUDWithIdApi<T> : BaseAbstractApi<T> where T : class, IEntityWithId
+
+    public class GenericRUWithIdApi<T> : BaseAbstractApi<T> where T : class, IEntityWithId
     {
-        public GenericRUDWithIdApi(IRestClient rest, string route, Dictionary<string, object> routeParams) : base(rest, route, routeParams)
+        public GenericRUWithIdApi(IRestClient rest, string route, Dictionary<string, object> routeParams) : base(rest, route, routeParams)
         {
         }
 
@@ -265,7 +266,13 @@ namespace FluentChange.Extensions.Common.Rest
             paramsDic.Add(Routes.ParamNameId, entity.Id.ToString());
 
             return await rest.Put<T>(route + Routes.PatternId, entity, paramsDic);
-        }
+        }     
+    }
+    public class GenericRUDWithIdApi<T> : GenericRUWithIdApi<T> where T : class, IEntityWithId
+    {
+        public GenericRUDWithIdApi(IRestClient rest, string route, Dictionary<string, object> routeParams) : base(rest, route, routeParams)
+        {
+        }            
 
         public async Task Delete(Guid id)
         {
@@ -275,9 +282,10 @@ namespace FluentChange.Extensions.Common.Rest
             await rest.Delete<T>(route + Routes.PatternId, paramsDic);
         }
     }
-    public class GenericRUDWithoutIdApi<T> : BaseAbstractApi<T> where T : class
+
+    public class GenericRUWithoutIdApi<T> : BaseAbstractApi<T> where T : class
     {
-        public GenericRUDWithoutIdApi(IRestClient rest, string route, Dictionary<string, object> routeParams) : base(rest, route, routeParams)
+        public GenericRUWithoutIdApi(IRestClient rest, string route, Dictionary<string, object> routeParams) : base(rest, route, routeParams)
         {
         }
 
@@ -291,6 +299,12 @@ namespace FluentChange.Extensions.Common.Rest
         {
             var paramsDic = routeParams.Copy();
             return await rest.Put<T>(route, entity, paramsDic);
+        }
+    }
+    public class GenericRUDWithoutIdApi<T> : GenericRUWithoutIdApi<T> where T : class
+    {
+        public GenericRUDWithoutIdApi(IRestClient rest, string route, Dictionary<string, object> routeParams) : base(rest, route, routeParams)
+        {
         }
 
         public async Task Delete()
