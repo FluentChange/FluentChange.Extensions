@@ -44,7 +44,6 @@ namespace FluentChange.Extensions.Common.Rest
 
     }
 
-
     public class WrappedGenericRUWithIdApi<T> : BaseAbstractApi<T> where T : class
     {
         public WrappedGenericRUWithIdApi(IRestClient rest, string route, Dictionary<string, object> routeParams) : base(rest, route, routeParams)

@@ -49,5 +49,6 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
         {
             return CreateJsonResponse(response, HttpStatusCode.OK, jsonSerializerSettings);
         }
+        
     }
 }

@@ -13,6 +13,14 @@ namespace FluentChange.Extensions.Common.Models.Rest
         }
     }
 
+    public class DataResponse<T> : Response
+    {
+        public T Data { get; set; }
+
+    }
+
+
+    [Obsolete("Please use DataResponse")]
     public class NewResponse<T> : Response 
     {
         public T Data { get; set; }
@@ -37,13 +45,5 @@ namespace FluentChange.Extensions.Common.Models.Rest
 
     }
 
-    //public class MultiResponseNew<T> : Response where T : class
-    //{
-    //    public T Results { get; set; }
-
-    //    public MultiResponseNew() : base()
-    //    {
-    //    }
-
-    //}
+   
 }

@@ -11,4 +11,10 @@ namespace FluentChange.Extensions.Azure.Functions.Interfaces
     {
         Task Create(HttpRequest req);
     }
+
+    public interface IContextCreationServiceNew
+    {
+        Task Create(HttpRequest req, ILogger logger);
+    }
+
 }
