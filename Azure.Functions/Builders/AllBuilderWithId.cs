@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using FluentChange.Extensions.Azure.Functions.Helper;
 using FluentChange.Extensions.Azure.Functions.Interfaces;
 using System.Net;
+using Newtonsoft.Json;
 
 namespace FluentChange.Extensions.Azure.Functions.CRUDL
 {
@@ -15,6 +16,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
     {
         private readonly IServiceProvider provider;
         private Action<HttpRequest, ILogger> contextCreateFunc;
+        private JsonSerializerSettings jsonSettings; 
 
         public AllBuilderWithId(IServiceProvider provider)
         {
@@ -23,18 +25,23 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
 
         public AllBuilderWithIdEntity<T, T> ForEntity<T>() where T : class
         {
-            var builder = new AllBuilderWithIdEntity<T, T>(provider, contextCreateFunc);
+            var builder = new AllBuilderWithIdEntity<T, T>(provider, contextCreateFunc, jsonSettings);
             return builder;
         }
         public AllBuilderWithIdEntity<T, M> ForEntityWithMapping<T, M>() where T : class where M : class
         {
-            var builder = new AllBuilderWithIdEntity<T, M>(provider, contextCreateFunc);
+            var builder = new AllBuilderWithIdEntity<T, M>(provider, contextCreateFunc, jsonSettings);
             return builder;
         }
 
         public async Task<HttpResponseMessage> Handle<T, S>(HttpRequest req, ILogger log, string id) where T : class where S : class, ICRUDLServiceWithId<T>
         {
             return await ForEntity<T>().UseInterface<S>().Handle(req, log, id);
+        }
+
+        public void WithJson(JsonSerializerSettings jsonSettings)
+        {
+            this.jsonSettings = jsonSettings;
         }
 
         public async Task<HttpResponseMessage> HandleAndMap<T, M, S>(HttpRequest req, ILogger log, string id) where T : class where M : class where S : class, ICRUDLServiceWithId<T>
@@ -76,7 +83,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             if (service == null) throw new NullReferenceException(nameof(service));
             if (mapper == null) throw new NullReferenceException(nameof(mapper));
 
-            var builder = new AllBuilderWithIdEntityServiceFree<TServiceModel>(service, contextCreateFunc, mapper);
+            var builder = new AllBuilderWithIdEntityServiceFree<TServiceModel>(service, contextCreateFunc, mapper, jsonSettings);
             return builder;
         }
 
@@ -102,11 +109,13 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         private readonly IServiceProvider provider;
         //private readonly bool usesMapping;
         private readonly Action<HttpRequest, ILogger> contextCreateFunc;
-        public AllBuilderWithIdEntity(IServiceProvider provider, Action<HttpRequest, ILogger> contextCreateFunc)
+        private readonly JsonSerializerSettings jsonSettings;
+        public AllBuilderWithIdEntity(IServiceProvider provider, Action<HttpRequest, ILogger> contextCreateFunc, JsonSerializerSettings jsonSettings)
         {
             this.provider = provider;
             //this.usesMapping = !(typeof(T).Equals(typeof(M)));
             this.contextCreateFunc = contextCreateFunc;
+            this.jsonSettings = jsonSettings;
         }
 
         public AllBuilderWithIdEntityServiceF<T, M, S> Use<S>() where S : class
@@ -116,7 +125,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             if (service == null) throw new NullReferenceException(nameof(service));
             if (mapper == null) throw new NullReferenceException(nameof(mapper));
 
-            var builder = new AllBuilderWithIdEntityServiceF<T, M, S>(service, contextCreateFunc, mapper);
+            var builder = new AllBuilderWithIdEntityServiceF<T, M, S>(service, contextCreateFunc, mapper, jsonSettings);
             return builder;
         }
 
@@ -128,7 +137,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             if (service == null) throw new NullReferenceException(nameof(service));
             if (mapper == null) throw new NullReferenceException(nameof(mapper));
 
-            var builder = new AllBuilderWithIdEntityInterfaceService<T, M, S>(service, contextCreateFunc, mapper);
+            var builder = new AllBuilderWithIdEntityInterfaceService<T, M, S>(service, contextCreateFunc, mapper, jsonSettings);
             return builder;
         }
         private IEntityMapper GetMapperService()
@@ -147,14 +156,14 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
     {
         private readonly AllBuilderWithIdEntityServiceF<T, M, S> internalBuilder;
         private readonly Action<HttpRequest, ILogger> contextCreateFunc;
-        public AllBuilderWithIdEntityInterfaceService(S service, Action<HttpRequest, ILogger> contextCreateFunc, IEntityMapper mapper)
+        public AllBuilderWithIdEntityInterfaceService(S service, Action<HttpRequest, ILogger> contextCreateFunc, IEntityMapper mapper, JsonSerializerSettings jsonSettings)
         {
             if (service == null) throw new ArgumentNullException(nameof(service));
             if (mapper == null) throw new ArgumentNullException(nameof(mapper));
             this.contextCreateFunc = contextCreateFunc;
 
-            internalBuilder = new AllBuilderWithIdEntityServiceF<T, M, S>(service, contextCreateFunc, mapper);
-            internalBuilder.Create(s => s.Create).Read(s => s.Read).Update(s => s.Update).Delete(s => s.Delete).List(s => s.List);
+            internalBuilder = new AllBuilderWithIdEntityServiceF<T, M, S>(service, contextCreateFunc, mapper, jsonSettings);
+            internalBuilder.OnPost(s => s.Create).OnGetWithId(s => s.Read).OnPut(s => s.Update).OnDeleteWithId(s => s.Delete).OnGet(s => s.List);
         }
         public async Task<HttpResponseMessage> Handle(HttpRequest req, ILogger log, string id)
         {
@@ -170,9 +179,9 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         private readonly TService service;
         private readonly Action<HttpRequest, ILogger> contextCreateFunc;
 
-        private bool unwrap = true;
-        private bool wrapout = true;
-        public AllBuilderWithIdEntityServiceFree(TService service, Action<HttpRequest, ILogger> contextCreateFunc, IEntityMapper mapper) : base(mapper)
+        private bool unwrap = false;
+        private bool wrapout = false;
+        public AllBuilderWithIdEntityServiceFree(TService service, Action<HttpRequest, ILogger> contextCreateFunc, IEntityMapper mapper, JsonSerializerSettings jsonSettings) : base(mapper, jsonSettings)
         {
             if (service == null) throw new ArgumentNullException(nameof(service));
             if (mapper == null) throw new ArgumentNullException(nameof(mapper));
@@ -180,30 +189,21 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             this.contextCreateFunc = contextCreateFunc;
         }
 
-        private Func<TService, HttpRequest, Task<HttpResponseMessage>> createFunc;
-        //private Func<TService, HttpRequest, string, Task<HttpResponseMessage>> readFunc;
-        private Func<TService, HttpRequest, Task<HttpResponseMessage>> readFunc;
-        private Func<TService, HttpRequest, Task<HttpResponseMessage>> updateFunc;
-        //private Func<TService, HttpRequest, string, Task<HttpResponseMessage>> deleteFunc;
+        private Func<TService, HttpRequest, Task<HttpResponseMessage>> getFunc;
+        private Func<TService, HttpRequest, Task<HttpResponseMessage>> getWithIdFunc;
+        private Func<TService, HttpRequest, Task<HttpResponseMessage>> postFunc;
+        private Func<TService, HttpRequest, Task<HttpResponseMessage>> putFunc;
         private Func<TService, HttpRequest, Task<HttpResponseMessage>> deleteFunc;
-        private Func<TService, HttpRequest, Task<HttpResponseMessage>> listFunc;
-
-        public AllBuilderWithIdEntityServiceFree<TService> WrapRequestAndResponse()
-        {
-            unwrap = true;
-            wrapout = true;
-            return this;
-        }
-        public AllBuilderWithIdEntityServiceFree<TService> NotWrapRequestAndResponse()
-        {
-            unwrap = false;
-            wrapout = false;
-            return this;
-        }
+        private Func<TService, HttpRequest, Task<HttpResponseMessage>> deleteWithIdFunc;
 
         public AllBuilderWithIdEntityServiceFree<TService> UnwrapRequest()
         {
             unwrap = true;
+            return this;
+        }
+        public AllBuilderWithIdEntityServiceFree<TService> NotUnwrapRequest()
+        {
+            unwrap = false;
             return this;
         }
         public AllBuilderWithIdEntityServiceFree<TService> WrapResponse()
@@ -211,100 +211,154 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             wrapout = true;
             return this;
         }
+        public AllBuilderWithIdEntityServiceFree<TService> NotWrapResponse()
+        {
+            wrapout = true;
+            return this;
+        }
 
-        public AllBuilderWithIdEntityServiceFree<TService> Create<Model>(Func<TService, Func<Model, Model>> predicate) where Model : class
+        public AllBuilderWithIdEntityServiceFree<TService> OnPost<Model>(Func<TService, Func<Model>> predicate) where Model : class
+        {
+            // only model outgoing
+            // no need for mapping ingoing and outgoing
+            MakePostFunc<Model, Model, Model, Model>(predicate);
+            return this;
+        }
+        public AllBuilderWithIdEntityServiceFree<TService> OnPost<Model>(Func<TService, Func<Model, Model>> predicate) where Model : class
         {
             // same model in and outgoing
             // no need for mapping ingoing and outgoing
-            MakeCreateFunc<Model, Model, Model, Model>(predicate);
+            MakePostFunc<Model, Model, Model, Model>(predicate);
             return this;
         }
-        public AllBuilderWithIdEntityServiceFree<TService> Create<IngoingModel, OutgoingModel>(Func<TService, Func<IngoingModel, OutgoingModel>> predicate) where IngoingModel : class where OutgoingModel : class
+        public AllBuilderWithIdEntityServiceFree<TService> OnPost<IngoingModel, OutgoingModel>(Func<TService, Func<IngoingModel, OutgoingModel>> predicate) where IngoingModel : class where OutgoingModel : class
         {
             // no need for mapping ingoing and outgoing
-            MakeCreateFunc<IngoingModel, IngoingModel, OutgoingModel, OutgoingModel>(predicate);
+            MakePostFunc<IngoingModel, IngoingModel, OutgoingModel, OutgoingModel>(predicate);
             return this;
         }
-        public AllBuilderWithIdEntityServiceFree<TService> Create<IngoingModel, OutgoingServiceModel, OutgoingModel>(Func<TService, Func<IngoingModel, OutgoingServiceModel>> predicate) where IngoingModel : class where OutgoingModel : class where OutgoingServiceModel : class
+        public AllBuilderWithIdEntityServiceFree<TService> OnPost<IngoingModel, OutgoingServiceModel, OutgoingModel>(Func<TService, Func<IngoingModel, OutgoingServiceModel>> predicate) where IngoingModel : class where OutgoingModel : class where OutgoingServiceModel : class
         {
             // no need for mapping ingoing
-            MakeCreateFunc<IngoingModel, IngoingModel, OutgoingServiceModel, OutgoingModel>(predicate);
+            MakePostFunc<IngoingModel, IngoingModel, OutgoingServiceModel, OutgoingModel>(predicate);
             return this;
         }
-        public AllBuilderWithIdEntityServiceFree<TService> Create<IngoingModel, IngoingServiceModel, OutgoingServiceModel, OutgoingModel>(Func<TService, Func<IngoingServiceModel, OutgoingServiceModel>> predicate) where IngoingModel : class where IngoingServiceModel : class where OutgoingModel : class where OutgoingServiceModel : class
+        public AllBuilderWithIdEntityServiceFree<TService> OnPost<IngoingModel, IngoingServiceModel, OutgoingServiceModel, OutgoingModel>(Func<TService, Func<IngoingServiceModel, OutgoingServiceModel>> predicate) where IngoingModel : class where IngoingServiceModel : class where OutgoingModel : class where OutgoingServiceModel : class
         {
             // all possible combination
-            MakeCreateFunc<IngoingModel, IngoingServiceModel, OutgoingServiceModel, OutgoingModel>(predicate);
+            MakePostFunc<IngoingModel, IngoingServiceModel, OutgoingServiceModel, OutgoingModel>(predicate);
             return this;
         }
 
 
-        public AllBuilderWithIdEntityServiceFree<TService> Read<Model>(Func<TService, Func<Guid, Model>> predicate) where Model : class
+        public AllBuilderWithIdEntityServiceFree<TService> OnGetWithId<Model>(Func<TService, Func<Guid, Model>> predicate) where Model : class
         {
             // no need for mapping outgoing
-            MakeReadFunc<Model, Model>(predicate);
-            MakeReadFuncNoId<Model, Model>(predicate);
+            MakeGetWithIdFunc<Model, Model>(predicate);
             return this;
         }
-        public AllBuilderWithIdEntityServiceFree<TService> Read<OutgoingServiceModel, OutgoingModel>(Func<TService, Func<Guid, OutgoingServiceModel>> predicate) where OutgoingModel : class where OutgoingServiceModel : class
+        public AllBuilderWithIdEntityServiceFree<TService> OnGetWithId<Model>(Func<TService, Func<Model>> predicate) where Model : class
+        {
+            // no need for mapping outgoing
+            MakeGetWithIdFunc<Model, Model>(predicate);
+            return this;
+        }
+        public AllBuilderWithIdEntityServiceFree<TService> OnGetWithId<OutgoingServiceModel, OutgoingModel>(Func<TService, Func<Guid, OutgoingServiceModel>> predicate) where OutgoingModel : class where OutgoingServiceModel : class
         {
             // with mapping outgoing
-            MakeReadFunc<OutgoingServiceModel, OutgoingModel>(predicate);
-            MakeReadFuncNoId<OutgoingServiceModel, OutgoingModel>(predicate);
+            MakeGetWithIdFunc<OutgoingServiceModel, OutgoingModel>(predicate);
+            return this;
+        }
+        public AllBuilderWithIdEntityServiceFree<TService> OnGetWithId<OutgoingServiceModel, OutgoingModel>(Func<TService, Func<OutgoingServiceModel>> predicate) where OutgoingModel : class where OutgoingServiceModel : class
+        {
+            // with mapping outgoing
+            MakeGetWithIdFunc<OutgoingServiceModel, OutgoingModel>(predicate);
             return this;
         }
 
-
-        public AllBuilderWithIdEntityServiceFree<TService> Update<Model>(Func<TService, Func<Model, Model>> predicate) where Model : class
+        public AllBuilderWithIdEntityServiceFree<TService> OnPut<Model>(Func<TService, Func<Model, Model>> predicate) where Model : class
         {
             // same model in and outgoing
             // no need for mapping ingoing and outgoing
-            MakeUpdateFunc<Model, Model, Model, Model>(predicate);
+            MakePutFunc<Model, Model, Model, Model>(predicate);
             return this;
         }
-        public AllBuilderWithIdEntityServiceFree<TService> Update<IngoingModel, OutgoingModel>(Func<TService, Func<IngoingModel, OutgoingModel>> predicate) where IngoingModel : class where OutgoingModel : class
+        public AllBuilderWithIdEntityServiceFree<TService> OnPut<IngoingModel, OutgoingModel>(Func<TService, Func<IngoingModel, OutgoingModel>> predicate) where IngoingModel : class where OutgoingModel : class
         {
             // no need for mapping ingoing and outgoing
-            MakeUpdateFunc<IngoingModel, IngoingModel, OutgoingModel, OutgoingModel>(predicate);
+            MakePutFunc<IngoingModel, IngoingModel, OutgoingModel, OutgoingModel>(predicate);
             return this;
         }
-        public AllBuilderWithIdEntityServiceFree<TService> Update<IngoingModel, OutgoingServiceModel, OutgoingModel>(Func<TService, Func<IngoingModel, OutgoingServiceModel>> predicate) where IngoingModel : class where OutgoingModel : class where OutgoingServiceModel : class
+        public AllBuilderWithIdEntityServiceFree<TService> OnPut<IngoingModel, OutgoingServiceModel, OutgoingModel>(Func<TService, Func<IngoingModel, OutgoingServiceModel>> predicate) where IngoingModel : class where OutgoingModel : class where OutgoingServiceModel : class
         {
             // no need for mapping ingoing
-            MakeUpdateFunc<IngoingModel, IngoingModel, OutgoingServiceModel, OutgoingModel>(predicate);
+            MakePutFunc<IngoingModel, IngoingModel, OutgoingServiceModel, OutgoingModel>(predicate);
             return this;
         }
-        public AllBuilderWithIdEntityServiceFree<TService> Update<IngoingModel, IngoingServiceModel, OutgoingServiceModel, OutgoingModel>(Func<TService, Func<IngoingServiceModel, OutgoingServiceModel>> predicate) where IngoingModel : class where IngoingServiceModel : class where OutgoingModel : class where OutgoingServiceModel : class
+        public AllBuilderWithIdEntityServiceFree<TService> OnPut<IngoingModel, IngoingServiceModel, OutgoingServiceModel, OutgoingModel>(Func<TService, Func<IngoingServiceModel, OutgoingServiceModel>> predicate) where IngoingModel : class where IngoingServiceModel : class where OutgoingModel : class where OutgoingServiceModel : class
         {
             // all possible combination
-            MakeUpdateFunc<IngoingModel, IngoingServiceModel, OutgoingServiceModel, OutgoingModel>(predicate);
+            MakePutFunc<IngoingModel, IngoingServiceModel, OutgoingServiceModel, OutgoingModel>(predicate);
             return this;
         }
 
 
 
-        public AllBuilderWithIdEntityServiceFree<TService> Delete(Func<TService, Action<Guid>> predicate)
+        public AllBuilderWithIdEntityServiceFree<TService> OnDeleteWithId(Func<TService, Action<Guid>> predicate)
+        {
+            MakeDeleteFuncWithId(predicate);
+            return this;
+        }
+        public AllBuilderWithIdEntityServiceFree<TService> OnDelete(Func<TService, Action> predicate)
         {
             MakeDeleteFunc(predicate);
             return this;
         }
 
-
-
-        public AllBuilderWithIdEntityServiceFree<TService> List<OutgoingServiceModel, OutgoingModel>(Func<TService, Func<IEnumerable<OutgoingServiceModel>>> predicate) where OutgoingModel : class where OutgoingServiceModel : class
+        public AllBuilderWithIdEntityServiceFree<TService> OnGet<OutgoingModel>(Func<TService, Func<OutgoingModel>> predicate) where OutgoingModel : class
         {
-            MakeListFunc<OutgoingServiceModel, OutgoingModel>(predicate);
+            MakeGetFunc<OutgoingModel, OutgoingModel>(predicate);
             return this;
+        }
+        public AllBuilderWithIdEntityServiceFree<TService> OnGet<OutgoingServiceModel, OutgoingModel>(Func<TService, Func<IEnumerable<OutgoingServiceModel>>> predicate) where OutgoingModel : class where OutgoingServiceModel : class
+        {
+            MakeGetFuncList<OutgoingServiceModel, OutgoingModel>(predicate);
+            return this;
+        }
+        private static Guid GetId(HttpRequest req)
+        {
+            if (!req.RouteValues.ContainsKey("id")) throw new ArgumentNullException("RouteValues do not contain id");
+            var idValue = req.RouteValues["id"].ToString();
+            if (String.IsNullOrEmpty(idValue)) throw new ArgumentNullException();
+            var idGuid = Guid.Parse(idValue);
+            return idGuid;
         }
 
         #region MakeFunction....
-        protected void MakeCreateFunc<IngoingModel, IngoingServiceModel, OutgoingServiceModel, OutgoingModel>(Func<TService, Func<IngoingServiceModel, OutgoingServiceModel>> predicate)
+        protected void MakePostFunc<IngoingModel, IngoingServiceModel, OutgoingServiceModel, OutgoingModel>(Func<TService, Func<OutgoingServiceModel>> predicate)
+            where IngoingModel : class
+            where IngoingServiceModel : class
+            where OutgoingServiceModel : class
+            where OutgoingModel : class
+        {
+            postFunc = async (TService service, HttpRequest req) =>
+            {
+                IngoingServiceModel createData = await EasyGetRequestBody<IngoingServiceModel, IngoingModel>(req, unwrap);
+
+                if (createData == null) throw new ArgumentNullException();
+                var resultCreated = predicate.Invoke(service).Invoke();
+
+                return EasyRespond<OutgoingServiceModel, OutgoingModel>(resultCreated, wrapout);
+
+            };
+        }
+        protected void MakePostFunc<IngoingModel, IngoingServiceModel, OutgoingServiceModel, OutgoingModel>(Func<TService, Func<IngoingServiceModel, OutgoingServiceModel>> predicate)
            where IngoingModel : class
            where IngoingServiceModel : class
            where OutgoingServiceModel : class
            where OutgoingModel : class
         {
-            createFunc = async (TService service, HttpRequest req) =>
+            postFunc = async (TService service, HttpRequest req) =>
             {
                 IngoingServiceModel createData = await EasyGetRequestBody<IngoingServiceModel, IngoingModel>(req, unwrap);
 
@@ -315,15 +369,12 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
 
             };
         }
-        protected void MakeReadFuncNoId<OutgoingServiceModel, OutgoingModel>(Func<TService, Func<Guid, OutgoingServiceModel>> predicate)
+        protected void MakeGetWithIdFunc<OutgoingServiceModel, OutgoingModel>(Func<TService, Func<Guid, OutgoingServiceModel>> predicate)
            where OutgoingServiceModel : class
            where OutgoingModel : class
         {
-            readFunc = async (TService service, HttpRequest req) =>
+            getWithIdFunc = async (TService service, HttpRequest req) =>
             {
-                //if (String.IsNullOrEmpty(id)) throw new ArgumentNullException();
-                //var idGuid = Guid.Parse(id);
-
                 var idGuid = GetId(req);
 
                 var resultRead = predicate.Invoke(service).Invoke(idGuid);
@@ -332,42 +383,25 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             };
         }
 
-        private static Guid GetId(HttpRequest req)
+        protected void MakeGetWithIdFunc<OutgoingServiceModel, OutgoingModel>(Func<TService, Func<OutgoingServiceModel>> predicate)
+         where OutgoingServiceModel : class
+         where OutgoingModel : class
         {
-            if (!req.RouteValues.ContainsKey("id")) throw new ArgumentNullException("RouteValues do not contain id");
-            var idValue = req.RouteValues["id"].ToString();
-            if (String.IsNullOrEmpty(idValue)) throw new ArgumentNullException();
-            var idGuid = Guid.Parse(idValue);
-            return idGuid;
+            getWithIdFunc = async (TService service, HttpRequest req) =>
+            {
+                var resultRead = predicate.Invoke(service).Invoke();
+                return EasyRespond<OutgoingServiceModel, OutgoingModel>(resultRead, wrapout);
+
+            };
         }
 
-        protected void MakeReadFunc<OutgoingServiceModel, OutgoingModel>(Func<TService, Func<Guid, OutgoingServiceModel>> predicate)
-          where OutgoingServiceModel : class
-          where OutgoingModel : class
-        {
-            //readFunc = async (TService service, HttpRequest req, string id) =>
-            //{
-
-            //    //if (String.IsNullOrEmpty(id)) throw new ArgumentNullException();
-            //    //var idGuid = Guid.Parse(id);
-
-            //    if (!req.RouteValues.ContainsKey("id")) throw new ArgumentNullException("RouteValues do not contain id");
-            //    var idValue = req.RouteValues["id"].ToString();
-            //    if (String.IsNullOrEmpty(idValue)) throw new ArgumentNullException();
-            //    var idGuid = Guid.Parse(idValue);
-
-            //    var resultRead = predicate.Invoke(service).Invoke(idGuid);
-            //    return EasyRespond<OutgoingServiceModel, OutgoingModel>(resultRead, wrapout);
-
-            //};
-        }
-        protected void MakeUpdateFunc<IngoingModel, IngoingServiceModel, OutgoingServiceModel, OutgoingModel>(Func<TService, Func<IngoingServiceModel, OutgoingServiceModel>> predicate)
+        protected void MakePutFunc<IngoingModel, IngoingServiceModel, OutgoingServiceModel, OutgoingModel>(Func<TService, Func<IngoingServiceModel, OutgoingServiceModel>> predicate)
          where IngoingModel : class
          where IngoingServiceModel : class
          where OutgoingServiceModel : class
          where OutgoingModel : class
         {
-            updateFunc = async (TService service, HttpRequest req) =>
+            putFunc = async (TService service, HttpRequest req) =>
             {
                 IngoingServiceModel updateData = await EasyGetRequestBody<IngoingServiceModel, IngoingModel>(req, unwrap);
 
@@ -378,13 +412,10 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
 
             };
         }
-        protected void MakeDeleteFunc(Func<TService, Action<Guid>> predicate)
+        protected void MakeDeleteFuncWithId(Func<TService, Action<Guid>> predicate)
         {
-            deleteFunc = async (TService service, HttpRequest req) =>
+            deleteWithIdFunc = async (TService service, HttpRequest req) =>
             {
-                //if (String.IsNullOrEmpty(id)) throw new ArgumentNullException();
-                //var idGuid = Guid.Parse(id);
-
                 var idGuid = GetId(req);
 
                 predicate.Invoke(service).Invoke(idGuid);
@@ -392,12 +423,33 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
 
             };
         }
+        protected void MakeDeleteFunc(Func<TService, Action> predicate)
+        {
+            deleteFunc = async (TService service, HttpRequest req) =>
+            {
+                predicate.Invoke(service).Invoke();
+                return EasyRespondEmpty(wrapout);
 
-        protected void MakeListFunc<OutgoingServiceModel, OutgoingModel>(Func<TService, Func<IEnumerable<OutgoingServiceModel>>> predicate)
+            };
+        }
+
+
+        protected void MakeGetFunc<OutgoingServiceModel, OutgoingModel>(Func<TService, Func<OutgoingServiceModel>> predicate)
+           where OutgoingServiceModel : class
+           where OutgoingModel : class
+        {
+            getFunc = async (TService service, HttpRequest req) =>
+            {
+                var listResult = predicate.Invoke(service).Invoke();
+                return EasyRespond<OutgoingServiceModel, OutgoingModel>(listResult, wrapout);
+
+            };
+        }
+        protected void MakeGetFuncList<OutgoingServiceModel, OutgoingModel>(Func<TService, Func<IEnumerable<OutgoingServiceModel>>> predicate)
             where OutgoingServiceModel : class
             where OutgoingModel : class
         {
-            listFunc = async (TService service, HttpRequest req) =>
+            getFunc = async (TService service, HttpRequest req) =>
             {
                 var listResult = predicate.Invoke(service).Invoke();
                 return EasyRespond<OutgoingServiceModel, OutgoingModel>(listResult, wrapout);
@@ -406,42 +458,6 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         }
 
         #endregion
-        //public override async Task<HttpResponseMessage> Handle(HttpRequest req, ILogger log, string id)
-        //{
-        //    log.LogInformation("AllNuilder handle function " + req.Method.ToUpper() + " " + typeof(TService).Name + "/" + typeof(TService).Name);
-
-        //    if (contextCreateFunc != null) contextCreateFunc.Invoke(req, log);
-
-        //    try
-        //    {
-        //        if (req.Method == "GET" && !String.IsNullOrEmpty(id) && readFunc != null)
-        //        {
-        //            return await readFunc.Invoke(service, req, id);
-        //        }
-        //        if (req.Method == "GET" && String.IsNullOrEmpty(id) && listFunc != null)
-        //        {
-        //            return await listFunc.Invoke(service, req);
-        //        }
-        //        if (req.Method == "POST" && createFunc != null)
-        //        {
-        //            return await createFunc.Invoke(service, req);
-        //        }
-        //        if (req.Method == "PUT" && updateFunc != null)
-        //        {
-        //            return await updateFunc.Invoke(service, req);
-        //        }
-        //        if (req.Method == "DELETE" && deleteFunc != null)
-        //        {
-        //            return await deleteFunc.Invoke(service, req, id);
-        //        }
-
-        //        return EasyRespondError(new NotImplementedException(req.Method + " method is not implemented in function"), wrapout, HttpStatusCode.BadRequest);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return EasyRespondError(ex, wrapout);
-        //    }
-        //}
 
         public async Task<HttpResponseMessage> Handle(HttpRequest req, ILogger log)
         {
@@ -451,26 +467,40 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
 
             try
             {
-                if (req.Method == "GET" && req.RouteValues.ContainsKey("id") && readFunc != null)
+                if (req.RouteValues.ContainsKey("id"))
                 {
-                    return await readFunc.Invoke(service, req);
+                    if (req.Method == "GET" && getWithIdFunc != null)
+                    {
+                        return await getWithIdFunc.Invoke(service, req);
+                    }
+                    if (req.Method == "DELETE" && deleteWithIdFunc != null)
+                    {
+                        return await deleteWithIdFunc.Invoke(service, req);
+                    }
                 }
-                if (req.Method == "GET" && !req.RouteValues.ContainsKey("id") && listFunc != null)
+                else
                 {
-                    return await listFunc.Invoke(service, req);
+                    if (req.Method == "GET" && getFunc != null)
+                    {
+                        return await getFunc.Invoke(service, req);
+                    }
+                    if (req.Method == "DELETE" && deleteFunc != null)
+                    {
+                        return await deleteFunc.Invoke(service, req);
+                    }
                 }
-                if (req.Method == "POST" && createFunc != null)
+              
+             
+                if (req.Method == "POST" && postFunc != null)
                 {
-                    return await createFunc.Invoke(service, req);
+                    return await postFunc.Invoke(service, req);
                 }
-                if (req.Method == "PUT" && updateFunc != null)
+                if (req.Method == "PUT" && putFunc != null)
                 {
-                    return await updateFunc.Invoke(service, req);
+                    return await putFunc.Invoke(service, req);
                 }
-                if (req.Method == "DELETE" && deleteFunc != null)
-                {
-                    return await deleteFunc.Invoke(service, req);
-                }
+               
+                
 
                 return EasyRespondError(new NotImplementedException(req.Method + " method is not implemented in function"), wrapout, HttpStatusCode.BadRequest);
             }
@@ -485,7 +515,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
     {
 
 
-        public AllBuilderWithIdEntityServiceF(TService service, Action<HttpRequest, ILogger> contextCreateFunc, IEntityMapper mapper) : base(service, contextCreateFunc, mapper)
+        public AllBuilderWithIdEntityServiceF(TService service, Action<HttpRequest, ILogger> contextCreateFunc, IEntityMapper mapper, JsonSerializerSettings jsonSettings) : base(service, contextCreateFunc, mapper, jsonSettings)
         {
 
         }
@@ -503,50 +533,52 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
 
         public AllBuilderWithIdEntityServiceF<ServiceModel, ApiModel, TService> With(Func<TService, Func<ServiceModel, ServiceModel>> create, Func<TService, Func<Guid, ServiceModel>> read, Func<TService, Func<ServiceModel, ServiceModel>> update, Func<TService, Action<Guid>> delete, Func<TService, Func<IEnumerable<ServiceModel>>> list)
         {
-            MakeCreateFunc<ApiModel, ServiceModel, ServiceModel, ApiModel>(create);
-            MakeReadFunc<ServiceModel, ApiModel>(read);
-            MakeUpdateFunc<ApiModel, ServiceModel, ServiceModel, ApiModel>(update);
-            MakeDeleteFunc(delete);
-            MakeListFunc<ServiceModel, ApiModel>(list);
+            MakePostFunc<ApiModel, ServiceModel, ServiceModel, ApiModel>(create);
+            MakeGetWithIdFunc<ServiceModel, ApiModel>(read);
+            MakePutFunc<ApiModel, ServiceModel, ServiceModel, ApiModel>(update);
+            MakeDeleteFuncWithId(delete);
+            MakeGetFuncList<ServiceModel, ApiModel>(list);
 
             return this;
         }
 
-        public AllBuilderWithIdEntityServiceF<ServiceModel, ApiModel, TService> Create(Func<TService, Func<ServiceModel, ServiceModel>> predicate)
+        public AllBuilderWithIdEntityServiceF<ServiceModel, ApiModel, TService> OnPost(Func<TService, Func<ServiceModel, ServiceModel>> predicate)
         {
-            MakeCreateFunc<ApiModel, ServiceModel, ServiceModel, ApiModel>(predicate);
+            MakePostFunc<ApiModel, ServiceModel, ServiceModel, ApiModel>(predicate);
             return this;
         }
-        //public AllBuilderWithIdEntityServiceF<ServiceModel, ApiModel, TService> Read(Func<TService, Func<ServiceModel>> predicate)
-        //{
-        //    MakeReadFunc<ServiceModel, ApiModel>(predicate);
-        //    return this;
-        //}
-        public AllBuilderWithIdEntityServiceF<ServiceModel, ApiModel, TService> Read(Func<TService, Func<Guid, ServiceModel>> predicate)
+        public AllBuilderWithIdEntityServiceF<ServiceModel, ApiModel, TService> OnGet(Func<TService, Func<ServiceModel>> predicate)
         {
-            MakeReadFuncNoId<ServiceModel, ApiModel>(predicate);
-            MakeReadFunc<ServiceModel, ApiModel>(predicate);
+            MakeGetFunc<ServiceModel, ApiModel>(predicate);
             return this;
         }
-        public AllBuilderWithIdEntityServiceF<ServiceModel, ApiModel, TService> Update(Func<TService, Func<ServiceModel, ServiceModel>> predicate)
+        public AllBuilderWithIdEntityServiceF<ServiceModel, ApiModel, TService> OnGetWithId(Func<TService, Func<Guid, ServiceModel>> predicate)
         {
-            MakeUpdateFunc<ApiModel, ServiceModel, ServiceModel, ApiModel>(predicate);
+            MakeGetWithIdFunc<ServiceModel, ApiModel>(predicate);
             return this;
         }
-        public AllBuilderWithIdEntityServiceF<ServiceModel, ApiModel, TService> Delete(Func<TService, Action<Guid>> predicate)
+        public AllBuilderWithIdEntityServiceF<ServiceModel, ApiModel, TService> OnPut(Func<TService, Func<ServiceModel, ServiceModel>> predicate)
+        {
+            MakePutFunc<ApiModel, ServiceModel, ServiceModel, ApiModel>(predicate);
+            return this;
+        }
+
+        public new AllBuilderWithIdEntityServiceF<ServiceModel, ApiModel, TService> OnDelete(Func<TService, Action> predicate)
         {
             MakeDeleteFunc(predicate);
             return this;
         }
-        public AllBuilderWithIdEntityServiceF<ServiceModel, ApiModel, TService> List(Func<TService, Func<IEnumerable<ServiceModel>>> predicate)
+        public new AllBuilderWithIdEntityServiceF<ServiceModel, ApiModel, TService> OnDeleteWithId(Func<TService, Action<Guid>> predicate)
         {
-            MakeListFunc<ServiceModel, ApiModel>(predicate);
+            MakeDeleteFuncWithId(predicate);
+            return this;
+        }
+        public AllBuilderWithIdEntityServiceF<ServiceModel, ApiModel, TService> OnGet(Func<TService, Func<IEnumerable<ServiceModel>>> predicate)
+        {
+            MakeGetFuncList<ServiceModel, ApiModel>(predicate);
             return this;
         }
 
-        public AllBuilderWithIdEntityServiceF<ServiceModel, ApiModel, TService> Id(Func<string> id)
-        {
-            throw new NotImplementedException();
-        }
+
     }
 }

@@ -164,7 +164,7 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
     {
         private readonly IEntityMapper mapper;
         protected JsonSerializerSettings jsonSettings;
-        public AbstractResponseHelpersNew(IEntityMapper mapper)
+        public AbstractResponseHelpersNew(IEntityMapper mapper, JsonSerializerSettings jsonSettings)
         {
             this.mapper = mapper;   
         }
@@ -205,9 +205,6 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
                 }
             }
         }
-
-
-
 
 
 
@@ -379,7 +376,7 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
 
     public abstract class AbstractResponseHelpersWithHandleIdNew : AbstractResponseHelpersNew
     {
-        protected AbstractResponseHelpersWithHandleIdNew(IEntityMapper mapper) : base(mapper)
+        protected AbstractResponseHelpersWithHandleIdNew(IEntityMapper mapper, JsonSerializerSettings jsonSettings) : base(mapper, jsonSettings)
         {
         }
         public AbstractResponseHelpersWithHandleIdNew WithJson(JsonSerializerSettings settings)
