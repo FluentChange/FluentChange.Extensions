@@ -23,7 +23,7 @@ namespace DemoCRUDLFunctions
         {
 
             return await ResponseBuilder
-                .Handle<Todo, TodoService>(req, log, id);
+                .Handle<Todo, TodoService>(req, log);
 
         }
 
@@ -33,7 +33,7 @@ namespace DemoCRUDLFunctions
             return await ResponseBuilder
                 .ForEntity<Todo>()
                 .UseInterface<TodoService>()
-                .Handle(req, log, id);
+                .Handle(req, log);
 
         }
 
@@ -66,11 +66,11 @@ namespace DemoCRUDLFunctions
             return await ResponseBuilder
                 .ForEntity<Event>()
                 .Use<EventService>()
-                .Create(s => s.New)
-                .Read(s => s.Get)
-                .Update(s => s.Edit)
-                .Delete(s => s.Remove)
-                .List(s => s.All)
+                .OnPost(s => s.New)
+                .OnGetWithId(s => s.Get)
+                .OnPut(s => s.Edit)
+                .OnDeleteWithId(s => s.Remove)
+                .OnGet(s => s.All)
                 .Handle(req, log);
         }
 
@@ -99,7 +99,6 @@ namespace DemoCRUDLFunctions
               .Use<ProductService>()
               .UnwrapRequest()
               .With(s => s.Create, s => s.Read, s => s.Update, s => s.Delete, s => s.List)
-              .WrapRequestAndResponse()
               .WrapResponse()
               .Handle(req, log);
             }

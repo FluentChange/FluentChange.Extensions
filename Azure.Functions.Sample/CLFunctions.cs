@@ -22,7 +22,7 @@ namespace DemoCRUDLFunctions
         public async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample1/todos" + RouteHelper.Id)] HttpRequest req, string id, ILogger log)
         {
 
-            return await CL
+            return await ResponseBuilder
                 .Handle<Todo, TodoService>(req, log);
 
         }
@@ -31,7 +31,7 @@ namespace DemoCRUDLFunctions
         public async Task<HttpResponseMessage> Run2([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample2/todos" + RouteHelper.Id)] HttpRequest req, string id, ILogger log)
         {
 
-            return await CL
+            return await ResponseBuilder
                 .ForEntity<Todo>()
                 .UseInterface<TodoService>()
                 .Handle(req, log);
@@ -42,8 +42,8 @@ namespace DemoCRUDLFunctions
         public async Task<HttpResponseMessage> Run3([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample3/events" + RouteHelper.Id)] HttpRequest req, string id, ILogger log)
         {
 
-            return await CL
-                .With<Event, EventService>(s => s.New, s => s.All)
+            return await ResponseBuilder
+                .With<Event, EventService>(s => s.New, null, null, null, s => s.All)
                 .Handle(req, log);
 
         }
@@ -52,10 +52,10 @@ namespace DemoCRUDLFunctions
         public async Task<HttpResponseMessage> Run4([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample4/events" + RouteHelper.Id)] HttpRequest req, string id, ILogger log)
         {
 
-            return await CL
+            return await ResponseBuilder
                  .ForEntity<Event>()
                  .Use<EventService>()
-                 .With(s => s.New, s => s.All)
+                 .With(s => s.New, null, null, null, s => s.All)
                  .Handle(req, log);
 
         }
@@ -64,11 +64,11 @@ namespace DemoCRUDLFunctions
         public async Task<HttpResponseMessage> Run5([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample5/events" + RouteHelper.Id)] HttpRequest req, string id, ILogger log)
         {
 
-            return await CL
+            return await ResponseBuilder
                 .ForEntity<Event>()
                 .Use<EventService>()
-                .Create(s => s.New)
-                .List(s => s.All)
+                .OnPost(s => s.New)
+                .OnGet(s => s.All)
                 .Handle(req, log);
 
         }
@@ -77,11 +77,12 @@ namespace DemoCRUDLFunctions
         public async Task<HttpResponseMessage> Run6([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample6/products" + RouteHelper.Id)] HttpRequest req, string id, ILogger log)
         {
 
-            return await CL
+            return await ResponseBuilder
                 .ForEntity<Product>()
                 .Use<ProductService>()
-                .With(s => s.Create, s => s.List)
-                .WrapRequestAndResponse()
+                .UnwrapRequest()
+                .With(s => s.Create, null, null, null, s => s.List)
+                .WrapResponse()
                 .Handle(req, log);
 
         }
@@ -92,11 +93,12 @@ namespace DemoCRUDLFunctions
         {
             try
             {
-                return await CL
+                return await ResponseBuilder
                   .ForEntityWithMapping<Product, ApiProduct>()
                   .Use<ProductService>()
-                  .With(s => s.Create, s => s.List)
-                  .WrapRequestAndResponse()
+                  .UnwrapRequest()
+                  .With(s => s.Create, null, null, null, s => s.List)
+                  .WrapResponse()
                   .Handle(req, log);
             }
             catch (Exception ex)

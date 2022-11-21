@@ -21,13 +21,11 @@ namespace DemoCRUDLFunctions
         [FunctionName("SingleFunctions")]
         public async Task<HttpResponseMessage> Run7([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "single/products")] HttpRequest req, ILogger log)
         {
-            return await Handler()
-                .Config(log)
+            return await ResponseBuilder
                 .Use<ProductService>()
-                .Execute<IEnumerable<Product>>(service => service.List)
-                .MapTo<IEnumerable<ApiProduct>>()
-                .WrapOutput()
-                .Respond();
+                .OnGet<Product, ApiProduct>(service => service.List)
+                .WrapResponse()
+                .Handle(req, log);
         }
     }
 }
