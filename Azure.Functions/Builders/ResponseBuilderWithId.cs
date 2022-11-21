@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -313,6 +314,14 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         }
         #endregion
 
+        #region POST FILE
+        public ResponseBuilderWithIdEntityService<TService> OnPostFile<Model>(Func<TService, Func<string, string, long, Stream, Model>> predicate) where Model : class
+        {
+            MakePostFileFunc<Model, Model>(predicate);
+            return this;
+        }
+        #endregion
+
         #region PUT
 
         // same model in and outgoing, no need for mapping ingoing and outgoing
@@ -464,7 +473,29 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
 
             };
         }
+        protected void MakePostFileFunc<OutgoingServiceModel, OutgoingModel>(Func<TService, Func<string, string, long, Stream, OutgoingServiceModel>> predicate)
+            where OutgoingServiceModel : class
+            where OutgoingModel : class
+        {
+            postFunc = async (TService service, HttpRequest req) =>
+            {
+                //IngoingServiceModel createData = await GetRequestBody<IngoingServiceModel, IngoingModel>(req, unwrap);
 
+                var formdata = await req.ReadFormAsync();
+                var file = formdata.Files["file"];
+
+                //return await ExecuteAsync(() => files.UploadAsync(file.FileName, file.ContentType, file.Length, file.OpenReadStream()).Result, req, log);
+
+                //var predicate = (s) => () =>
+                //       s.Upload(file.FileName, file.ContentType, file.Length, file.OpenReadStream());
+
+                //if (createData == null) throw new ArgumentNullException();
+                var resultCreated = predicate.Invoke(service).Invoke(file.FileName, file.ContentType, file.Length, file.OpenReadStream());
+
+                return Respond<OutgoingServiceModel, OutgoingModel>(resultCreated, wrapout);
+
+            };
+        }
 
         protected void MakePutFunc<IngoingModel, IngoingServiceModel, OutgoingServiceModel, OutgoingModel>(Func<TService, Func<IngoingServiceModel, OutgoingServiceModel>> predicate)
          where IngoingModel : class
@@ -592,6 +623,8 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
                 return RespondError(ex, wrapout);
             }
         }
+
+
     }
 
     public class ResponseBuilderWithIdEntityServiceWithModels<ServiceModel, ApiModel, TService> : ResponseBuilderWithIdEntityService<TService> where TService : class where ServiceModel : class where ApiModel : class
