@@ -571,7 +571,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
 
         public async Task<HttpResponseMessage> Handle(HttpRequest req, ILogger log)
         {
-            log.LogInformation("AllNuilder handle function " + req.Method.ToUpper() + " " + typeof(TService).Name + "/" + typeof(TService).Name);
+            log.LogInformation("ResponseBuilder handle function " + req.Method.ToUpper() + " " + typeof(TService).Name + "/" + typeof(TService).Name);
 
             if (contextCreateFunc != null) contextCreateFunc.Invoke(req, log);
 
@@ -616,10 +616,13 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
                     }
                 }
 
-                return RespondError(new NotImplementedException(req.Method + " method is not implemented in function"), wrapout, HttpStatusCode.BadRequest);
+                var message = req.Method + " method is not implemented in function";
+                log.LogError(message);
+                return RespondError(new NotImplementedException(message), wrapout, HttpStatusCode.BadRequest);
             }
             catch (Exception ex)
             {
+                log.LogError(ex.Message);
                 return RespondError(ex, wrapout);
             }
         }
