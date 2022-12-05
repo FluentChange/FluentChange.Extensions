@@ -280,36 +280,61 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         #endregion
 
         #region POST
+        // only model outgoing
+        // no need for mapping ingoing and outgoing
         public ResponseBuilderWithIdEntityService<TService> OnPost<Model>(Func<TService, Func<Model>> predicate) where Model : class
         {
-            // only model outgoing
-            // no need for mapping ingoing and outgoing
             MakePostFunc<Model, Model, Model, Model>(predicate);
             return this;
         }
+        public ResponseBuilderWithIdEntityService<TService> OnPostWithId<Model>(Func<TService, Func<Guid, Model>> predicate) where Model : class
+        {
+            MakePostWithIdFunc<Model, Model, Model, Model>(predicate);
+            return this;
+        }
+        // same model in and outgoing
+        // no need for mapping ingoing and outgoing
         public ResponseBuilderWithIdEntityService<TService> OnPost<Model>(Func<TService, Func<Model, Model>> predicate) where Model : class
         {
-            // same model in and outgoing
-            // no need for mapping ingoing and outgoing
             MakePostFunc<Model, Model, Model, Model>(predicate);
             return this;
         }
+        public ResponseBuilderWithIdEntityService<TService> OnPostWithId<Model>(Func<TService, Func<Guid, Model, Model>> predicate) where Model : class
+        {
+            MakePostWithIdFunc<Model, Model, Model, Model>(predicate);
+            return this;
+        }
+        // no need for mapping ingoing and outgoing
         public ResponseBuilderWithIdEntityService<TService> OnPost<IngoingModel, OutgoingModel>(Func<TService, Func<IngoingModel, OutgoingModel>> predicate) where IngoingModel : class where OutgoingModel : class
         {
-            // no need for mapping ingoing and outgoing
             MakePostFunc<IngoingModel, IngoingModel, OutgoingModel, OutgoingModel>(predicate);
             return this;
         }
+        public ResponseBuilderWithIdEntityService<TService> OnPostWithId<IngoingModel, OutgoingModel>(Func<TService, Func<Guid, IngoingModel, OutgoingModel>> predicate) where IngoingModel : class where OutgoingModel : class
+        {
+            MakePostWithIdFunc<IngoingModel, IngoingModel, OutgoingModel, OutgoingModel>(predicate);
+            return this;
+        }
+        // no need for mapping ingoing
         public ResponseBuilderWithIdEntityService<TService> OnPost<IngoingModel, OutgoingServiceModel, OutgoingModel>(Func<TService, Func<IngoingModel, OutgoingServiceModel>> predicate) where IngoingModel : class where OutgoingModel : class where OutgoingServiceModel : class
         {
-            // no need for mapping ingoing
             MakePostFunc<IngoingModel, IngoingModel, OutgoingServiceModel, OutgoingModel>(predicate);
             return this;
         }
+        public ResponseBuilderWithIdEntityService<TService> OnPostWithId<IngoingModel, OutgoingServiceModel, OutgoingModel>(Func<TService, Func<Guid, IngoingModel, OutgoingServiceModel>> predicate) where IngoingModel : class where OutgoingModel : class where OutgoingServiceModel : class
+        {
+            MakePostWithIdFunc<IngoingModel, IngoingModel, OutgoingServiceModel, OutgoingModel>(predicate);
+            return this;
+        }
+        // all possible combination
         public ResponseBuilderWithIdEntityService<TService> OnPost<IngoingModel, IngoingServiceModel, OutgoingServiceModel, OutgoingModel>(Func<TService, Func<IngoingServiceModel, OutgoingServiceModel>> predicate) where IngoingModel : class where IngoingServiceModel : class where OutgoingModel : class where OutgoingServiceModel : class
         {
-            // all possible combination
             MakePostFunc<IngoingModel, IngoingServiceModel, OutgoingServiceModel, OutgoingModel>(predicate);
+            return this;
+        }
+        public ResponseBuilderWithIdEntityService<TService> OnPostWithId<IngoingModel, IngoingServiceModel, OutgoingServiceModel, OutgoingModel>(Func<TService, Func<Guid, IngoingServiceModel, OutgoingServiceModel>> predicate) where IngoingModel : class where IngoingServiceModel : class where OutgoingModel : class where OutgoingServiceModel : class
+        {
+            MakePostWithIdFunc<IngoingModel, IngoingServiceModel, OutgoingServiceModel, OutgoingModel>(predicate);
             return this;
         }
         #endregion
@@ -320,12 +345,17 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             MakePostFileFunc<Model, Model>(predicate);
             return this;
         }
+        public ResponseBuilderWithIdEntityService<TService> OnPostFileWithId<Model>(Func<TService, Func<Guid, string, string, long, Stream, Model>> predicate) where Model : class
+        {
+            MakePostFileWithIdFunc<Model, Model>(predicate);
+            return this;
+        }
         #endregion
 
         #region PUT
 
         // same model in and outgoing, no need for mapping ingoing and outgoing
-        public ResponseBuilderWithIdEntityService<TService> OnPutId<Model>(Func<TService, Func<Model, Model>> predicate)
+        public ResponseBuilderWithIdEntityService<TService> OnPut<Model>(Func<TService, Func<Model, Model>> predicate)
             where Model : class
         {
             MakePutFunc<Model, Model, Model, Model>(predicate);
@@ -456,6 +486,24 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
 
             };
         }
+        protected void MakePostWithIdFunc<IngoingModel, IngoingServiceModel, OutgoingServiceModel, OutgoingModel>(Func<TService, Func<Guid, OutgoingServiceModel>> predicate)
+           where IngoingModel : class
+           where IngoingServiceModel : class
+           where OutgoingServiceModel : class
+           where OutgoingModel : class
+        {
+            postWithIdFunc = async (TService service, HttpRequest req) =>
+            {
+                IngoingServiceModel createData = await GetRequestBody<IngoingServiceModel, IngoingModel>(req, unwrap);
+                var idGuid = GetId(req);
+
+                if (createData == null) throw new ArgumentNullException();
+                var resultCreated = predicate.Invoke(service).Invoke(idGuid);
+
+                return Respond<OutgoingServiceModel, OutgoingModel>(resultCreated, wrapout);
+
+            };
+        }
         protected void MakePostFunc<IngoingModel, IngoingServiceModel, OutgoingServiceModel, OutgoingModel>(Func<TService, Func<IngoingServiceModel, OutgoingServiceModel>> predicate)
             where IngoingModel : class
             where IngoingServiceModel : class
@@ -468,6 +516,24 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
 
                 if (createData == null) throw new ArgumentNullException();
                 var resultCreated = predicate.Invoke(service).Invoke(createData);
+
+                return Respond<OutgoingServiceModel, OutgoingModel>(resultCreated, wrapout);
+
+            };
+        }
+        protected void MakePostWithIdFunc<IngoingModel, IngoingServiceModel, OutgoingServiceModel, OutgoingModel>(Func<TService, Func<Guid, IngoingServiceModel, OutgoingServiceModel>> predicate)
+         where IngoingModel : class
+         where IngoingServiceModel : class
+         where OutgoingServiceModel : class
+         where OutgoingModel : class
+        {
+            postWithIdFunc = async (TService service, HttpRequest req) =>
+            {
+                IngoingServiceModel createData = await GetRequestBody<IngoingServiceModel, IngoingModel>(req, unwrap);
+                var idGuid = GetId(req);
+
+                if (createData == null) throw new ArgumentNullException();
+                var resultCreated = predicate.Invoke(service).Invoke(idGuid, createData);
 
                 return Respond<OutgoingServiceModel, OutgoingModel>(resultCreated, wrapout);
 
@@ -491,6 +557,29 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
 
                 //if (createData == null) throw new ArgumentNullException();
                 var resultCreated = predicate.Invoke(service).Invoke(file.FileName, file.ContentType, file.Length, file.OpenReadStream());
+
+                return Respond<OutgoingServiceModel, OutgoingModel>(resultCreated, wrapout);
+
+            };
+        }
+        protected void MakePostFileWithIdFunc<OutgoingServiceModel, OutgoingModel>(Func<TService, Func<Guid, string, string, long, Stream, OutgoingServiceModel>> predicate)
+           where OutgoingServiceModel : class
+           where OutgoingModel : class
+        {
+            postWithIdFunc = async (TService service, HttpRequest req) =>
+            {
+                //IngoingServiceModel createData = await GetRequestBody<IngoingServiceModel, IngoingModel>(req, unwrap);
+
+                var formdata = await req.ReadFormAsync();
+                var file = formdata.Files["file"];
+                var idGuid = GetId(req);
+                //return await ExecuteAsync(() => files.UploadAsync(file.FileName, file.ContentType, file.Length, file.OpenReadStream()).Result, req, log);
+
+                //var predicate = (s) => () =>
+                //       s.Upload(file.FileName, file.ContentType, file.Length, file.OpenReadStream());
+
+                //if (createData == null) throw new ArgumentNullException();
+                var resultCreated = predicate.Invoke(service).Invoke(idGuid, file.FileName, file.ContentType, file.Length, file.OpenReadStream());
 
                 return Respond<OutgoingServiceModel, OutgoingModel>(resultCreated, wrapout);
 
@@ -689,13 +778,17 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             MakePostFunc<ApiModel, ServiceModel, ServiceModel, ApiModel>(predicate);
             return this;
         }
+        public ResponseBuilderWithIdEntityServiceWithModels<ServiceModel, ApiModel, TService> OnPostWithId(Func<TService, Func<Guid, ServiceModel, ServiceModel>> predicate)
+        {
+            MakePostWithIdFunc<ApiModel, ServiceModel, ServiceModel, ApiModel>(predicate);
+            return this;
+        }
 
         public ResponseBuilderWithIdEntityServiceWithModels<ServiceModel, ApiModel, TService> OnPut(Func<TService, Func<ServiceModel, ServiceModel>> predicate)
         {
             MakePutFunc<ApiModel, ServiceModel, ServiceModel, ApiModel>(predicate);
             return this;
         }
-
         public ResponseBuilderWithIdEntityServiceWithModels<ServiceModel, ApiModel, TService> OnPutWithId(Func<TService, Func<Guid, ServiceModel, ServiceModel>> predicate)
         {
             MakePutWithIdFunc<ApiModel, ServiceModel, ServiceModel, ApiModel>(predicate);
