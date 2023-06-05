@@ -16,7 +16,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
     public class ResponseBuilderWithId
     {
         private readonly IServiceProvider provider;
-        private Action<HttpRequest, ILogger> contextCreateFunc;
+        private Func<HttpRequest, ILogger, Task> contextCreateFunc;
         private JsonSerializerSettings jsonSettings;
 
         public ResponseBuilderWithId(IServiceProvider provider)
@@ -65,10 +65,10 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             {
                 var existingCreate = contextCreateFunc;
                 // execute multiple context creation services
-                contextCreateFunc = (HttpRequest req, ILogger log) =>
+                contextCreateFunc = async (HttpRequest req, ILogger log)  =>
                 {
-                    existingCreate.Invoke(req, log);
-                    provider.GetService<C>().Create(req, log);
+                    await existingCreate.Invoke(req, log);
+                    await provider.GetService<C>().Create(req, log);
                 };
             }
 
@@ -108,9 +108,9 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
     {
         private readonly IServiceProvider provider;
         //private readonly bool usesMapping;
-        private readonly Action<HttpRequest, ILogger> contextCreateFunc;
+        private readonly Func<HttpRequest, ILogger, Task> contextCreateFunc;
         private readonly JsonSerializerSettings jsonSettings;
-        public ResponseBuilderWithIdEntity(IServiceProvider provider, Action<HttpRequest, ILogger> contextCreateFunc, JsonSerializerSettings jsonSettings)
+        public ResponseBuilderWithIdEntity(IServiceProvider provider, Func<HttpRequest, ILogger, Task> contextCreateFunc, JsonSerializerSettings jsonSettings)
         {
             this.provider = provider;
             //this.usesMapping = !(typeof(T).Equals(typeof(M)));
@@ -153,8 +153,8 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
     public class ResponseBuilderWithIdEntityInterfaceService<T, M, S> where S : class, ICRUDLServiceWithId<T> where M : class where T : class
     {
         private readonly ResponseBuilderWithIdEntityServiceWithModels<T, M, S> internalBuilder;
-        private readonly Action<HttpRequest, ILogger> contextCreateFunc;
-        public ResponseBuilderWithIdEntityInterfaceService(S service, Action<HttpRequest, ILogger> contextCreateFunc, IEntityMapper mapper, JsonSerializerSettings jsonSettings)
+        private readonly Func<HttpRequest, ILogger, Task> contextCreateFunc;
+        public ResponseBuilderWithIdEntityInterfaceService(S service, Func<HttpRequest, ILogger, Task> contextCreateFunc, IEntityMapper mapper, JsonSerializerSettings jsonSettings)
         {
             if (service == null) throw new ArgumentNullException(nameof(service));
             if (mapper == null) throw new ArgumentNullException(nameof(mapper));
@@ -172,11 +172,11 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
     public class ResponseBuilderWithIdEntityService<TService> : AbstractResponseHelpersNew where TService : class
     {
         private readonly TService service;
-        private readonly Action<HttpRequest, ILogger> contextCreateFunc;
+        private readonly Func<HttpRequest, ILogger, Task> contextCreateFunc;
 
         private bool unwrap = false;
         private bool wrapout = false;
-        public ResponseBuilderWithIdEntityService(TService service, Action<HttpRequest, ILogger> contextCreateFunc, IEntityMapper mapper, JsonSerializerSettings jsonSettings) : base(mapper, jsonSettings)
+        public ResponseBuilderWithIdEntityService(TService service, Func<HttpRequest, ILogger, Task> contextCreateFunc, IEntityMapper mapper, JsonSerializerSettings jsonSettings) : base(mapper, jsonSettings)
         {
             if (service == null) throw new ArgumentNullException(nameof(service));
             if (mapper == null) throw new ArgumentNullException(nameof(mapper));
@@ -662,7 +662,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         {
             log.LogInformation("ResponseBuilder handle function " + req.Method.ToUpper() + " " + typeof(TService).Name + "/" + typeof(TService).Name);
 
-            if (contextCreateFunc != null) contextCreateFunc.Invoke(req, log);
+            if (contextCreateFunc != null) await contextCreateFunc.Invoke(req, log);
 
             try
             {
@@ -723,7 +723,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
     {
 
 
-        public ResponseBuilderWithIdEntityServiceWithModels(TService service, Action<HttpRequest, ILogger> contextCreateFunc, IEntityMapper mapper, JsonSerializerSettings jsonSettings) : base(service, contextCreateFunc, mapper, jsonSettings)
+        public ResponseBuilderWithIdEntityServiceWithModels(TService service, Func<HttpRequest, ILogger, Task> contextCreateFunc, IEntityMapper mapper, JsonSerializerSettings jsonSettings) : base(service, contextCreateFunc, mapper, jsonSettings)
         {
 
         }

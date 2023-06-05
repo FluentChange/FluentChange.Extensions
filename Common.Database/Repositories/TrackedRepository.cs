@@ -127,7 +127,10 @@ namespace FluentChange.Extensions.Common.Database
             if (id == null || id == Guid.Empty) throw new ArgumentNullException("id");
 
             E entity = dbSet.Find(id);
-            Delete(entity);
+            if (entity != null)
+            {
+                Delete(entity);
+            }           
         }
         public virtual void Delete(E entity)
         {
@@ -139,7 +142,10 @@ namespace FluentChange.Extensions.Common.Database
             if (id == null || id == Guid.Empty) throw new ArgumentNullException(nameof(id));
 
             E entity = await dbSet.FindAsync(id);
-            await DeleteAsync(entity);
+            if (entity != null)
+            {
+                await DeleteAsync(entity);
+            }
         }
         public virtual async Task DeleteAsync(E entity)
         {
