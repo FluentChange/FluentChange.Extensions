@@ -4,23 +4,29 @@ namespace FluentChange.Extensions.Common.Database.Services
 {
     public class SpaceContextService
     {
-        public Guid? CurrentId { get; private set; }
+        private Guid? currentId { get; set; }
+        public Guid CurrentId { get
+            {
+                if (!currentId.HasValue) throw new ArgumentNullException();
+                return currentId.Value;
+            }
+        }
 
         public void Set(Guid spaceId)
         {
             if (spaceId != null && spaceId == Guid.Empty) throw new ArgumentNullException(nameof(spaceId));
 
-            CurrentId = spaceId;
+            currentId = spaceId;
         }
 
         public void EnsureExist()
         {
-            if (!CurrentId.HasValue || CurrentId.Value == Guid.Empty) throw new Exception("Space is not set. Try to set space id in SpaceContext service");
+            if (!currentId.HasValue || currentId.Value == Guid.Empty) throw new Exception("Space is not set. Try to set space id in SpaceContext service");
         }
 
         public void Clear()
         {
-            CurrentId = null;
+            currentId = null;
         }
     }
 }

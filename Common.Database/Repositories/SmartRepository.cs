@@ -24,8 +24,8 @@ namespace FluentChange.Extensions.Common.Database
         private static bool isIdEntity = typeof(IEntityWithId).IsAssignableFrom(eType);
         private static bool isTrackedEntity = typeof(ITrackedEntity).IsAssignableFrom(eType);
         private static bool isUserTrackedEntity = typeof(IUserTrackedEntity).IsAssignableFrom(eType);
-        private static bool iSpaceDependendEntity = typeof(ISpaceDependendEntity).IsAssignableFrom(eType);
-     
+        private static bool isSpaceDependendEntity = typeof(ISpaceDependendEntity).IsAssignableFrom(eType);
+
 
         public SmartRepository(D database, UserContextService userContext, SpaceContextService contextSpace, bool allowInsertWithNewId = false)
         {
@@ -41,6 +41,12 @@ namespace FluentChange.Extensions.Common.Database
         public virtual IQueryable<E> All()
         {
             return dbSet;
+        }
+
+        public IQueryable<E> AllFor(Guid spaceId)
+        {
+            CheckIfSpaceIdSupported();
+            return All().Where(e => ((ISpaceDependendEntity)e).SpaceId == spaceId);
         }
         public virtual E GetById(Guid id)
         {
@@ -64,7 +70,7 @@ namespace FluentChange.Extensions.Common.Database
             dbSet.Add(entity);
             database.SaveChanges();
         }
-            
+
 
         public virtual void InsertBulk(IEnumerable<E> entities)
         {
@@ -128,7 +134,7 @@ namespace FluentChange.Extensions.Common.Database
             database.SaveChanges();
         }
 
-      
+
         public virtual async Task UpdateAsync(E entity)
         {
             await UpdateSaveAsync(entity);
@@ -148,7 +154,7 @@ namespace FluentChange.Extensions.Common.Database
         {
             TrackDateUpdatedIfNeeded(entity);
             TrackUserUpdatedIfNeeded(entity);
-            CheckSpaceIfNeeded(entity);  
+            CheckSpaceIfNeededOnInsert(entity);
         }
 
         #endregion
@@ -247,7 +253,10 @@ namespace FluentChange.Extensions.Common.Database
         private void CheckIfIdSupported()
         {
             if (!isIdEntity) throw new Exception("Entity do not support id");
-
+        }
+        private void CheckIfSpaceIdSupported()
+        {
+            if (!isSpaceDependendEntity) throw new Exception("Entity do not support spaceId");
         }
         private void CheckForIdInsert(E entity)
         {
@@ -272,11 +281,11 @@ namespace FluentChange.Extensions.Common.Database
             {
                 contextUser.EnsureExist();
                 if (((IUserTrackedEntity)entity).CreatedById != Guid.Empty
-                    && ((IUserTrackedEntity)entity).CreatedById != contextUser.CurrentId.Value)
+                    && ((IUserTrackedEntity)entity).CreatedById != contextUser.CurrentId)
                 {
                     throw new ArgumentException("CreatedById should not be set or has to be same as current user");
                 }
-                ((IUserTrackedEntity)entity).CreatedById = contextUser.CurrentId.Value;
+                ((IUserTrackedEntity)entity).CreatedById = contextUser.CurrentId;
                 //((IUserTrackedEntity)entity).UpdatedUtc = userContext.CurrentUserId.Value;
             }
         }
@@ -293,39 +302,40 @@ namespace FluentChange.Extensions.Common.Database
             {
                 contextUser.EnsureExist();
                 if (((IUserTrackedEntity)entity).UpdatedById != Guid.Empty
-                    && ((IUserTrackedEntity)entity).UpdatedById != contextUser.CurrentId.Value)
+                    && ((IUserTrackedEntity)entity).UpdatedById != contextUser.CurrentId)
                 {
                     throw new ArgumentException("UpdatedById should not be set or has to be same as current user");
-                }               
-                ((IUserTrackedEntity)entity).UpdatedById = contextUser.CurrentId.Value;
+                }
+                ((IUserTrackedEntity)entity).UpdatedById = contextUser.CurrentId;
             }
         }
 
         private void TrackSpaceIfNeeded(E entity)
         {
-            if (iSpaceDependendEntity)
+            if (isSpaceDependendEntity)
             {
                 contextSpace.EnsureExist();
                 if (((ISpaceDependendEntity)entity).SpaceId != Guid.Empty
-                   && ((ISpaceDependendEntity)entity).SpaceId != contextSpace.CurrentId.Value)
+                   && ((ISpaceDependendEntity)entity).SpaceId != contextSpace.CurrentId)
                 {
                     throw new ArgumentException("SpaceId should not be set or has to be same as current space");
                 }
-                ((ISpaceDependendEntity)entity).SpaceId = contextSpace.CurrentId.Value;
+                ((ISpaceDependendEntity)entity).SpaceId = contextSpace.CurrentId;
             }
         }
-        private void CheckSpaceIfNeeded(E entity)
+        private void CheckSpaceIfNeededOnInsert(E entity)
         {
-            if (iSpaceDependendEntity)
+            if (isSpaceDependendEntity)
             {
                 contextSpace.EnsureExist();
                 if (((ISpaceDependendEntity)entity).SpaceId != Guid.Empty
-                   && ((ISpaceDependendEntity)entity).SpaceId != contextSpace.CurrentId.Value)
+                   && ((ISpaceDependendEntity)entity).SpaceId != contextSpace.CurrentId)
                 {
                     throw new ArgumentException("SpaceId should not be set or has to be same as current space");
-                }               
+                }
             }
         }
+
         #endregion
 
     }
