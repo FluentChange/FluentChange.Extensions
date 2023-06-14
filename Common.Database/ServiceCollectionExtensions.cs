@@ -10,6 +10,8 @@ namespace FluentChange.Extensions.Common.Database
     {
         public static void AddCommonDatabase(this IServiceCollection services)
         {
+            services.AddScoped<ContextService>();
+            services.AddScoped<SpaceContextService>();
             services.AddScoped<UserContextService>();
         }
     }

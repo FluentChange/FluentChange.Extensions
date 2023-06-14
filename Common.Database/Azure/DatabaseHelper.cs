@@ -25,11 +25,13 @@ namespace FluentChange.Common.Database.Azure
             var db = sqlServer.Databases.Get(dbName);
             if (db != null)
             {
-                Console.WriteLine("deleting exsting db " + dbName);
+                Console.WriteLine("deleting existing db " + dbName + serverName + " - started");
                 db.Delete();
+                Console.WriteLine("deleting existing db " + dbName + " - finished");
             }
-            Console.WriteLine("creating new db " + dbName);
+            Console.WriteLine("creating new db " + dbName + " - started");
             var database = sqlServer.Databases.Define(dbName).WithBasicEdition().Create();
+            Console.WriteLine("creating new db " + dbName + " - finished");
         }
     }
 }

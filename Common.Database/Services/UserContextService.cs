@@ -6,23 +6,37 @@ namespace FluentChange.Extensions.Common.Database.Services
 {
     public class UserContextService
     {
-        public Guid? CurrentUserId { get; private set; }
+        [Obsolete("Use CurrentId instead")]
+        public Guid? CurrentUserId => CurrentId;
+        public Guid? CurrentId { get; private set; }
 
         public void SetUser(Guid userId)
         {
-            if (userId == Guid.Empty) throw new ArgumentOutOfRangeException();
+            if (userId != null && userId == Guid.Empty) throw new ArgumentNullException(nameof(userId));
 
-            CurrentUserId = userId;
+            CurrentId = userId;
         }
 
+        [Obsolete("Use EnsureExist() instead")]
         public void EnsureUser()
         {
-            if (!CurrentUserId.HasValue || CurrentUserId.Value == Guid.Empty) throw new Exception("User is not set. Try to set user id in UserContext service");
+            EnsureExist();
         }
 
+        public void EnsureExist()
+        {
+            if (!CurrentId.HasValue || CurrentId.Value == Guid.Empty) throw new Exception("User is not set. Try to set user id in UserContext service");
+        }
+
+        public void Clear()
+        {
+            CurrentId = null;           
+        }
+
+        [Obsolete("Use Clear() instead")]
         public void ClearUser()
         {
-            CurrentUserId = null;
+            Clear();
         }
     }
 }
