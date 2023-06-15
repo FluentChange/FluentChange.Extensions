@@ -10,46 +10,46 @@ namespace FluentChange.Extensions.Common.Database.Repositories
 {
     public class UserTrackedRepository<E, D> : TrackedRepository<E, D>, IUserTrackedRepository<E> where E : AbstractUserTrackedEntity where D : DbContext
     {
-        protected UserContextService context;
+        protected UserContextService contextUser;
 
         public UserTrackedRepository(D database, UserContextService context) : base(database)
         {
-            this.context = context;
+            this.contextUser = context;
         }
 
         public override void Insert(E entity)
         {
-            context.EnsureUser();
-            entity.CreatedById = context.CurrentUserId.Value;
+            contextUser.EnsureExist();
+            entity.CreatedById = contextUser.CurrentId;
             base.Insert(entity);
         }
         public override async Task InsertAsync(E entity)
         {
-            context.EnsureUser();
-            entity.CreatedById = context.CurrentUserId.Value;
+            contextUser.EnsureExist();
+            entity.CreatedById = contextUser.CurrentId;
             await base.InsertAsync(entity);
         }
 
         public override void InsertBulk(IEnumerable<E> entities)
         {
-            context.EnsureUser();
+            contextUser.EnsureExist();
             if (entities == null) throw new ArgumentNullException("entities");
 
             foreach (var entity in entities)
             {
-                entity.CreatedById = context.CurrentUserId.Value;
+                entity.CreatedById = contextUser.CurrentId;
             }
             base.InsertBulk(entities);
 
         }
         public override async Task InsertBulkAsync(IEnumerable<E> entities)
         {
-            context.EnsureUser();
+            contextUser.EnsureExist();
             if (entities == null) throw new ArgumentNullException("entities");
 
             foreach (var entity in entities)
             {
-                entity.CreatedById = context.CurrentUserId.Value;
+                entity.CreatedById = contextUser.CurrentId;
             }
             await base.InsertBulkAsync(entities);
         }
@@ -57,17 +57,17 @@ namespace FluentChange.Extensions.Common.Database.Repositories
 
         public override void UpdateSave(E entity)
         {
-            context.EnsureUser();
-            if (entity.UpdatedById != Guid.Empty && entity.UpdatedById != context.CurrentUserId.Value) throw new ArgumentException("UserId should not be set or same as current user");
-            entity.UpdatedById = context.CurrentUserId.Value;
+            contextUser.EnsureExist();
+            if (entity.UpdatedById != Guid.Empty && entity.UpdatedById != contextUser.CurrentId) throw new ArgumentException("UserId should not be set or same as current user");
+            entity.UpdatedById = contextUser.CurrentId;
             base.UpdateSave(entity);
         }
 
         public override async Task UpdateSaveAsync(E entity)
         {
-            context.EnsureUser();
-            if (entity.UpdatedById != Guid.Empty && entity.UpdatedById != context.CurrentUserId.Value) throw new ArgumentException("UserId should not be set or same as current user");
-            entity.UpdatedById = context.CurrentUserId.Value;
+            contextUser.EnsureExist();
+            if (entity.UpdatedById != Guid.Empty && entity.UpdatedById != contextUser.CurrentId) throw new ArgumentException("UserId should not be set or same as current user");
+            entity.UpdatedById = contextUser.CurrentId;
             await base.UpdateSaveAsync(entity);
         }
 

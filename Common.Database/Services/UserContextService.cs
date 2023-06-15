@@ -18,7 +18,7 @@ namespace FluentChange.Extensions.Common.Database.Services
             }
         }
 
-        public void SetUser(Guid userId)
+        public void Set(Guid userId)
         {
             if (userId != null && userId == Guid.Empty) throw new ArgumentNullException(nameof(userId));
 

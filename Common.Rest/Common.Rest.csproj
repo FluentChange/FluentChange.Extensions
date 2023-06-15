@@ -19,13 +19,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentChange.Extensions.System" Version="0.0.8" />
     <PackageReference Include="MimeKit" Version="3.2.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Common.Models\Common.Models.csproj" />
+    <ProjectReference Include="..\System\System.csproj" />
   </ItemGroup>
 
 </Project>

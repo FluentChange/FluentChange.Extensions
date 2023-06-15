@@ -25,7 +25,7 @@ namespace FluentChange.Extensions.Common.Database.Services
 
         public void SetUser(Guid userId)
         {
-            userContextService.SetUser(userId);
+            userContextService.Set(userId);
             IsAuth = true;
         }
         public void SetClient(Guid clientId)
