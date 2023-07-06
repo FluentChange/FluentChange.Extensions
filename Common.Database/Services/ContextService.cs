@@ -1,90 +1,42 @@
-﻿using FluentChange.Extensions.Common.Database.Services;
-using System;
+﻿using System;
 
 namespace FluentChange.Extensions.Common.Database.Services
 {
 
     public class ContextService
     {
-        private readonly UserContextService userContextService;
-        private readonly SpaceContextService spaceContextService;
-        public bool IsAuth { get; private set; }
-        public Guid? CurrentUserId => userContextService.CurrentId;
+        private readonly TenantContextService tenantContext;
+        private readonly UserContextService userContext;
+        private readonly ClientContextService clientContext;
+        private readonly SpaceContextService spaceContext;
 
-        public Guid? CurrentClientId { get; private set; }
-        public Guid? CurrentSpaceId => spaceContextService.CurrentId;
+        public Guid? CurrentTenantId => tenantContext.CurrentId;
+        public Guid? CurrentUserId => userContext.CurrentId;
+        public Guid? CurrentClientId => clientContext.CurrentId;
+        public Guid? CurrentSpaceId => spaceContext.CurrentId;
 
-        public string CurrentClientSlug { get; private set; }
-        public string CurrentSpaceSlug { get; private set; }
-
-        public ContextService(UserContextService userContextService, SpaceContextService spaceContextService)
+        public ContextService(UserContextService userContext, TenantContextService tenantContext, ClientContextService clientContext, SpaceContextService spaceContext)
         {
-            this.userContextService = userContextService;
-            this.spaceContextService = spaceContextService;
-        }
-
-        public void SetUser(Guid userId)
-        {
-            userContextService.Set(userId);
-            IsAuth = true;
-        }
-        public void SetClient(Guid clientId)
-        {
-            if (clientId != null && clientId != Guid.Empty)
-            {
-                CurrentClientId = clientId;
-            }
-            else
-            {
-                throw new ArgumentNullException(nameof(clientId));
-            }
-        }
-        public void SetClientSlug(string slug)
-        {
-            if (!String.IsNullOrEmpty(slug))
-            {
-                CurrentClientSlug = slug;
-            }
-            else
-            {
-                throw new ArgumentNullException(nameof(slug));
-            }
-        }
-        public void SetSpace(Guid spaceId)
-        {
-            spaceContextService.Set(spaceId);
-        }
-        public void SetSpaceSlug(string slug)
-        {
-            if (!String.IsNullOrEmpty(slug))
-            {
-                CurrentSpaceSlug = slug;
-            }
-            else
-            {
-                throw new ArgumentNullException(nameof(slug));
-            }
+            this.userContext = userContext;
+            this.spaceContext = spaceContext;
+            this.tenantContext = tenantContext;
+            this.clientContext = clientContext;
         }
 
-        public void EnsureUser()
-        {
-            userContextService.EnsureExist();
-        }
-        public void EnsureClient()
-        {
-            if (!CurrentClientId.HasValue || CurrentClientId.Value == Guid.Empty) throw new Exception("please set client id");
-            if (String.IsNullOrEmpty(CurrentClientSlug)) throw new Exception("please set client slug");
-        }
-        public void EnsureSpace()
-        {
-            spaceContextService.EnsureExist();
-            if (String.IsNullOrEmpty(CurrentSpaceSlug)) throw new Exception("please set space slug");
-        }
+        public void SetTenant(Guid userId) => tenantContext.Set(userId);
+        public void SetUser(Guid userId) => userContext.Set(userId);
+        public void SetClient(Guid clientId) => clientContext.Set(clientId);
+        public void SetSpace(Guid spaceId) => spaceContext.Set(spaceId);
 
-        public void ClearUser()
-        {
-            userContextService.Clear();
-            IsAuth = false;   
-        }
+        public void EnsureTenant() => tenantContext.EnsureExist();
+        public void EnsureUser() => userContext.EnsureExist();
+        public void EnsureClient()=> clientContext.EnsureExist();
+        public void EnsureSpace()=> spaceContext.EnsureExist();
+
+        public void ClearTenant() => tenantContext.Clear();
+        public void ClearUser() => userContext.Clear();
+        public void ClearClient() => clientContext.Clear();
+        public void ClearSpace() => spaceContext.Clear();
+
     }
 }

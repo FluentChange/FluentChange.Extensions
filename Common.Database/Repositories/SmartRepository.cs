@@ -277,7 +277,7 @@ namespace FluentChange.Extensions.Common.Database
         }
         private void TrackUserCreatedIfNeeded(E entity)
         {
-            if (isTrackedEntity)
+            if (isUserTrackedEntity)
             {
                 contextUser.EnsureExist();
                 if (((IUserTrackedEntity)entity).CreatedById != Guid.Empty
@@ -291,7 +291,7 @@ namespace FluentChange.Extensions.Common.Database
         }
         private void TrackDateUpdatedIfNeeded(E entity)
         {
-            if (isUserTrackedEntity)
+            if (isTrackedEntity)
             {
                 ((ITrackedEntity)entity).UpdatedUtc = DateTime.UtcNow;
             }
