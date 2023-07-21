@@ -41,7 +41,7 @@ namespace FluentChange.Extensions.Common.Database
         public virtual IQueryable<E> All()
         {
             return dbSet;
-        }
+        }      
 
         public IQueryable<E> AllFor(Guid spaceId)
         {
@@ -70,7 +70,7 @@ namespace FluentChange.Extensions.Common.Database
             dbSet.Add(entity);
             database.SaveChanges();
         }
-
+        
 
         public virtual void InsertBulk(IEnumerable<E> entities)
         {
@@ -78,9 +78,10 @@ namespace FluentChange.Extensions.Common.Database
             foreach (var entity in entities)
             {
                 InsertCheckAndTrack(entity);
-                //    dbSet.Add(entity);
+                dbSet.Add(entity);
             }
-            database.BulkInsert(entities.ToList());
+            //FixIdgenerationBulk(entities);
+            //database.BulkInsert(entities.ToList());
             database.SaveChanges();
         }
         public virtual async Task InsertAsync(E entity)
@@ -99,11 +100,33 @@ namespace FluentChange.Extensions.Common.Database
             foreach (var entity in entities)
             {
                 InsertCheckAndTrack(entity);
-                //    await dbSet.AddAsync(entity);
+                await dbSet.AddAsync(entity);
             }
-            await database.BulkInsertAsync(entities.ToList());
+            //FixIdgenerationBulk(entities);
+            //await database.BulkInsertAsync(entities.ToList());
             await database.SaveChangesAsync();
 
+        }
+
+        private static void FixIdgenerationBulk(IEnumerable<E> entities)
+        {
+            foreach (var entity in entities)
+            {
+                FixIdGenerationBulk(entity);
+            }
+        }
+
+        private static void FixIdGenerationBulk(E entity)
+        {
+            if (isIdEntity)
+            {
+
+                if (((IEntityWithId)entity).Id != Guid.Empty)
+                {
+                    ((IEntityWithId)entity).Id = Guid.NewGuid();
+                }
+
+            }
         }
 
         private void InsertCheckAndTrack(E entity)
@@ -122,6 +145,8 @@ namespace FluentChange.Extensions.Common.Database
         {
             UpdateSave(entity);
         }
+
+      
         public virtual void UpdateSave(E entity)
         {
             // for direct calls i.e. in unit tests without rest we need to detach 
@@ -134,6 +159,24 @@ namespace FluentChange.Extensions.Common.Database
             database.SaveChanges();
         }
 
+        public virtual void UpdateBulkSave(IEnumerable<E> entities, bool detach = true)
+        {
+            // for direct calls i.e. in unit tests without rest we need to detach 
+            foreach(var entity in entities)
+            {
+                //if (detach) Detach(entity);
+
+                if (entity == null) throw new ArgumentNullException("entity");
+                UpdateCheckAndTrack(entity);            
+                dbSet.Update(entity);
+                //database.Attach(entity).State = EntityState.Modified;
+            }
+      
+           
+            //dbSet.BatchUpdate(entities);
+            database.SaveChanges();
+        }
+
 
         public virtual async Task UpdateAsync(E entity)
         {
@@ -142,12 +185,13 @@ namespace FluentChange.Extensions.Common.Database
         public virtual async Task UpdateSaveAsync(E entity)
         {
             // for direct calls i.e. in unit tests without rest we need to detach 
-            Detach(entity);
+            //Detach(entity);
 
             if (entity == null) throw new ArgumentNullException("entity");
             UpdateCheckAndTrack(entity);
             //database.Attach(entity).State = EntityState.Modified;
             var result = dbSet.Update(entity);
+           
             await database.SaveChangesAsync();
         }
         private void UpdateCheckAndTrack(E entity)
