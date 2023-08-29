@@ -48,6 +48,13 @@ namespace FluentChange.Extensions.Common.Database
             CheckIfSpaceIdSupported();
             return All().Where(e => ((ISpaceDependendEntity)e).SpaceId == spaceId);
         }
+
+        public IQueryable<E> AllForCurrentSpace()
+        {
+            contextSpace.EnsureExist();           
+            return AllFor(contextSpace.CurrentId);
+        }
+
         public virtual E GetById(Guid id)
         {
             CheckIfIdSupported();
