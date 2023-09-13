@@ -1,13 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <Authors>Frank Mühlschlegel</Authors>
     <Company>Fluent Change</Company>
     <Product>Common Rest Extension</Product>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Version>0.0.42</Version>
+    <Version>0.1.1</Version>
     <Description>Common classes and models for rest and json api</Description>
     <PackageTags>Common Rest Json Reponse Request Client Api</PackageTags>
     <PackageProjectUrl>https://github.com/FluentChange/FluentChange.Extensions/tree/master/Common.Rest</PackageProjectUrl>
@@ -19,7 +19,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MimeKit" Version="3.2.0" />
+    <PackageReference Include="MimeKit" Version="4.2.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 

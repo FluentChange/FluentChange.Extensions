@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <Authors>Frank Mühlschlegel</Authors>
     <Company>Fluent Change</Company>
     <Product>System Extensions</Product>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Version>0.0.8</Version>
+    <Version>0.1.1</Version>
     <Description>Extensions to the System class of .NET Core</Description>
     <PackageTags>System Helpers</PackageTags>
     <PackageProjectUrl>https://github.com/FluentChange/FluentChange.Extensions/tree/master/System</PackageProjectUrl>

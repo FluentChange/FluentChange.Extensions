@@ -124,7 +124,7 @@ namespace FluentChange.Extensions.Common.Database
 
         public virtual void Delete(Guid id)
         {
-            if (id == null || id == Guid.Empty) throw new ArgumentNullException("id");
+            if (id == Guid.Empty) throw new ArgumentNullException("id");
 
             E entity = dbSet.Find(id);
             if (entity != null)

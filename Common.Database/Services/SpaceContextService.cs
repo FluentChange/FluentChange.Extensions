@@ -18,7 +18,7 @@ namespace FluentChange.Extensions.Common.Database.Services
 
         public void Set(Guid spaceId)
         {
-            if (spaceId != null && spaceId == Guid.Empty) throw new ArgumentNullException(nameof(spaceId));
+            if (spaceId == Guid.Empty) throw new ArgumentNullException(nameof(spaceId));
 
             currentId = spaceId;
         }
