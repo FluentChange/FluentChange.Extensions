@@ -1,32 +1,36 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <Authors>Frank Mühlschlegel</Authors>
-    <Company>Fluent Change</Company>
-    <Product>Azure Functions Extension</Product>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Version>0.1.1</Version>
-    <Description>Azure functions extension for simple CRUD + List functions following the DRY principle.</Description>
-    <PackageTags>Azure Functions CRUD List DRY</PackageTags>
-    <PackageProjectUrl>https://github.com/FluentChange/FluentChange.Extensions/tree/master/AzureFunctions</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/FluentChange/FluentChange.Extensions</RepositoryUrl>
-    <RepositoryType>GitHub</RepositoryType>
-    <PackageId>FluentChange.Extensions.Azure.Functions</PackageId>
-    <AssemblyName>FluentChange.Extensions.Azure.Functions</AssemblyName>
-    <RootNamespace>FluentChange.Extensions.Azure.Functions</RootNamespace>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Azure.WebJobs" Version="3.0.37" />
-    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Http" Version="3.2.0" />
-    <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.1.0" />
-  </ItemGroup>
-  <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Common.Rest\Common.Rest.csproj" />
-  </ItemGroup>
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<Authors>Frank Mühlschlegel</Authors>
+		<Company>Fluent Change</Company>
+		<Product>Azure Functions Extension</Product>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+		<Version>0.1.1</Version>
+		<Description>Azure functions extension for simple CRUD + List functions following the DRY principle.</Description>
+		<PackageTags>Azure Functions CRUD List DRY</PackageTags>
+		<PackageProjectUrl>https://github.com/FluentChange/FluentChange.Extensions/tree/master/AzureFunctions</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/FluentChange/FluentChange.Extensions</RepositoryUrl>
+		<RepositoryType>GitHub</RepositoryType>
+		<PackageId>FluentChange.Extensions.Azure.Functions</PackageId>
+		<AssemblyName>FluentChange.Extensions.Azure.Functions</AssemblyName>
+		<RootNamespace>FluentChange.Extensions.Azure.Functions</RootNamespace>
+	</PropertyGroup>
+	<ItemGroup>
+
+		<PackageReference Include="Microsoft.Azure.WebJobs" Version="3.0.32" />
+		<PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Http" Version="3.2.0" />
+		<PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.1.0" />
+
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.2.0" />
+	</ItemGroup>
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Common.Rest\Common.Rest.csproj" />
+	</ItemGroup>
 
 </Project>
