@@ -65,7 +65,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             {
                 var existingCreate = contextCreateFunc;
                 // execute multiple context creation services
-                contextCreateFunc = async (HttpRequest req, ILogger log)  =>
+                contextCreateFunc = async (HttpRequest req, ILogger log) =>
                 {
                     await existingCreate.Invoke(req, log);
                     await provider.GetService<C>().Create(req, log);

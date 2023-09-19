@@ -106,7 +106,7 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
                 services.AddSingleton<IConfigurationRoot>(configuration);
                 services.AddSingleton<IConfiguration>(configuration);
             }
-            
+
             services.AddLogging();
 
             var dummyHostBuilder = new DummyFunctionsHostBuilder(services);
@@ -194,10 +194,10 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
             var routeValues = new Dictionary<string, string>();
             route = ReplaceParams(route, parameters, out routeValues);
             var dummyHttpRequest = await CreateHttpRequest(method, route, content);
-            
+
 
             // ADD Routevalues
-            foreach(var entry in routeValues)
+            foreach (var entry in routeValues)
             {
                 dummyHttpRequest.RouteValues.Add(entry.Key, entry.Value);
             }
@@ -227,14 +227,14 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
                         {
                             throw new Exception("paramter missmatch");
                         }
-                     
+
                     }
                     else
                     {
                         functionParameters.Add(null);
                     }
                 }
-                else 
+                else
                 {
                     if (onlyOneComplexClassType) throw new Exception("only one complex type as parameter binding ins possible");
                     onlyOneComplexClassType = true;
@@ -262,11 +262,11 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
                 var httpContent = SerializeContentIfNeeded(content);
                 var stream = await httpContent.ReadAsStreamAsync();
                 dummyHttpRequest.Body = stream;
-                foreach(var header in httpContent.Headers)
+                foreach (var header in httpContent.Headers)
                 {
                     var sv = new StringValues(header.Value.ToArray());
                     dummyHttpRequest.Headers.Add(header.Key, sv);
-                }            
+                }
             }
 
             return dummyHttpRequest;

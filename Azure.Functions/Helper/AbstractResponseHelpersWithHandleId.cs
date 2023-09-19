@@ -1,7 +1,5 @@
-﻿using FluentChange.Extensions.Azure.Functions.Interfaces;
-using FluentChange.Extensions.Common.Models.Rest;
+﻿using FluentChange.Extensions.Common.Models.Rest;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -9,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using SystemNet = System.Net;
 

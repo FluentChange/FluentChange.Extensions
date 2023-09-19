@@ -2,7 +2,6 @@
 using System.Net;
 using System.Net.Http;
 using System.Text;
-using FluentChange.Extensions.Common.Models.Rest;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.IO;
