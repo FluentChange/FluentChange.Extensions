@@ -59,12 +59,10 @@ namespace FluentChange.Extensions.Common.Database
 
         void Insert(T entity);
         Task InsertAsync(T entity);
-        void InsertBulk(IEnumerable<T> entity);
+        void InsertBulk(IEnumerable<T> entity, bool allowInsertId = false);
         Task InsertBulkAsync(IEnumerable<T> entity);
 
-        [Obsolete("use UpdateSave")]
         void Update(T entity);
-        [Obsolete("use UpdateuSaveAsync")]
         Task UpdateAsync(T entity);
 
         void UpdateSave(T entity);

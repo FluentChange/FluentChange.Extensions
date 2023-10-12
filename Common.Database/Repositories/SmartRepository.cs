@@ -19,7 +19,7 @@ namespace FluentChange.Extensions.Common.Database
         private SpaceContextService contextSpace;
 
         string errorMessage = string.Empty;
-        private bool allowInsertWithNewId = false;
+        private bool generalAllowInsertWithNewId = false;
         private static Type eType = typeof(E);
         private static bool isIdEntity = typeof(IEntityWithId).IsAssignableFrom(eType);
         private static bool isTrackedEntity = typeof(ITrackedEntity).IsAssignableFrom(eType);
@@ -31,7 +31,7 @@ namespace FluentChange.Extensions.Common.Database
         {
             this.database = database;
             dbSet = database.Set<E>();
-            this.allowInsertWithNewId = allowInsertWithNewId;
+            this.generalAllowInsertWithNewId = allowInsertWithNewId;
             this.contextUser = userContext;
             this.contextSpace = contextSpace;
         }
@@ -79,12 +79,12 @@ namespace FluentChange.Extensions.Common.Database
         }
         
 
-        public virtual void InsertBulk(IEnumerable<E> entities)
+        public virtual void InsertBulk(IEnumerable<E> entities, bool allowInsertId = false)
         {
             if (entities == null) throw new ArgumentNullException("entities");
             foreach (var entity in entities)
             {
-                InsertCheckAndTrack(entity);
+                InsertCheckAndTrack(entity, allowInsertId);
                 dbSet.Add(entity);
             }
             //FixIdgenerationBulk(entities);
@@ -136,9 +136,9 @@ namespace FluentChange.Extensions.Common.Database
             }
         }
 
-        private void InsertCheckAndTrack(E entity)
+        private void InsertCheckAndTrack(E entity, bool allowInsertId = false)
         {
-            CheckForIdInsert(entity);
+            CheckForIdInsert(entity, allowInsertId);
             TrackDateCreatedIfNeeded(entity);
             TrackUserCreatedIfNeeded(entity);
             TrackSpaceIfNeeded(entity);
@@ -150,19 +150,19 @@ namespace FluentChange.Extensions.Common.Database
 
         public virtual void Update(E entity)
         {
-            UpdateSave(entity);
-        }
-
-      
-        public virtual void UpdateSave(E entity)
-        {
             // for direct calls i.e. in unit tests without rest we need to detach 
             Detach(entity);
 
             if (entity == null) throw new ArgumentNullException("entity");
             UpdateCheckAndTrack(entity);
             //database.Attach(entity).State = EntityState.Modified;
-            var result = dbSet.Update(entity);
+            var result = dbSet.Update(entity);            
+        }
+
+      
+        public virtual void UpdateSave(E entity)
+        {
+            Update(entity);
             database.SaveChanges();
         }
 
@@ -186,19 +186,18 @@ namespace FluentChange.Extensions.Common.Database
 
 
         public virtual async Task UpdateAsync(E entity)
-        {
-            await UpdateSaveAsync(entity);
-        }
-        public virtual async Task UpdateSaveAsync(E entity)
-        {
-            // for direct calls i.e. in unit tests without rest we need to detach 
+        {  // for direct calls i.e. in unit tests without rest we need to detach 
             //Detach(entity);
 
             if (entity == null) throw new ArgumentNullException("entity");
             UpdateCheckAndTrack(entity);
             //database.Attach(entity).State = EntityState.Modified;
             var result = dbSet.Update(entity);
-           
+          
+        }
+        public virtual async Task UpdateSaveAsync(E entity)
+        {
+            await UpdateAsync(entity);
             await database.SaveChangesAsync();
         }
         private void UpdateCheckAndTrack(E entity)
@@ -231,7 +230,7 @@ namespace FluentChange.Extensions.Common.Database
         public virtual async Task DeleteAsync(Guid id)
         {
             CheckIfIdSupported();
-            if (id == null || id == Guid.Empty) throw new ArgumentNullException(nameof(id));
+            if (id == Guid.Empty) throw new ArgumentNullException(nameof(id));
 
             E entity = await dbSet.FindAsync(id);
             if (entity != null)
@@ -261,13 +260,13 @@ namespace FluentChange.Extensions.Common.Database
         public virtual bool Exist(Guid id)
         {
             CheckIfIdSupported();
-            if (id == null || id == Guid.Empty) throw new ArgumentNullException("id");
+            if (id == Guid.Empty) throw new ArgumentNullException("id");
             return dbSet.Any(e => ((IEntityWithId)e).Id == id);
         }
         public virtual async Task<bool> ExistAsync(Guid id)
         {
             CheckIfIdSupported();
-            if (id == null || id == Guid.Empty) throw new ArgumentNullException("id");
+            if (id == Guid.Empty) throw new ArgumentNullException("id");
             return await dbSet.AnyAsync(e => ((IEntityWithId)e).Id == id);
         }
 
@@ -309,11 +308,11 @@ namespace FluentChange.Extensions.Common.Database
         {
             if (!isSpaceDependendEntity) throw new Exception("Entity do not support spaceId");
         }
-        private void CheckForIdInsert(E entity)
+        private void CheckForIdInsert(E entity, bool allowInsertId = false)
         {
             if (isIdEntity)
             {
-                if (!allowInsertWithNewId && ((IEntityWithId)entity).Id != Guid.Empty) throw new Exception("Can not add existing entity.");
+                if (!allowInsertId && !generalAllowInsertWithNewId && ((IEntityWithId)entity).Id != Guid.Empty) throw new Exception("Can not add existing entity.");
             }
         }
 

@@ -139,7 +139,7 @@ namespace FluentChange.Extensions.Common.Database
         }
         public virtual async Task DeleteAsync(Guid id)
         {
-            if (id == null || id == Guid.Empty) throw new ArgumentNullException(nameof(id));
+            if (id == Guid.Empty) throw new ArgumentNullException(nameof(id));
 
             E entity = await dbSet.FindAsync(id);
             if (entity != null)
@@ -165,12 +165,12 @@ namespace FluentChange.Extensions.Common.Database
 
         public virtual bool Exist(Guid id)
         {
-            if (id == null || id == Guid.Empty) throw new ArgumentNullException("id");
+            if (id == Guid.Empty) throw new ArgumentNullException("id");
             return dbSet.Any(e => e.Id == id);
         }
         public virtual async Task<bool> ExistAsync(Guid id)
         {
-            if (id == null || id == Guid.Empty) throw new ArgumentNullException("id");
+            if (id == Guid.Empty) throw new ArgumentNullException("id");
             return await dbSet.AnyAsync(e => e.Id == id);
         }
 
