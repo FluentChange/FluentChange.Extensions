@@ -24,34 +24,20 @@ namespace FluentChange.Extensions.Common.Rest
         public async Task<T> Get<T>(string route, Dictionary<string, object> parameters = null)
         {
             var response = await GetImplementation(route, parameters);
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                var data = await response.Content.ReadAsStringAsync();
-                var result = JsonConvert.DeserializeObject<T>(data);
-                return result;
-            }
-            else
-            {
-                throw await HandleError(response);
-            }
+            return await HandleContentOrError<T>(response);
         }
+
+       
 
         protected abstract Task<HttpResponseMessage> PostImplementation(string route, object content, Dictionary<string, object> parameters);
         protected async Task<T> PostInternal<T>(string route, object content, Dictionary<string, object> parameters = null)
         {
             var response = await PostImplementation(route, content, parameters);
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                var data = await response.Content.ReadAsStringAsync();
-                var result = JsonConvert.DeserializeObject<T>(data);
-
-                return result;
-            }
-            else
-            {
-                throw await HandleError(response);
-            }
+            return await HandleContentOrError<T>(response);
         }
+
+
+
         public async Task<T> Post<T>(string route, object content, Dictionary<string, object> parameters = null)
         {
             var response = await PostInternal<T>(route, content, parameters);
@@ -73,34 +59,14 @@ namespace FluentChange.Extensions.Common.Rest
         public async Task<T> Put<T>(string route, object requestBody, Dictionary<string, object> parameters = null)
         {
             var response = await PutImplementation(route, requestBody, parameters);
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                var data = await response.Content.ReadAsStringAsync();
-                var result = JsonConvert.DeserializeObject<T>(data);
-
-                return result;
-            }
-            else
-            {
-                throw await HandleError(response);
-            }
+            return await HandleContentOrError<T>(response);
         }
 
         protected abstract Task<HttpResponseMessage> DeleteImplementation(string route, Dictionary<string, object> parameters);
         public async Task<T> Delete<T>(string route, Dictionary<string, object> parameters = null)
         {
             var response = await DeleteImplementation(route, parameters);
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                var data = await response.Content.ReadAsStringAsync();
-                var result = JsonConvert.DeserializeObject<T>(data);
-
-                return result;
-            }
-            else
-            {
-                throw await HandleError(response);
-            }
+            return await HandleContentOrError<T>(response);
         }
 
         protected static HttpContent SerializeContentIfNeeded(object requestBody)
@@ -126,7 +92,7 @@ namespace FluentChange.Extensions.Common.Rest
         }
 
 
-        // HHEADER stuff
+        // HEADER stuff
         public abstract bool ExistHeader(string key);
         public abstract void SetHeader(string key, string value);
         public abstract void RemoveHeader(string key);
@@ -151,10 +117,28 @@ namespace FluentChange.Extensions.Common.Rest
 
         // HELPER
 
+        private async Task<T> HandleContentOrError<T>(HttpResponseMessage response)
+        {
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                return await HandleContent<T>(response);
+            }
+            else
+            {
+                throw await HandleError(response);
+            }
+        }
+        private static async Task<T> HandleContent<T>(HttpResponseMessage response)
+        {
+            var data = await response.Content.ReadAsStringAsync();
+            var result = JsonConvert.DeserializeObject<T>(data);
+
+            return result;
+        }
         protected async Task<Exception> HandleError(HttpResponseMessage response)
         {
             var message = response.ReasonPhrase + " (" + ((int)response.StatusCode) + ")" + Environment.NewLine;
-            var exception = new Exception(message);
+            var exceptionData = new Dictionary<string, string>();
 
             if (response.Content != null)
             {
@@ -175,19 +159,23 @@ namespace FluentChange.Extensions.Common.Rest
                     var i = 1;
                     foreach (var error in result.Errors)
                     {
-                        exception.Data.Add("Error " + i, error.FullMessage);
+                        exceptionData.Add("Error " + i, error.FullMessage);
                         i++;
                     }
 
                 }
                 catch (Exception ex)
                 {
-                    exception.Data.Add("Reading Response Content", ex.ToString());
+                    exceptionData.Add("Reading Response Content", ex.ToString());
                 }
 
 
             }
-
+            var exception = new Exception(message);
+            foreach (var data in exceptionData)
+            {
+                exception.Data.Add(data.Key, data.Value);
+            }
             return exception;
         }
 

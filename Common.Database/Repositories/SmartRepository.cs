@@ -41,7 +41,7 @@ namespace FluentChange.Extensions.Common.Database
         public virtual IQueryable<E> All()
         {
             return dbSet;
-        }      
+        }
 
         public IQueryable<E> AllFor(Guid spaceId)
         {
@@ -51,7 +51,7 @@ namespace FluentChange.Extensions.Common.Database
 
         public IQueryable<E> AllForCurrentSpace()
         {
-            contextSpace.EnsureExist();           
+            contextSpace.EnsureExist();
             return AllFor(contextSpace.CurrentId);
         }
 
@@ -77,19 +77,22 @@ namespace FluentChange.Extensions.Common.Database
             dbSet.Add(entity);
             database.SaveChanges();
         }
-        
 
-        public virtual void InsertBulk(IEnumerable<E> entities, bool allowInsertId = false)
+
+        public virtual void InsertBulk(IEnumerable<E> entities, bool disableChecks = false)
         {
             if (entities == null) throw new ArgumentNullException("entities");
+            //if (entities != null && entities.Count() > 0)
+            //{
             foreach (var entity in entities)
             {
-                InsertCheckAndTrack(entity, allowInsertId);
+                InsertCheckAndTrack(entity, disableChecks);
                 dbSet.Add(entity);
             }
             //FixIdgenerationBulk(entities);
             //database.BulkInsert(entities.ToList());
             database.SaveChanges();
+            //}
         }
         public virtual async Task InsertAsync(E entity)
         {
@@ -136,12 +139,15 @@ namespace FluentChange.Extensions.Common.Database
             }
         }
 
-        private void InsertCheckAndTrack(E entity, bool allowInsertId = false)
+        private void InsertCheckAndTrack(E entity, bool disableChecks = false)
         {
-            CheckForIdInsert(entity, allowInsertId);
-            TrackDateCreatedIfNeeded(entity);
-            TrackUserCreatedIfNeeded(entity);
-            TrackSpaceIfNeeded(entity);
+            if (!disableChecks)
+            {
+                CheckForIdInsert(entity);
+                TrackDateCreatedIfNeeded(entity);
+                TrackUserCreatedIfNeeded(entity);
+                TrackSpaceIfNeeded(entity);
+            }
         }
 
         #endregion
@@ -156,10 +162,10 @@ namespace FluentChange.Extensions.Common.Database
             if (entity == null) throw new ArgumentNullException("entity");
             UpdateCheckAndTrack(entity);
             //database.Attach(entity).State = EntityState.Modified;
-            var result = dbSet.Update(entity);            
+            var result = dbSet.Update(entity);
         }
 
-      
+
         public virtual void UpdateSave(E entity)
         {
             Update(entity);
@@ -169,17 +175,17 @@ namespace FluentChange.Extensions.Common.Database
         public virtual void UpdateBulkSave(IEnumerable<E> entities, bool detach = true)
         {
             // for direct calls i.e. in unit tests without rest we need to detach 
-            foreach(var entity in entities)
+            foreach (var entity in entities)
             {
                 //if (detach) Detach(entity);
 
                 if (entity == null) throw new ArgumentNullException("entity");
-                UpdateCheckAndTrack(entity);            
+                UpdateCheckAndTrack(entity);
                 dbSet.Update(entity);
                 //database.Attach(entity).State = EntityState.Modified;
             }
-      
-           
+
+
             //dbSet.BatchUpdate(entities);
             database.SaveChanges();
         }
@@ -193,7 +199,7 @@ namespace FluentChange.Extensions.Common.Database
             UpdateCheckAndTrack(entity);
             //database.Attach(entity).State = EntityState.Modified;
             var result = dbSet.Update(entity);
-          
+
         }
         public virtual async Task UpdateSaveAsync(E entity)
         {

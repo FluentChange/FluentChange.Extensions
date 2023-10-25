@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace FluentChange.Extensions.Common.Database
 {
+    [Obsolete("Please use SmartRepo")]
     public interface IRepository<T, E> where T : E where E : AbstractIdEntity
     {
         IQueryable<T> All();
@@ -42,11 +43,9 @@ namespace FluentChange.Extensions.Common.Database
 
         X GetOldValue<X>(T entity, string propertyName);
     }
-    public interface ITrackedRepository<T> : IRepository<T, AbstractTrackedEntity> where T : AbstractTrackedEntity
-    {
 
-    }
-    public interface IUserTrackedRepository<T> : IRepository<T, AbstractUserTrackedEntity> where T : AbstractUserTrackedEntity
+    [Obsolete("Please use SmartRepo")]
+    public interface ITrackedRepository<T> : IRepository<T, AbstractTrackedEntity> where T : AbstractTrackedEntity
     {
 
     }
