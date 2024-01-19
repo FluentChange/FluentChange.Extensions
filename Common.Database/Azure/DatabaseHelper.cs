@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.IO;
-
+using System.Threading.Tasks;
 
 namespace FluentChange.Common.Database.Azure
 {
@@ -31,6 +31,15 @@ namespace FluentChange.Common.Database.Azure
             }
             Console.WriteLine("creating new db " + dbName + " on " + serverName + " - started");
             var database = sqlServer.Databases.Define(dbName).WithBasicEdition().Create();
+            Console.WriteLine("    Status " + database.Status);
+            for (int i = 0; i <= 30; i++)
+            {
+                var dbStatus = sqlServer.Databases.Get(dbName);
+                Console.WriteLine("  " + i + " Status " + dbStatus.Status);
+                Task.Delay(1000);
+
+            }
+
             Console.WriteLine("creating new db " + dbName + " on " + serverName + " - finished");
         }
     }

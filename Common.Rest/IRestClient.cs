@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace FluentChange.Extensions.Common.Rest
@@ -9,6 +10,7 @@ namespace FluentChange.Extensions.Common.Rest
         Task<T> Get<T>(string route, Dictionary<string, object> parameters = null);
         Task<T> Post<T>(string route, object requestBody, Dictionary<string, object> parameters = null);
         Task<T> PostFile<T>(string route, string filePath, Dictionary<string, object> parameters = null);
+        Task<T> PostFile<T>(string route, Stream fileStream, string fileName, Dictionary<string, object> parameters = null);
         Task<T> Put<T>(string route, object requestBody, Dictionary<string, object> parameters = null);
     }
 }

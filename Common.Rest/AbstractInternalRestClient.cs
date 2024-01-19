@@ -27,7 +27,6 @@ namespace FluentChange.Extensions.Common.Rest
             return await HandleContentOrError<T>(response);
         }
 
-       
 
         protected abstract Task<HttpResponseMessage> PostImplementation(string route, object content, Dictionary<string, object> parameters);
         protected async Task<T> PostInternal<T>(string route, object content, Dictionary<string, object> parameters = null)
@@ -44,14 +43,19 @@ namespace FluentChange.Extensions.Common.Rest
             return response;
         }
         public async Task<T> PostFile<T>(string route, string filePath, Dictionary<string, object> parameters = null)
+        {          
+            var file = new FileInfo(filePath);          
+            return await PostFile<T>(route, file.OpenRead(), file.Name, parameters);
+        }
+
+        public async Task<T> PostFile<T>(string route, Stream fileStream, string fileName, Dictionary<string, object> parameters = null)
         {
             var content = new MultipartFormDataContent();
 
-            var file = new FileInfo(filePath);
-            string mimeType = MimeTypes.GetMimeType(file.Name);
-            var fileContent = new StreamContent(file.OpenRead());
+            string mimeType = MimeTypes.GetMimeType(fileName);
+            var fileContent = new StreamContent(fileStream);
             fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse(mimeType);
-            content.Add(fileContent, "file", file.Name);
+            content.Add(fileContent, "file", fileName);
             return await PostInternal<T>(route, content, parameters);
         }
 
@@ -90,6 +94,7 @@ namespace FluentChange.Extensions.Common.Rest
 
             return content;
         }
+      
 
 
         // HEADER stuff
@@ -147,22 +152,23 @@ namespace FluentChange.Extensions.Common.Rest
                     var data = await response.Content.ReadAsStringAsync();
                     var result = JsonConvert.DeserializeObject<Response>(data);
 
-
-                    var j = 1;
-                    foreach (var error in result.Errors)
+                    if (result != null && result.Errors != null)
                     {
-                        message += "- Error " + j + ": " + error.Message + Environment.NewLine;
-                        j++;
+                        var j = 1;
+                        foreach (var error in result.Errors)
+                        {
+                            message += "- Error " + j + ": " + error.Message + Environment.NewLine;
+                            j++;
+                        }
+
+
+                        var i = 1;
+                        foreach (var error in result.Errors)
+                        {
+                            exceptionData.Add("Error " + i, error.FullMessage);
+                            i++;
+                        }
                     }
-
-
-                    var i = 1;
-                    foreach (var error in result.Errors)
-                    {
-                        exceptionData.Add("Error " + i, error.FullMessage);
-                        i++;
-                    }
-
                 }
                 catch (Exception ex)
                 {
