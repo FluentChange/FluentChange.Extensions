@@ -31,7 +31,7 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
         protected async Task<TServiceModel> GetRequestBody<TServiceModel, TOutputModel>(HttpRequest req, bool unwrapRequest) where TServiceModel : class where TOutputModel : class
         {
             if (req.Body == null) throw new ArgumentNullException();
-            if (req.Body.Length == 0) throw new ArgumentNullException();
+            //if (req.Body.Length == 0) throw new ArgumentNullException();
             var mapRequest = (typeof(TServiceModel) != typeof(TOutputModel));
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();

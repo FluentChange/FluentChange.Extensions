@@ -14,6 +14,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using FluentChange.Extensions.Common.Rest;
 using Microsoft.Extensions.Primitives;
+using Microsoft.Azure.Functions.Worker;
 
 namespace FluentChange.Extensions.Azure.Functions.Testing
 {
