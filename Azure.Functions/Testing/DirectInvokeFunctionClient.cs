@@ -18,7 +18,7 @@ using Microsoft.Azure.Functions.Worker;
 
 namespace FluentChange.Extensions.Azure.Functions.Testing
 {
-    public class DirectInvokeFunctionClient<T> : AbstractInternalRestClient where T : FunctionsStartup
+    public class DirectInvokeFunctionClient<T> : AbstractInternalRestClient //where T : FunctionsStartup
     {
         public ILogger Logger { get; private set; }
         public ServiceProvider GlobalServiceProvider { get; private set; }
@@ -30,14 +30,14 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
         {
             var assembly = Assembly.GetAssembly(typeof(T));
             var allTypesWithFunctions = assembly.GetTypes()
-                   .Where(t => t.GetMethods().Any(m => m.GetCustomAttributes(typeof(FunctionNameAttribute), false).Length > 0))
+                   .Where(t => t.GetMethods().Any(m => m.GetCustomAttributes(typeof(FunctionAttribute), false).Length > 0))
                    .ToList();
 
 
 
             var allMethodsWithHttpTriggers = allTypesWithFunctions
                       .SelectMany(t => t.GetMethods())
-                      .Where(m => m.GetCustomAttributes(typeof(FunctionNameAttribute), false).Length > 0
+                      .Where(m => m.GetCustomAttributes(typeof(FunctionAttribute), false).Length > 0
                       && m.GetParameters().Any(m => m.GetCustomAttributes(typeof(HttpTriggerAttribute), false).Length > 0))
                       .ToArray();
 
@@ -111,8 +111,8 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
             services.AddLogging();
 
             var dummyHostBuilder = new DummyFunctionsHostBuilder(services);
-            var functionsStartup = (T)Activator.CreateInstance(typeof(T));
-            functionsStartup.Configure(dummyHostBuilder);
+            //var functionsStartup = (T)Activator.CreateInstance(typeof(T));
+            //functionsStartup.Configure(dummyHostBuilder);
 
 
             foreach (var f in functionClasses)

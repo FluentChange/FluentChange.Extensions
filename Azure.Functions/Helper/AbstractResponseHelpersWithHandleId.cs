@@ -1,5 +1,6 @@
 ﻿using FluentChange.Extensions.Common.Models.Rest;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -67,33 +68,33 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
 
 
 
-        public HttpResponseMessage RespondJson(object result, HttpStatusCode code = HttpStatusCode.OK)
+        public IActionResult RespondJson(object result, HttpStatusCode code = HttpStatusCode.OK)
         {
             return ResponseHelper.CreateJsonResponse(result, code, jsonSettings);
         }
-        public HttpResponseMessage RespondWrapped<TModel>(TModel result) where TModel : class
+        public IActionResult RespondWrapped<TModel>(TModel result) where TModel : class
         {
             var wrappedResponse = new DataResponse<TModel>();
             wrappedResponse.Data = result;
             return RespondJson(wrappedResponse);
         }
-        public HttpResponseMessage RespondWrappedList<TServiceModel>(IEnumerable<TServiceModel> results) where TServiceModel : class
+        public IActionResult RespondWrappedList<TServiceModel>(IEnumerable<TServiceModel> results) where TServiceModel : class
         {
             var wrappedResponse = new DataResponse<IEnumerable<TServiceModel>>();
             wrappedResponse.Data = results.ToList();
             return RespondJson(wrappedResponse);
         }
-        public HttpResponseMessage RespondMapped<TServiceModel, TOutputModel>(TServiceModel result) where TServiceModel : class where TOutputModel : class
+        public IActionResult RespondMapped<TServiceModel, TOutputModel>(TServiceModel result) where TServiceModel : class where TOutputModel : class
         {
             var mappedResult = mapper.MapTo<TOutputModel>(result);
             return RespondJson(mappedResult);
         }
-        public HttpResponseMessage RespondMappedList<TServiceModel, TOutputModel>(IEnumerable<TServiceModel> results) where TServiceModel : class where TOutputModel : class
+        public IActionResult RespondMappedList<TServiceModel, TOutputModel>(IEnumerable<TServiceModel> results) where TServiceModel : class where TOutputModel : class
         {
             var mappedResults = mapper.ProjectTo<TOutputModel>(results.ToList().AsQueryable());
             return RespondJson(mappedResults);
         }
-        public HttpResponseMessage RespondMappedAndWrapped<TServiceModel, TOutputModel>(TServiceModel result) where TServiceModel : class where TOutputModel : class
+        public IActionResult RespondMappedAndWrapped<TServiceModel, TOutputModel>(TServiceModel result) where TServiceModel : class where TOutputModel : class
         {
             //if (IsGenericList(typeof(TServiceModel)))
             //{
@@ -103,7 +104,7 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
             var mappedResult = mapper.MapTo<TOutputModel>(result);           
             return RespondWrapped(mappedResult);
         }
-        public HttpResponseMessage RespondMappedAndWrappedList<TServiceModel, TOutputModel>(IEnumerable<TServiceModel> results) where TServiceModel : class where TOutputModel : class
+        public IActionResult RespondMappedAndWrappedList<TServiceModel, TOutputModel>(IEnumerable<TServiceModel> results) where TServiceModel : class where TOutputModel : class
         {
             var mappedResults = mapper.ProjectTo<TOutputModel>(results.ToList().AsQueryable());
             return RespondWrappedList(mappedResults);
@@ -112,7 +113,7 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
 
 
 
-        public HttpResponseMessage RespondError(Exception ex, bool wrapResponse, SystemNet.HttpStatusCode code = SystemNet.HttpStatusCode.InternalServerError)
+        public IActionResult RespondError(Exception ex, bool wrapResponse, SystemNet.HttpStatusCode code = SystemNet.HttpStatusCode.InternalServerError)
         {
             var errorInfo = new Common.Models.ErrorInfo() { Message = ex.Message, FullMessage = ex.ToString() };
             if (wrapResponse)
@@ -126,7 +127,7 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
                 return RespondJson(errorInfo, code);
             }
         }
-        public HttpResponseMessage RespondEmpty(bool wrapResponse)
+        public IActionResult RespondEmpty(bool wrapResponse)
         {
             if (wrapResponse)
             {
@@ -139,7 +140,7 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
             }
         }
 
-        protected HttpResponseMessage Respond<TServiceModel, TOutputModel>(TServiceModel result, bool wrapResponse) where TServiceModel : class where TOutputModel : class
+        protected IActionResult Respond<TServiceModel, TOutputModel>(TServiceModel result, bool wrapResponse) where TServiceModel : class where TOutputModel : class
         {
             var typeInput = typeof(TServiceModel);
             var mapResponse = (typeof(TServiceModel) != typeof(TOutputModel));
@@ -184,7 +185,7 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
             return isList;
         }
 
-        protected HttpResponseMessage RespondList<TServiceModel, TOutputModel>(IEnumerable<TServiceModel> results, bool wrapResponse) where TServiceModel : class where TOutputModel : class
+        protected IActionResult RespondList<TServiceModel, TOutputModel>(IEnumerable<TServiceModel> results, bool wrapResponse) where TServiceModel : class where TOutputModel : class
         {
             var mapResponse = (typeof(TServiceModel) != typeof(TOutputModel));
             if (wrapResponse)

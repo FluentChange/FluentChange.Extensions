@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FluentChange.Extensions.Azure.Functions.Helper
 {
@@ -25,7 +26,7 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
 
     public static class ResponseHelper
     {
-        public static HttpResponseMessage CreateJsonResponse(object response, HttpStatusCode statuscode, JsonSerializerSettings jsonSerializerSettings = null)
+        public static IActionResult CreateJsonResponse(object response, HttpStatusCode statuscode, JsonSerializerSettings jsonSerializerSettings = null)
         {
             var json = "";
             if (jsonSerializerSettings == null)
@@ -38,13 +39,19 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
             }
 
             //return new JsonResult(response,settings); // this is currently not working
-            return new HttpResponseMessage(statuscode)
-            {
-                Content = new StringContent(json, Encoding.UTF8, "application/json")
-            };
+            //return new HttpResponseMessage(statuscode)
+            //{
+            //    Content = new StringContent(json, Encoding.UTF8, "application/json")
+            //};
+
+            var result = new ContentResult();
+            result.Content = json;
+            result.ContentType = "application/json";
+            result.StatusCode = (int) statuscode;
+            return result;
         }
 
-        public static HttpResponseMessage CreateJsonResponse(object response, JsonSerializerSettings jsonSerializerSettings = null)
+        public static IActionResult CreateJsonResponse(object response, JsonSerializerSettings jsonSerializerSettings = null)
         {
             return CreateJsonResponse(response, HttpStatusCode.OK, jsonSerializerSettings);
         }

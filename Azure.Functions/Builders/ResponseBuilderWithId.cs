@@ -1,6 +1,7 @@
 ﻿using FluentChange.Extensions.Azure.Functions.Helper;
 using FluentChange.Extensions.Azure.Functions.Interfaces;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -35,7 +36,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             return builder;
         }
 
-        public async Task<HttpResponseMessage> Handle<T, S>(HttpRequest req, ILogger log) where T : class where S : class, ICRUDLServiceWithId<T>
+        public async Task<IActionResult> Handle<T, S>(HttpRequest req, ILogger log) where T : class where S : class, ICRUDLServiceWithId<T>
         {
             return await ForEntity<T>().UseInterface<S>().Handle(req, log);
         }
@@ -45,7 +46,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             this.jsonSettings = jsonSettings;
         }
 
-        public async Task<HttpResponseMessage> HandleAndMap<T, M, S>(HttpRequest req, ILogger log) where T : class where M : class where S : class, ICRUDLServiceWithId<T>
+        public async Task<IActionResult> HandleAndMap<T, M, S>(HttpRequest req, ILogger log) where T : class where M : class where S : class, ICRUDLServiceWithId<T>
         {
             return await ForEntityWithMapping<T, M>().UseInterface<S>().Handle(req, log);
         }
@@ -163,7 +164,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             internalBuilder = new ResponseBuilderWithIdEntityServiceWithModels<T, M, S>(service, contextCreateFunc, mapper, jsonSettings);
             internalBuilder.OnPost(s => s.Create).OnGetWithId(s => s.Read).OnPut(s => s.Update).OnDeleteWithId(s => s.Delete).OnGet<IEnumerable<T>, IEnumerable<M>>(s => s.List);
         }
-        public async Task<HttpResponseMessage> Handle(HttpRequest req, ILogger log)
+        public async Task<IActionResult> Handle(HttpRequest req, ILogger log)
         {
             return await internalBuilder.Handle(req, log);
         }
@@ -210,14 +211,14 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         #endregion
 
 
-        private Func<TService, HttpRequest, Task<HttpResponseMessage>> getFunc;
-        private Func<TService, HttpRequest, Task<HttpResponseMessage>> getWithIdFunc;
-        private Func<TService, HttpRequest, Task<HttpResponseMessage>> postFunc;
-        private Func<TService, HttpRequest, Task<HttpResponseMessage>> postWithIdFunc;
-        private Func<TService, HttpRequest, Task<HttpResponseMessage>> putFunc;
-        private Func<TService, HttpRequest, Task<HttpResponseMessage>> putWithIdFunc;
-        private Func<TService, HttpRequest, Task<HttpResponseMessage>> deleteFunc;
-        private Func<TService, HttpRequest, Task<HttpResponseMessage>> deleteWithIdFunc;
+        private Func<TService, HttpRequest, Task<IActionResult>> getFunc;
+        private Func<TService, HttpRequest, Task<IActionResult>> getWithIdFunc;
+        private Func<TService, HttpRequest, Task<IActionResult>> postFunc;
+        private Func<TService, HttpRequest, Task<IActionResult>> postWithIdFunc;
+        private Func<TService, HttpRequest, Task<IActionResult>> putFunc;
+        private Func<TService, HttpRequest, Task<IActionResult>> putWithIdFunc;
+        private Func<TService, HttpRequest, Task<IActionResult>> deleteFunc;
+        private Func<TService, HttpRequest, Task<IActionResult>> deleteWithIdFunc;
 
         #region GET
 
@@ -658,7 +659,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             return idGuid;
         }
 
-        public async Task<HttpResponseMessage> Handle(HttpRequest req, ILogger log)
+        public async Task<IActionResult> Handle(HttpRequest req, ILogger log)
         {
             log.LogInformation("ResponseBuilder handle function " + req.Method.ToUpper() + " " + typeof(TService).Name + "/" + typeof(TService).Name);
 
@@ -715,7 +716,6 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
                 return RespondError(ex, wrapout);
             }
         }
-
 
     }
 
