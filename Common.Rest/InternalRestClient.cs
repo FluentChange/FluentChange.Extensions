@@ -21,6 +21,11 @@ namespace FluentChange.Extensions.Common.Rest
             route = ReplaceParams(route, parameters);
             return http.GetAsync(route);
         }
+        protected override Task<HttpResponseMessage> HeadImplementation(string route, Dictionary<string, object> parameters)
+        {
+            route = ReplaceParams(route, parameters);
+            return http.GetAsync(route);
+        }
         protected override Task<HttpResponseMessage> PostImplementation(string route, object requestBody, Dictionary<string, object> parameters)
         {
             var content = SerializeContentIfNeeded(requestBody);
@@ -37,6 +42,24 @@ namespace FluentChange.Extensions.Common.Rest
         {
             route = ReplaceParams(route, parameters);
             return http.DeleteAsync(route);
+        }
+        protected override Task<HttpResponseMessage> ConnectImplementation(string route, Dictionary<string, object> parameters)
+        {
+            throw new NotImplementedException();
+        }
+        protected override Task<HttpResponseMessage> OptionsImplementation(string route, Dictionary<string, object> parameters)
+        {
+            throw new NotImplementedException();
+        }
+        protected override Task<HttpResponseMessage> TraceImplementation(string route, object requestBody, Dictionary<string, object> parameters)
+        {
+            throw new NotImplementedException();
+        }
+        protected override Task<HttpResponseMessage> PatchImplementation(string route, object requestBody, Dictionary<string, object> parameters)
+        {
+            var content = SerializeContentIfNeeded(requestBody);
+            route = ReplaceParams(route, parameters);
+            return http.PatchAsync(route, content);
         }
 
         public override void SetHeader(string key, string value)

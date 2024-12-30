@@ -1,20 +1,12 @@
 ﻿using FluentChange.Extensions.System.Helper;
 using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection.Emit;
 using System.Reflection;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
-using System.Threading;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis;
-using System.Security.Cryptography.X509Certificates;
-using System.Diagnostics;
-using System.Net.Security;
-using System.Reflection.Metadata;
 
 namespace FluentChange.Extensions.System.CodeGen
 {

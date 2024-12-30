@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using FluentChange.Extensions.Azure.Functions.CRUDL;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Azure.Functions.Extensions.DependencyInjection;
-using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -15,6 +13,10 @@ using System.Threading.Tasks;
 using FluentChange.Extensions.Common.Rest;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.AspNetCore.Mvc;
+using FluentChange.Extensions.Azure.Functions.Helper;
+using System.Net;
+using System.Net.Http.Headers;
 
 namespace FluentChange.Extensions.Azure.Functions.Testing
 {
@@ -24,7 +26,7 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
         public ServiceProvider GlobalServiceProvider { get; private set; }
         private Dictionary<string, string> headers = new Dictionary<string, string>();
 
-        private Dictionary<string, Dictionary<string, MethodInfo>> routeMapping = new Dictionary<string, Dictionary<string, MethodInfo>>();
+        private Dictionary<HttpMethod, Dictionary<string, MethodInfo>> routeMapping = new Dictionary<HttpMethod, Dictionary<string, MethodInfo>>();
 
         public DirectInvokeFunctionClient()
         {
@@ -53,8 +55,11 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
 
                 if (attribute != null)
                 {
-                    foreach (var httpMethod in attribute.Methods)
+                    foreach (var httpMethodString in attribute.Methods)
                     {
+
+                        var httpMethod = HttpMethodHelper.Get(httpMethodString);
+
                         if (!routeMapping.ContainsKey(httpMethod))
                         {
                             routeMapping.Add(httpMethod, new Dictionary<string, MethodInfo>());
@@ -108,9 +113,22 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
                 services.AddSingleton<IConfiguration>(configuration);
             }
 
+
+
+
             services.AddLogging();
 
-            var dummyHostBuilder = new DummyFunctionsHostBuilder(services);
+
+            Type interfaceType = typeof(IFunctionsStartUp);
+            var statupClasses = typeof(T).Assembly.GetTypes().Where(type => type.IsClass && interfaceType.IsAssignableFrom(type));
+
+            foreach (var startupClass in statupClasses)
+            {
+                var functionsStartup = (IFunctionsStartUp)Activator.CreateInstance(startupClass);
+                functionsStartup.Configure(services, "inmemory");
+            }
+            //var dummyHostBuilder = new DummyFunctionsHostBuilder(services);
+
             //var functionsStartup = (T)Activator.CreateInstance(typeof(T));
             //functionsStartup.Configure(dummyHostBuilder);
 
@@ -126,54 +144,53 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
 
 
         protected async override Task<HttpResponseMessage> GetImplementation(string route, Dictionary<string, object> parameters)
-        {
-            using (var scope = GlobalServiceProvider.CreateScope())
-            {
-                var functionMethod = findFunctionMethod("get", route);
-                var functionClassInstance = scope.ServiceProvider.GetService(functionMethod.DeclaringType);
-                var functionParameters = await CreateFunctionParameters("get", route, parameters, functionMethod);
-
-                return await (Task<HttpResponseMessage>)functionMethod.Invoke(functionClassInstance, functionParameters.ToArray());
-            }
-        }
-
+            => await Invoke(HttpMethod.Get, route, parameters);
+        protected async override Task<HttpResponseMessage> HeadImplementation(string route, Dictionary<string, object> parameters)
+            => await Invoke(HttpMethod.Head, route, parameters);
         protected async override Task<HttpResponseMessage> PostImplementation(string route, object content, Dictionary<string, object> parameters = null)
-        {
-            using (var scope = GlobalServiceProvider.CreateScope())
-            {
-                var functionMethod = findFunctionMethod("post", route);
-                var functionClassInstance = scope.ServiceProvider.GetService(functionMethod.DeclaringType);
-                var functionParameters = await CreateFunctionParameters("post", route, parameters, functionMethod, content);
-
-                return await (Task<HttpResponseMessage>)functionMethod.Invoke(functionClassInstance, functionParameters.ToArray());
-            }
-        }
-
+            => await Invoke(HttpMethod.Post, route, parameters, content);
         protected async override Task<HttpResponseMessage> PutImplementation(string route, object content, Dictionary<string, object> parameters = null)
-        {
-            using (var scope = GlobalServiceProvider.CreateScope())
-            {
-                var functionMethod = findFunctionMethod("put", route);
-                var functionClassInstance = scope.ServiceProvider.GetService(functionMethod.DeclaringType);
-                var functionParameters = await CreateFunctionParameters("put", route, parameters, functionMethod, content);
-
-                return await (Task<HttpResponseMessage>)functionMethod.Invoke(functionClassInstance, functionParameters.ToArray());
-            }
-        }
-
+            => await Invoke(HttpMethod.Put, route, parameters, content);
         protected async override Task<HttpResponseMessage> DeleteImplementation(string route, Dictionary<string, object> parameters)
+            => await Invoke(HttpMethod.Delete, route, parameters);
+        protected async override Task<HttpResponseMessage> ConnectImplementation(string route, Dictionary<string, object> parameters)
+            => await Invoke(HttpMethod.Connect, route, parameters);
+        protected async override Task<HttpResponseMessage> OptionsImplementation(string route, Dictionary<string, object> parameters)
+            => await Invoke(HttpMethod.Options, route, parameters);
+        protected async override Task<HttpResponseMessage> TraceImplementation(string route, object content, Dictionary<string, object> parameters = null)
+            => await Invoke(HttpMethod.Trace, route, parameters, content);
+        protected async override Task<HttpResponseMessage> PatchImplementation(string route, object content, Dictionary<string, object> parameters = null)
+            => await Invoke(HttpMethod.Patch, route, parameters, content);
+
+
+        private async Task<HttpResponseMessage> Invoke(HttpMethod method, string route, Dictionary<string, object> parameters, object content = null)
         {
+            var functionMethod = FindFunctionMethod(method, route);
+            var functionParameters = await CreateFunctionParameters(method, route, parameters, functionMethod, content);
             using (var scope = GlobalServiceProvider.CreateScope())
             {
-                var functionMethod = findFunctionMethod("delete", route);
-                var functionClass = scope.ServiceProvider.GetService(functionMethod.DeclaringType);
-                var functionParameters = await CreateFunctionParameters("delete", route, parameters, functionMethod);
-
-                return await (Task<HttpResponseMessage>)functionMethod.Invoke(functionClass, functionParameters.ToArray());
+                var functionClassInstance = scope.ServiceProvider.GetService(functionMethod.DeclaringType);
+                var response = await (Task<IActionResult>)functionMethod.Invoke(functionClassInstance, functionParameters.ToArray());
+                return GetHttpResponseMessage(response);
             }
         }
-
-        private MethodInfo findFunctionMethod(string method, string route)
+        private HttpResponseMessage GetHttpResponseMessage(IActionResult response)
+        {
+            if (response is ContentResult)
+            {
+                var contentResult = (ContentResult)response;
+                var responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
+                responseMessage.Content = new StringContent(contentResult.Content);
+                responseMessage.StatusCode = (HttpStatusCode)contentResult.StatusCode.GetValueOrDefault((int)HttpStatusCode.OK);
+                if (!string.IsNullOrEmpty(contentResult.ContentType))
+                {
+                    responseMessage.Content.Headers.ContentType = new MediaTypeHeaderValue(contentResult.ContentType);
+                }
+                return responseMessage;
+            }
+            throw new NotImplementedException(response.GetType().Name);
+        }
+        private MethodInfo FindFunctionMethod(HttpMethod method, string route)
         {
             if (routeMapping[method].ContainsKey(route))
             {
@@ -190,7 +207,7 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
             throw new Exception("function method for route " + method + " " + route + " not found");
         }
 
-        private async Task<List<object>> CreateFunctionParameters(string method, string route, Dictionary<string, object> parameters, MethodInfo functionMethod, object content = null)
+        private async Task<List<object>> CreateFunctionParameters(HttpMethod method, string route, Dictionary<string, object> parameters, MethodInfo functionMethod, object content = null)
         {
             var routeValues = new Dictionary<string, string>();
             route = ReplaceParams(route, parameters, out routeValues);
@@ -245,12 +262,11 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
 
             return functionParameters;
         }
-
-        private async Task<HttpRequest> CreateHttpRequest(string method, string route, object content = null)
+        private async Task<HttpRequest> CreateHttpRequest(HttpMethod method, string route, object content = null)
         {
             var dummyHttpContext = new DefaultHttpContext();
             var dummyHttpRequest = dummyHttpContext.Request;
-            dummyHttpRequest.Method = method.ToUpper();
+            dummyHttpRequest.Method = method.ToString().ToUpper();
             dummyHttpRequest.Host = new HostString("https://localhost");
             dummyHttpRequest.Path = "/" + route;
             foreach (var header in headers)
@@ -277,7 +293,6 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
         {
             return headers.ContainsKey(key);
         }
-
         public override void SetHeader(string key, string value)
         {
             if (headers.ContainsKey(key))

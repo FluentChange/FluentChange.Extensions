@@ -19,7 +19,7 @@ namespace FluentChange.Extensions.Common.Rest
 
         }
 
-
+        // The GET method requests a representation of the specified resource. Requests using GET should only retrieve data and should not contain a request content.
         protected abstract Task<HttpResponseMessage> GetImplementation(string route, Dictionary<string, object> parameters);
         public async Task<T> Get<T>(string route, Dictionary<string, object> parameters = null)
         {
@@ -27,16 +27,22 @@ namespace FluentChange.Extensions.Common.Rest
             return await HandleContentOrError<T>(response);
         }
 
+        // The HEAD method asks for a response identical to a GET request, but without a response body.
+        protected abstract Task<HttpResponseMessage>  HeadImplementation(string route, Dictionary<string, object> parameters);
+        public async Task<T> Head<T>(string route, Dictionary<string, object> parameters = null)
+        {
+            var response = await HeadImplementation(route, parameters);
+            return await HandleContentOrError<T>(response);
+        }
 
+
+        // The POST method submits an entity to the specified resource, often causing a change in state or side effects on the server.
         protected abstract Task<HttpResponseMessage> PostImplementation(string route, object content, Dictionary<string, object> parameters);
         protected async Task<T> PostInternal<T>(string route, object content, Dictionary<string, object> parameters = null)
         {
             var response = await PostImplementation(route, content, parameters);
             return await HandleContentOrError<T>(response);
         }
-
-
-
         public async Task<T> Post<T>(string route, object content, Dictionary<string, object> parameters = null)
         {
             var response = await PostInternal<T>(route, content, parameters);
@@ -59,19 +65,56 @@ namespace FluentChange.Extensions.Common.Rest
             return await PostInternal<T>(route, content, parameters);
         }
 
-        protected abstract Task<HttpResponseMessage> PutImplementation(string route, object requestBody, Dictionary<string, object> parameters);
-        public async Task<T> Put<T>(string route, object requestBody, Dictionary<string, object> parameters = null)
+
+        // The PUT method replaces all current representations of the target resource with the request content.
+        protected abstract Task<HttpResponseMessage> PutImplementation(string route, object content, Dictionary<string, object> parameters);
+        public async Task<T> Put<T>(string route, object content, Dictionary<string, object> parameters = null)
         {
-            var response = await PutImplementation(route, requestBody, parameters);
+            var response = await PutImplementation(route, content, parameters);
             return await HandleContentOrError<T>(response);
         }
 
+        // The DELETE method deletes the specified resource.
         protected abstract Task<HttpResponseMessage> DeleteImplementation(string route, Dictionary<string, object> parameters);
         public async Task<T> Delete<T>(string route, Dictionary<string, object> parameters = null)
         {
             var response = await DeleteImplementation(route, parameters);
             return await HandleContentOrError<T>(response);
         }
+
+        // The CONNECT method establishes a tunnel to the server identified by the target resource
+        protected abstract Task<HttpResponseMessage> ConnectImplementation(string route, Dictionary<string, object> parameters);
+        public async Task<T> Connect<T>(string route, Dictionary<string, object> parameters = null)
+        {
+            var response = await ConnectImplementation(route, parameters);
+            return await HandleContentOrError<T>(response);
+        }
+
+        // The OPTIONS method describes the communication options for the target resource.
+        protected abstract Task<HttpResponseMessage> OptionsImplementation(string route, Dictionary<string, object> parameters);
+        public async Task<T> Options<T>(string route, Dictionary<string, object> parameters = null)
+        {
+            var response = await OptionsImplementation(route, parameters);
+            return await HandleContentOrError<T>(response);
+        }
+
+        // The TRACE method performs a message loop-back test along the path to the target resource.
+        protected abstract Task<HttpResponseMessage> TraceImplementation(string route, object content, Dictionary<string, object> parameters);
+        public async Task<T> Trace<T>(string route, object content, Dictionary<string, object> parameters = null)
+        {
+            var response = await TraceImplementation(route, content, parameters);
+            return await HandleContentOrError<T>(response);
+        }
+
+
+        // The PATCH method applies partial modifications to a resource.
+        protected abstract Task<HttpResponseMessage> PatchImplementation(string route, object content, Dictionary<string, object> parameters);
+        public async Task<T> Patch<T>(string route, object content, Dictionary<string, object> parameters = null)
+        {
+            var response = await PatchImplementation(route, content, parameters);
+            return await HandleContentOrError<T>(response);
+        }
+
 
         protected static HttpContent SerializeContentIfNeeded(object requestBody)
         {
