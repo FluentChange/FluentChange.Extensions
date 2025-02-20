@@ -3,23 +3,18 @@ using DemoCRUDLFunctions.Services;
 using FluentChange.Extensions.Azure.Functions.CRUDL;
 using FluentChange.Extensions.Azure.Functions.Helper;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace DemoCRUDLFunctions
 {
-    public class CLFunctions : AbstractFunction
+    public class CLFunctions(IServiceProvider provider, ILogger<CLFunctions> log) : AbstractFunction(provider)
     {
-        public CLFunctions(IServiceProvider provider) : base(provider)
-        {
-        }
-
-        [FunctionName("Sample1TodoCL")]
-        public async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample1/todos" + RouteHelper.Id)] HttpRequest req, string id, ILogger log)
+        [Function("Sample1TodoCL")]
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample1/todos" + RouteHelper.Id)] HttpRequest req, string id)
         {
 
             return await ResponseBuilder
@@ -27,8 +22,8 @@ namespace DemoCRUDLFunctions
 
         }
 
-        [FunctionName("Sample2TodoCL")]
-        public async Task<HttpResponseMessage> Run2([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample2/todos" + RouteHelper.Id)] HttpRequest req, string id, ILogger log)
+        [Function("Sample2TodoCL")]
+        public async Task<IActionResult> Run2([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample2/todos" + RouteHelper.Id)] HttpRequest req, string id)
         {
 
             return await ResponseBuilder
@@ -38,8 +33,8 @@ namespace DemoCRUDLFunctions
 
         }
 
-        [FunctionName("Sample3EventCL")]
-        public async Task<HttpResponseMessage> Run3([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample3/events" + RouteHelper.Id)] HttpRequest req, string id, ILogger log)
+        [Function("Sample3EventCL")]
+        public async Task<IActionResult> Run3([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample3/events" + RouteHelper.Id)] HttpRequest req, string id)
         {
 
             return await ResponseBuilder
@@ -48,8 +43,8 @@ namespace DemoCRUDLFunctions
 
         }
 
-        [FunctionName("Sample4EventCL")]
-        public async Task<HttpResponseMessage> Run4([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample4/events" + RouteHelper.Id)] HttpRequest req, string id, ILogger log)
+        [Function("Sample4EventCL")]
+        public async Task<IActionResult> Run4([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample4/events" + RouteHelper.Id)] HttpRequest req, string id)
         {
 
             return await ResponseBuilder
@@ -60,8 +55,8 @@ namespace DemoCRUDLFunctions
 
         }
 
-        [FunctionName("Sample5EventCL")]
-        public async Task<HttpResponseMessage> Run5([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample5/events" + RouteHelper.Id)] HttpRequest req, string id, ILogger log)
+        [Function("Sample5EventCL")]
+        public async Task<IActionResult> Run5([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample5/events" + RouteHelper.Id)] HttpRequest req, string id)
         {
 
             return await ResponseBuilder
@@ -73,8 +68,8 @@ namespace DemoCRUDLFunctions
 
         }
 
-        [FunctionName("Sample6ProductCL")]
-        public async Task<HttpResponseMessage> Run6([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample6/products" + RouteHelper.Id)] HttpRequest req, string id, ILogger log)
+        [Function("Sample6ProductCL")]
+        public async Task<IActionResult> Run6([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample6/products" + RouteHelper.Id)] HttpRequest req, string id)
         {
 
             return await ResponseBuilder
@@ -88,8 +83,8 @@ namespace DemoCRUDLFunctions
         }
 
 
-        [FunctionName("Sample7ProductMappingCL")]
-        public async Task<HttpResponseMessage> Run7([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample7/products" + RouteHelper.Id)] HttpRequest req, string id, ILogger log)
+        [Function("Sample7ProductMappingCL")]
+        public async Task<IActionResult> Run7([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "cl/sample7/products" + RouteHelper.Id)] HttpRequest req, string id)
         {
             try
             {
