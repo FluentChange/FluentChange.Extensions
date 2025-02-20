@@ -23,7 +23,7 @@
 		</None>
 	</ItemGroup>
 	<ItemGroup>
-		<Using Include="System.Threading.ExecutionContext" Alias="ExecutionContext"/>
+		<Using Include="System.Threading.ExecutionContext" Alias="ExecutionContext" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Azure.Functions\Azure.Functions.csproj" />

@@ -1,10 +1,10 @@
 using DemoCRUDLFunctions.Services;
-using DemoCRUDLFunctions;
 using FluentChange.Extensions.Azure.Functions.Helper;
 using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SampleFunctions.Services;
+using SampleFunctions.Mapping;
 
 var builder = FunctionsApplication.CreateBuilder(args);
 

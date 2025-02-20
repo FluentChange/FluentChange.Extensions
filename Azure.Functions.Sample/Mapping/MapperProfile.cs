@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using DemoCRUDLFunctions.Models;
 
-namespace DemoCRUDLFunctions
+namespace SampleFunctions.Mapping
 {
     public class MapperProfile : Profile
     {

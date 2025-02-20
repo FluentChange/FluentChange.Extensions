@@ -1,9 +1,5 @@
 ﻿using DemoCRUDLFunctions.Models;
-using FluentChange.Extensions.Azure.Functions.CRUDL;
 using FluentChange.Extensions.Azure.Functions.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace DemoCRUDLFunctions.Services
 {

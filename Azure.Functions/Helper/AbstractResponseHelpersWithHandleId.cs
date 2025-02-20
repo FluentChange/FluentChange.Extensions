@@ -67,7 +67,10 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
         }
 
 
-
+        public IActionResult RespondEmpty(HttpStatusCode code = HttpStatusCode.OK)
+        {
+            return ResponseHelper.CreateEmptyResponse(code);
+        }
         public IActionResult RespondJson(object result, HttpStatusCode code = HttpStatusCode.OK)
         {
             return ResponseHelper.CreateJsonResponse(result, code, jsonSettings);
@@ -111,20 +114,34 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
         }
 
 
-
-
-        public IActionResult RespondError(Exception ex, bool wrapResponse, SystemNet.HttpStatusCode code = SystemNet.HttpStatusCode.InternalServerError)
+        public IActionResult RespondNotFound()
         {
-            var errorInfo = new Common.Models.ErrorInfo() { Message = ex.Message, FullMessage = ex.ToString() };
-            if (wrapResponse)
+            return RespondError(null, false, HttpStatusCode.NotFound);
+        }
+        public IActionResult RespondNotFound(Exception ex, bool wrapResponse)
+        {
+            return RespondError(ex, wrapResponse, HttpStatusCode.NotFound);
+        }
+
+        public IActionResult RespondError(Exception? ex, bool wrapResponse, SystemNet.HttpStatusCode code = SystemNet.HttpStatusCode.InternalServerError)
+        {
+            if (ex != null)
             {
-                var response = new Response();
-                response.Errors.Add(errorInfo);
-                return RespondJson(response, code);
+                var errorInfo = new Common.Models.ErrorInfo() { Message = ex.Message, FullMessage = ex.ToString() };
+                if (wrapResponse)
+                {
+                    var response = new Response();
+                    response.Errors.Add(errorInfo);
+                    return RespondJson(response, code);
+                }
+                else
+                {
+                    return RespondJson(errorInfo, code);
+                }
             }
             else
             {
-                return RespondJson(errorInfo, code);
+                return RespondEmpty(code);
             }
         }
         public IActionResult RespondEmpty(bool wrapResponse)

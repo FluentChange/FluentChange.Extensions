@@ -442,7 +442,11 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             {
                 var idGuid = GetId(req);
                 var resultRead = predicate.Invoke(service).Invoke(idGuid);
-                return Respond<OutgoingServiceModel, OutgoingModel>(resultRead, wrapout);
+                if (resultRead != null)
+                {
+                    return Respond<OutgoingServiceModel, OutgoingModel>(resultRead, wrapout);
+                }
+                return RespondNotFound(new Exception(typeof(OutgoingModel).Name + " with id " + idGuid + " and service "+ typeof(TService).Name+ " not found"), wrapout);
             };
         }
         protected void MakeGetFuncList<OutgoingServiceModel, OutgoingModel>(Func<TService, Func<IEnumerable<OutgoingServiceModel>>> predicate)
@@ -469,6 +473,9 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             };
         }
 
+
+
+      
 
         protected void MakePostFunc<IngoingModel, IngoingServiceModel, OutgoingServiceModel, OutgoingModel>(Func<TService, Func<OutgoingServiceModel>> predicate)
             where IngoingModel : class
@@ -522,6 +529,24 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
 
             };
         }
+        protected void MakePostFunc<IngoingModel, IngoingServiceModel, OutgoingServiceModel, OutgoingModel>(Func<TService, Func<IngoingServiceModel, Task<OutgoingServiceModel>>> predicate)
+          where IngoingModel : class
+          where IngoingServiceModel : class
+          where OutgoingServiceModel : class
+          where OutgoingModel : class
+        {
+            postFunc = async (TService service, HttpRequest req) =>
+            {
+                IngoingServiceModel createData = await GetRequestBody<IngoingServiceModel, IngoingModel>(req, unwrap);
+
+                if (createData == null) throw new ArgumentNullException();
+                var resultCreated = await predicate.Invoke(service).Invoke(createData);
+
+                return Respond<OutgoingServiceModel, OutgoingModel>(resultCreated, wrapout);
+
+            };
+        }
+
         protected void MakePostWithIdFunc<IngoingModel, IngoingServiceModel, OutgoingServiceModel, OutgoingModel>(Func<TService, Func<Guid, IngoingServiceModel, OutgoingServiceModel>> predicate)
          where IngoingModel : class
          where IngoingServiceModel : class
@@ -766,13 +791,19 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             MakeGetWithIdFuncList<ServiceModel, ApiModel>(predicate);
             return this;
         }
-        public ResponseBuilderWithIdEntityServiceWithModels<ServiceModel, ApiModel, TService> OnGetWithId(Func<TService, Func<Guid, ServiceModel>> predicate)
+        
+        #nullable enable annotations
+        public ResponseBuilderWithIdEntityServiceWithModels<ServiceModel, ApiModel, TService> OnGetWithId(Func<TService, Func<Guid, ServiceModel?>> predicate)
         {
             MakeGetWithIdFunc<ServiceModel, ApiModel>(predicate);
             return this;
         }
 
-
+        public ResponseBuilderWithIdEntityServiceWithModels<ServiceModel, ApiModel, TService> OnPost(Func<TService, Func<ServiceModel, Task<ServiceModel>>> predicate)
+        {
+            MakePostFunc<ApiModel, ServiceModel, ServiceModel, ApiModel>(predicate);
+            return this;
+        }
         public ResponseBuilderWithIdEntityServiceWithModels<ServiceModel, ApiModel, TService> OnPost(Func<TService, Func<ServiceModel, ServiceModel>> predicate)
         {
             MakePostFunc<ApiModel, ServiceModel, ServiceModel, ApiModel>(predicate);

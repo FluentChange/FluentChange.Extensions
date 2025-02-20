@@ -3,9 +3,9 @@ using AutoMapper.QueryableExtensions;
 using FluentChange.Extensions.Azure.Functions.Helper;
 using System.Linq;
 
-namespace DemoCRUDLFunctions
+namespace SampleFunctions.Mapping
 {
-    public class MapperWrapper: IEntityMapper
+    public class MapperWrapper : IEntityMapper
     {
         private readonly IMapper automapper;
         public MapperWrapper(IMapper automapper)

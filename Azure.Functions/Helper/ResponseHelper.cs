@@ -26,6 +26,11 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
 
     public static class ResponseHelper
     {
+        public static IActionResult CreateEmptyResponse(HttpStatusCode statuscode)
+        {
+            var result = new StatusCodeResult((int)statuscode);           
+            return result;
+        }
         public static IActionResult CreateJsonResponse(object response, HttpStatusCode statuscode, JsonSerializerSettings jsonSerializerSettings = null)
         {
             var json = "";
@@ -55,6 +60,8 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
         {
             return CreateJsonResponse(response, HttpStatusCode.OK, jsonSerializerSettings);
         }
-        
+
+       
+
     }
 }
