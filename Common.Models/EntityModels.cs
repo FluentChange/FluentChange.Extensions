@@ -10,6 +10,12 @@ namespace FluentChange.Extensions.Common.Models
     {
         Guid Id { get; set; }
     }
+
+    public interface ITimeTrackedEntity
+    {
+        DateTime CreatedOn { get; set; }
+        DateTime UpdatedOn { get; set; }
+    }
     public interface ITrackedEntity
     {
         public DateTime CreatedUtc { get; set; }
