@@ -464,7 +464,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
            where OutgoingServiceModel : class
            where OutgoingModel : class
         {
-            getFunc = async (TService service, HttpRequest req) =>
+            getWithIdFunc = async (TService service, HttpRequest req) =>
             {
                 var idGuid = GetId(req);
                 var listResult = predicate.Invoke(service).Invoke(idGuid);

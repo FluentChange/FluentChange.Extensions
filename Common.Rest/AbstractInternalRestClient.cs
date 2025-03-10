@@ -167,7 +167,7 @@ namespace FluentChange.Extensions.Common.Rest
 
         private async Task<T> HandleContentOrError<T>(HttpResponseMessage response)
         {
-            if (response.StatusCode == HttpStatusCode.OK)
+            if (response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Accepted)
             {
                 return await HandleContent<T>(response);
             }
