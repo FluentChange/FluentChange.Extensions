@@ -25,8 +25,14 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
             }
                         
             var response = request.CreateResponse(statuscode);
+            
+            if (response.Headers.Contains("Content-Type"))
+            {
+                response.Headers.Remove("Content-Type");
+            }
             response.Headers.Add("Content-Type", "application/json");
-            response.WriteString(json);
+
+            response.WriteStringAsync(json).Wait();
 
             return response;
         }
