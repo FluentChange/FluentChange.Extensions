@@ -275,7 +275,12 @@ namespace FluentChange.Extensions.Common.Rest
                         }
                         if (route.Contains("{" + param.Key + "?}"))
                         {
-                            route = route.Replace("{" + param.Key + "}", param.Value.ToString());
+                            route = route.Replace("{" + param.Key + "?}", param.Value.ToString());
+                            routevalues.Add(param.Key, param.Value.ToString());
+                        }
+                        if (route.Contains("{*" + param.Key + "}"))
+                        {
+                            route = route.Replace("{*" + param.Key + "}", param.Value.ToString());
                             routevalues.Add(param.Key, param.Value.ToString());
                         }
                     }
