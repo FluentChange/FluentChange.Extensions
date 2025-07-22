@@ -223,15 +223,16 @@ namespace FluentChange.Extensions.Common.Database
             if (id == Guid.Empty) throw new ArgumentNullException("id");
 
             E entity = dbSet.Find(id);
-            if (entity != null)
-            {
-                Delete(entity);
-            }
+            Delete(entity);
+
         }
         public virtual void Delete(E entity)
         {
-            dbSet.Remove(entity);
-            database.SaveChanges();
+            if (entity != null)
+            {
+                dbSet.Remove(entity);
+                database.SaveChanges();
+            }
         }
         public virtual async Task DeleteAsync(Guid id)
         {
@@ -239,15 +240,17 @@ namespace FluentChange.Extensions.Common.Database
             if (id == Guid.Empty) throw new ArgumentNullException(nameof(id));
 
             E entity = await dbSet.FindAsync(id);
-            if (entity != null)
-            {
-                await DeleteAsync(entity);
-            }
+
+            await DeleteAsync(entity);
+
         }
         public virtual async Task DeleteAsync(E entity)
         {
-            dbSet.Remove(entity);
-            await database.SaveChangesAsync();
+            if (entity != null)
+            {
+                dbSet.Remove(entity);
+                await database.SaveChangesAsync();
+            }
         }
         public void DeleteBulk(IEnumerable<E> entities)
         {
