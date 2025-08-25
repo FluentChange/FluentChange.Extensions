@@ -177,9 +177,9 @@ namespace FluentChange.Extensions.System.CodeGen
 
         }
 
-        public void SaveToFiles()
+        public void SaveToFiles(string folder)
         {
-            var path = @"C:\Code\2025\IfficienT.Platform.Core\Logic\Modules\CalcSpace\Calculation\TempSource\";
+            var path = folder;
 
             var assemblyFile = Path.Combine(path, FileName + ".dll");
             var sourceFile = Path.Combine(path, FileName + ".cs");
