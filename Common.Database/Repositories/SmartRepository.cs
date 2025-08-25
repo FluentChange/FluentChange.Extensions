@@ -157,7 +157,7 @@ namespace FluentChange.Extensions.Common.Database
         public virtual void Update(E entity)
         {
             // for direct calls i.e. in unit tests without rest we need to detach 
-            Detach(entity);
+            //Detach(entity);
 
             if (entity == null) throw new ArgumentNullException("entity");
             UpdateCheckAndTrack(entity);
@@ -179,21 +179,46 @@ namespace FluentChange.Extensions.Common.Database
             {
                 //if (detach) Detach(entity);
 
-                if (entity == null) throw new ArgumentNullException("entity");
-                UpdateCheckAndTrack(entity);
-                dbSet.Update(entity);
-                //database.Attach(entity).State = EntityState.Modified;
+                //if (entity == null) throw new ArgumentNullException("entity");
+                //UpdateCheckAndTrack(entity);
+                //dbSet.Update(entity);
+                ////database.Attach(entity).State = EntityState.Modified;
+
+                Update(entity);
             }
 
 
             //dbSet.BatchUpdate(entities);
             database.SaveChanges();
         }
+        public virtual async Task UpdateBulkSaveAsync(IEnumerable<E> entities, bool detach = true)
+        {
+            // for direct calls i.e. in unit tests without rest we need to detach 
+            var tasks = new List<Task>();
+            foreach (var entity in entities)
+            {
+                //if (detach) Detach(entity);
+
+                //if (entity == null) throw new ArgumentNullException("entity");
+                //UpdateCheckAndTrack(entity);
+                //dbSet.Update(entity);
+                ////database.Attach(entity).State = EntityState.Modified;
+
+                var task = UpdateAsync(entity);
+                tasks.Add(task);
+            }
+
+            await Task.WhenAll(tasks);
+
+
+            //dbSet.BatchUpdate(entities);
+            await database.SaveChangesAsync();
+        }
 
 
         public virtual async Task UpdateAsync(E entity)
         {  // for direct calls i.e. in unit tests without rest we need to detach 
-            //Detach(entity);
+            Detach(entity);
 
             if (entity == null) throw new ArgumentNullException("entity");
             UpdateCheckAndTrack(entity);

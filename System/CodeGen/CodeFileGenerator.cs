@@ -166,6 +166,8 @@ namespace FluentChange.Extensions.System.CodeGen
                 if (xy != null)
                 {
                     Console.WriteLine(xy.GetMessage());
+                    var tempSourceFolder = @"C:\Code\2025\IfficienT.Platform.Core\Logic\Modules\CalcSpace\Calculation\TempSource\";
+                    File.WriteAllText(tempSourceFolder + "output.cs", source);
                 }
             }
             else
@@ -177,7 +179,7 @@ namespace FluentChange.Extensions.System.CodeGen
 
         public void SaveToFiles()
         {
-            var path = "C:\\Code\\2023\\Test\\CompileDynamicNetApp\\results";
+            var path = @"C:\Code\2025\IfficienT.Platform.Core\Logic\Modules\CalcSpace\Calculation\TempSource\";
 
             var assemblyFile = Path.Combine(path, FileName + ".dll");
             var sourceFile = Path.Combine(path, FileName + ".cs");
@@ -627,6 +629,16 @@ namespace FluentChange.Extensions.System.CodeGen
                 elseCaseAction.Invoke(builder, indentation + 1);
                 builder.AppendLineIndented(indentation, "}");
             }
+            return builder.ToString();
+
+        }
+        public static string GenerateIfSingleLine(int indentation, string check, Action<StringBuilder> trueCaseAction)
+        {
+            var builder = new StringBuilder();
+            var ifCode = new StringBuilder();
+            trueCaseAction.Invoke(ifCode);
+            builder.AppendLineIndented(indentation, "if (" + check + ") { " + ifCode.ToString() + " }");
+
             return builder.ToString();
 
         }
