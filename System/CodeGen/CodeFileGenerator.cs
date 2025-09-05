@@ -546,11 +546,13 @@ namespace FluentChange.Extensions.System.CodeGen
 
     public class ClassGeneratorHelpers
     {
-        public static string GenerateClassField(string modelName, string fieldName, bool isPrivate, bool initNew)
+        public static string GenerateClassField(string modelName, string fieldName, bool isPrivate, bool initNew, bool isStatic = false, string initParam = "")
         {
             var builder = new StringBuilder();
             if (isPrivate) builder.Append("private ");
             else builder.Append("public ");
+
+            if (isStatic) builder.Append("static ");
 
             builder.Append(modelName + " ");
             builder.Append(fieldName);
@@ -559,10 +561,15 @@ namespace FluentChange.Extensions.System.CodeGen
             {
                 builder.Append(" = new " + modelName + "()");
             }
+            if (!String.IsNullOrEmpty(initParam))
+            {
+                builder.Append(" = " + initParam);
+            }
             builder.Append(";");
 
             return builder.ToString();
         }
+
 
         public static string GenerateMethod(int indentation, string methodName, string returntype, Dictionary<string, Type> parameters, Action<StringBuilder, int> builderAction, bool isOverride = false)
         {
