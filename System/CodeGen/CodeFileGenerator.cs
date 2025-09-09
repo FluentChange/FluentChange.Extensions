@@ -258,6 +258,29 @@ namespace FluentChange.Extensions.System.CodeGen
         protected List<ClassPropertyGenerator> properties = new List<ClassPropertyGenerator>();
         protected List<ClassMethodGenerator> methods = new List<ClassMethodGenerator>();
 
+        public ClassPropertyGenerator CreatePropertyLambda(string type, string name, bool isPrivate, string lambda)
+        {
+            var prop = new ClassPropertyGenerator();
+            prop.Name = name;
+            prop.TypeName = type;
+            prop.IsPrivate = isPrivate;
+            prop.Lambda = lambda;
+            properties.Add(prop);
+            return prop;
+        }
+
+        public ClassPropertyGenerator CreateStaticField(string type, string name, bool isPrivate, string init)
+        {
+            var prop = new ClassPropertyGenerator();
+            prop.Name = name;
+            prop.TypeName = type;
+            prop.IsPrivate = isPrivate;
+            prop.IsStatic = true;
+            prop.IsProperty = false;
+            prop.DefaultInit = init;
+            properties.Add(prop);
+            return prop;
+        }
         public ClassPropertyGenerator CreateProperty(string type, string name, bool isPrivate, string? defaultInit)
         {
             var prop = new ClassPropertyGenerator();
@@ -269,7 +292,7 @@ namespace FluentChange.Extensions.System.CodeGen
             return prop;
         }
         public ClassMethodGenerator CreateMethod(string returnType, string name, Dictionary<string, Type> parameters,
-            bool isPrivate, string region, Action<StringBuilder, int> codeAction = null)
+            bool isPrivate, string region, Action<StringBuilder, int> codeAction = null, bool isOverride = false)
 
         {
             var method = new ClassMethodGenerator();
@@ -279,6 +302,7 @@ namespace FluentChange.Extensions.System.CodeGen
             method.IsPrivate = isPrivate;
             method.Parameters = parameters;
             method.CodeAction = codeAction;
+            method.IsOverride = isOverride;
             methods.Add(method);
             return method;
         }
@@ -317,6 +341,15 @@ namespace FluentChange.Extensions.System.CodeGen
 
 
         private List<ClassRegionGenerator> regions = new List<ClassRegionGenerator>();
+
+
+        public ClassRegionGenerator CreateRegion(string name)
+        {
+            var region = new ClassRegionGenerator();
+            region.Name = name;
+            regions.Add(region);
+            return region;
+        }
         public ClassRegionGenerator CreateRegion(string name, Action<StringBuilder, int> codeAction)
         {
             var region = new ClassRegionGenerator();
@@ -386,6 +419,9 @@ namespace FluentChange.Extensions.System.CodeGen
         internal string Name { get; set; }
         internal string TypeName { get; set; }
         internal bool IsPrivate { get; set; }
+        internal bool IsStatic { get; set; } = false;
+        internal bool IsProperty { get; set; } = true;
+        internal string? Lambda { get; set; }
         internal string DefaultInit;
 
         internal void Generate(StringBuilder builder, int indentation)
@@ -395,10 +431,20 @@ namespace FluentChange.Extensions.System.CodeGen
             if (IsPrivate) propCode = "private ";
             else propCode = "public ";
 
+            if (IsStatic) propCode += "static ";
+
             propCode += TypeName + " ";
             propCode += Name;
-            propCode += " { get; set; }";
-            if (!String.IsNullOrEmpty(DefaultInit)) propCode += " = " + DefaultInit + ";";
+
+            if (String.IsNullOrEmpty(Lambda))
+            {
+                if (IsProperty) propCode += " { get; set; }";
+                if (!String.IsNullOrEmpty(DefaultInit)) propCode += " = " + DefaultInit + ";";
+            }
+            else
+            {
+                propCode += " => " + Lambda + ";";
+            }
 
             builder.AppendLineIndented(indentation, propCode);
         }
@@ -411,6 +457,7 @@ namespace FluentChange.Extensions.System.CodeGen
         internal Action<StringBuilder, int> CodeAction;
         internal Dictionary<string, Type> Parameters;
         internal bool IsPrivate;
+        internal bool IsOverride = false;
 
         public CodeLinesGenerator Code = new CodeLinesGenerator();
 
@@ -430,6 +477,8 @@ namespace FluentChange.Extensions.System.CodeGen
 
             var modifiers = "public";
             if (IsPrivate) modifiers = "private";
+
+            if (IsOverride) modifiers += " override";
 
             builder.AppendLineIndented(indentation, modifiers + " " + returnTypeName + " " + Name + "(" + parameterString + ")");
             builder.AppendLineIndented(indentation, "{");
@@ -569,7 +618,20 @@ namespace FluentChange.Extensions.System.CodeGen
 
             return builder.ToString();
         }
+        public static string GenerateClassFieldLamda(string modelName, string fieldName, bool isPrivate, string lambda)
+        {
+            var builder = new StringBuilder();
+            if (isPrivate) builder.Append("private ");
+            else builder.Append("public ");
 
+            builder.Append(modelName + " ");
+            builder.Append(fieldName);
+            builder.Append(" => " + lambda);
+
+            builder.Append(";");
+
+            return builder.ToString();
+        }
 
         public static string GenerateMethod(int indentation, string methodName, string returntype, Dictionary<string, Type> parameters, Action<StringBuilder, int> builderAction, bool isOverride = false)
         {
