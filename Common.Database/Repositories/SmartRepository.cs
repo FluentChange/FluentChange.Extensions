@@ -16,7 +16,7 @@ namespace FluentChange.Extensions.Common.Database
         protected readonly D database;
         private DbSet<E> dbSet;
         private UserContextService contextUser;
-        private SpaceContextService contextSpace;
+        //private SpaceContextService contextSpace;
 
         string errorMessage = string.Empty;
         private bool generalAllowInsertWithNewId = false;
@@ -27,13 +27,13 @@ namespace FluentChange.Extensions.Common.Database
         private static bool isSpaceDependendEntity = typeof(ISpaceDependendEntity).IsAssignableFrom(eType);
 
 
-        public SmartRepository(D database, UserContextService userContext, SpaceContextService contextSpace, bool allowInsertWithNewId = false)
+        public SmartRepository(D database, UserContextService userContext, bool allowInsertWithNewId = false)
         {
             this.database = database;
             dbSet = database.Set<E>();
             this.generalAllowInsertWithNewId = allowInsertWithNewId;
             this.contextUser = userContext;
-            this.contextSpace = contextSpace;
+            //this.contextSpace = contextSpace;
         }
 
         #region READ
@@ -49,11 +49,11 @@ namespace FluentChange.Extensions.Common.Database
             return All().Where(e => ((ISpaceDependendEntity)e).SpaceId == spaceId);
         }
 
-        public IQueryable<E> AllForCurrentSpace()
-        {
-            contextSpace.EnsureExist();
-            return AllFor(contextSpace.CurrentId);
-        }
+        //public IQueryable<E> AllForCurrentSpace()
+        //{
+        //    contextSpace.EnsureExist();
+        //    return AllFor(contextSpace.CurrentId);
+        //}
 
         public virtual E GetById(Guid id)
         {
@@ -146,7 +146,7 @@ namespace FluentChange.Extensions.Common.Database
                 CheckForIdInsert(entity);
                 TrackDateCreatedIfNeeded(entity);
                 TrackUserCreatedIfNeeded(entity);
-                TrackSpaceIfNeeded(entity);
+                //TrackSpaceIfNeeded(entity);
             }
         }
 
@@ -235,7 +235,7 @@ namespace FluentChange.Extensions.Common.Database
         {
             TrackDateUpdatedIfNeeded(entity);
             TrackUserUpdatedIfNeeded(entity);
-            CheckSpaceIfNeededOnInsert(entity);
+            //CheckSpaceIfNeededOnInsert(entity);
         }
 
         #endregion
@@ -248,10 +248,10 @@ namespace FluentChange.Extensions.Common.Database
             if (id == Guid.Empty) throw new ArgumentNullException("id");
 
             E entity = dbSet.Find(id);
-            Delete(entity);
+            DeleteSave(entity);
 
         }
-        public virtual void Delete(E entity)
+        public virtual void DeleteSave(E entity)
         {
             if (entity != null)
             {
@@ -259,17 +259,17 @@ namespace FluentChange.Extensions.Common.Database
                 database.SaveChanges();
             }
         }
-        public virtual async Task DeleteAsync(Guid id)
+        public virtual async Task DeleteSaveAsync(Guid id)
         {
             CheckIfIdSupported();
             if (id == Guid.Empty) throw new ArgumentNullException(nameof(id));
 
             E entity = await dbSet.FindAsync(id);
 
-            await DeleteAsync(entity);
+            await DeleteSaveAsync(entity);
 
         }
-        public virtual async Task DeleteAsync(E entity)
+        public virtual async Task DeleteSaveAsync(E entity)
         {
             if (entity != null)
             {
@@ -277,7 +277,7 @@ namespace FluentChange.Extensions.Common.Database
                 await database.SaveChangesAsync();
             }
         }
-        public void DeleteBulk(IEnumerable<E> entities)
+        public void DeleteSave(IEnumerable<E> entities)
         {
             if (entities == null) throw new ArgumentNullException(nameof(entities));
 
@@ -394,31 +394,31 @@ namespace FluentChange.Extensions.Common.Database
             }
         }
 
-        private void TrackSpaceIfNeeded(E entity)
-        {
-            if (isSpaceDependendEntity)
-            {
-                contextSpace.EnsureExist();
-                if (((ISpaceDependendEntity)entity).SpaceId != Guid.Empty
-                   && ((ISpaceDependendEntity)entity).SpaceId != contextSpace.CurrentId)
-                {
-                    throw new ArgumentException("SpaceId should not be set or has to be same as current space");
-                }
-                ((ISpaceDependendEntity)entity).SpaceId = contextSpace.CurrentId;
-            }
-        }
-        private void CheckSpaceIfNeededOnInsert(E entity)
-        {
-            if (isSpaceDependendEntity)
-            {
-                contextSpace.EnsureExist();
-                if (((ISpaceDependendEntity)entity).SpaceId != Guid.Empty
-                   && ((ISpaceDependendEntity)entity).SpaceId != contextSpace.CurrentId)
-                {
-                    throw new ArgumentException("SpaceId should not be set or has to be same as current space");
-                }
-            }
-        }
+        //private void TrackSpaceIfNeeded(E entity)
+        //{
+        //    if (isSpaceDependendEntity)
+        //    {
+        //        contextSpace.EnsureExist();
+        //        if (((ISpaceDependendEntity)entity).SpaceId != Guid.Empty
+        //           && ((ISpaceDependendEntity)entity).SpaceId != contextSpace.CurrentId)
+        //        {
+        //            throw new ArgumentException("SpaceId should not be set or has to be same as current space");
+        //        }
+        //        ((ISpaceDependendEntity)entity).SpaceId = contextSpace.CurrentId;
+        //    }
+        //}
+        //private void CheckSpaceIfNeededOnInsert(E entity)
+        //{
+        //    if (isSpaceDependendEntity)
+        //    {
+        //        contextSpace.EnsureExist();
+        //        if (((ISpaceDependendEntity)entity).SpaceId != Guid.Empty
+        //           && ((ISpaceDependendEntity)entity).SpaceId != contextSpace.CurrentId)
+        //        {
+        //            throw new ArgumentException("SpaceId should not be set or has to be same as current space");
+        //        }
+        //    }
+        //}
 
         #endregion
 

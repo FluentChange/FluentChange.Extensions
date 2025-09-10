@@ -68,10 +68,10 @@ namespace FluentChange.Extensions.Common.Database
         Task UpdateSaveAsync(T entity);
 
         void Delete(Guid id);
-        void Delete(T entity);
-        Task DeleteAsync(Guid id);
-        Task DeleteAsync(T entity);
-        void DeleteBulk(IEnumerable<T> entities);
+        void DeleteSave(T entity);
+        Task DeleteSaveAsync(Guid id);
+        Task DeleteSaveAsync(T entity);
+        void DeleteSave(IEnumerable<T> entities);
 
         bool Exist(Guid id);
         Task<bool> ExistAsync(Guid id);

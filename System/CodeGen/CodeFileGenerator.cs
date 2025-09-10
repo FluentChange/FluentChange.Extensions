@@ -215,11 +215,12 @@ namespace FluentChange.Extensions.System.CodeGen
         private List<ClassGenerator> classes = new List<ClassGenerator>();
         internal string Name { get; set; }
 
-        public ClassGenerator CreateClass(string name, string baseclass = null)
+        public ClassGenerator CreateClass(string name, string baseclass = null, string interfaceName = null)
         {
             var @class = new ClassGenerator();
             @class.Name = name;
             @class.BaseClass = baseclass;
+            @class.Interface = interfaceName;
             classes.Add(@class);
             return @class;
         }
@@ -338,6 +339,7 @@ namespace FluentChange.Extensions.System.CodeGen
     {
         internal string Name { get; set; }
         internal string BaseClass { get; set; }
+        internal string Interface { get; set; }
 
 
         private List<ClassRegionGenerator> regions = new List<ClassRegionGenerator>();
@@ -370,15 +372,22 @@ namespace FluentChange.Extensions.System.CodeGen
 
         internal void Generate(StringBuilder builder, int indentation)
         {
-            if (String.IsNullOrEmpty(BaseClass))
-            {
-                builder.AppendLineIndented(indentation, "public class " + Name);
-            }
-            else
-            {
-                builder.AppendLineIndented(indentation, "public class " + Name + " : " + BaseClass);
-            }
+            var inheritance = "";
 
+            if (!String.IsNullOrEmpty(Interface))
+            {
+                inheritance = Interface;
+            }
+            if (!String.IsNullOrEmpty(BaseClass))
+            {
+                if (!String.IsNullOrEmpty(inheritance)) inheritance += ", ";
+                inheritance = BaseClass;
+            }
+            
+
+            inheritance = " : " + inheritance;
+
+            builder.AppendLineIndented(indentation, "public class " + Name + inheritance);
             builder.AppendLineIndented(indentation, "{");
             foreach (var region in regions)
             {

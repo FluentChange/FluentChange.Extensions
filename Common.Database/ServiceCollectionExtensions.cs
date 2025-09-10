@@ -15,7 +15,7 @@ namespace FluentChange.Extensions.Common.Database
             services.AddScoped<TenantContextService>();
             services.AddScoped<UserContextService>();
             services.AddScoped<ClientContextService>();
-            services.AddScoped<SpaceContextService>();
+            //services.AddScoped<SpaceContextService>();
             
         }
     }
