@@ -1,26 +1,28 @@
 ﻿using FluentChange.Extensions.System.Helper;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Emit;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis;
 
 namespace FluentChange.Extensions.System.CodeGen
 {
 
     public class CodeGenerator
     {
-        private List<CodeResultGenerator> files = new List<CodeResultGenerator>();
+        public List<CodeResultGenerator> Files = new List<CodeResultGenerator>();
         public CodeFileGenerator CreateFile(string path, string filename)
         {
             var fileGen = new CodeFileGenerator();
             fileGen.FilePath = path;
             fileGen.FileName = filename;
 
-            files.Add(fileGen);
+            Files.Add(fileGen);
             return fileGen;
         }
 
@@ -30,16 +32,19 @@ namespace FluentChange.Extensions.System.CodeGen
             fileGen.FilePath = path;
             fileGen.FileName = filename;
 
-            files.Add(fileGen);
+            Files.Add(fileGen);
             return fileGen;
         }
 
-        public void Generate()
+        public bool Generate()
         {
-            foreach (var file in files)
+           
+            
+            foreach (var file in Files)
             {
                 file.Generate();
             }
+            return Files.All(f => f.Success);
         }
     }
 
@@ -50,6 +55,10 @@ namespace FluentChange.Extensions.System.CodeGen
         internal String FileName;
 
         protected List<NamespaceGenerator> namespaces = new List<NamespaceGenerator>();
+
+        public bool Success = false;
+        public string Source { get; protected set; }
+        public ImmutableArray<Diagnostic> GenerationDiagnostics { get; protected set; }
 
         public CodeResultGenerator AddUsing(string reference)
         {
@@ -91,10 +100,16 @@ namespace FluentChange.Extensions.System.CodeGen
     {
         internal List<String> AssemblyLocations = new List<String>();
 
+        
         public MemoryStream StreamSource;
         public MemoryStream StreamLib;
         public MemoryStream StreamPdb;
-        public bool Success = false;
+
+
+        //public string Source { get; private set; }
+        //public ImmutableArray<Diagnostic> GenerationDiagnostics { get; private set; }
+
+
         public CodeCompiledLibGenerator AddAssemblyByType(Type type)
         {
             AddAssembly(type.Assembly);
@@ -132,15 +147,15 @@ namespace FluentChange.Extensions.System.CodeGen
 
         internal override void Generate()
         {
-            var source = GenerateCode();
+            Source = GenerateCode();
             StreamSource = new MemoryStream();
 
             var writer = new StreamWriter(StreamSource);
-            writer.Write(source);
+            writer.Write(Source);
             writer.Flush();
             StreamSource.Position = 0;
 
-            var syntaxTree = CSharpSyntaxTree.ParseText(source);
+            var syntaxTree = CSharpSyntaxTree.ParseText(Source);
 
             var references = new List<MetadataReference>();
             //references.Add(MetadataReference.CreateFromFile(typeof(object).Assembly.Location));
@@ -162,13 +177,8 @@ namespace FluentChange.Extensions.System.CodeGen
             var emitResult = compilation.Emit(StreamLib, StreamPdb);
             if (!emitResult.Success)
             {
-                var xy = emitResult.Diagnostics.FirstOrDefault();
-                if (xy != null)
-                {
-                    Console.WriteLine(xy.GetMessage());
-                    var tempSourceFolder = @"C:\Code\2025\IfficienT.Platform.Core\Logic\Modules\CalcSpace\Calculation\TempSource\";
-                    File.WriteAllText(tempSourceFolder + "output.cs", source);
-                }
+                GenerationDiagnostics = emitResult.Diagnostics;
+                Success = false;               
             }
             else
             {
