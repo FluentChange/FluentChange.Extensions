@@ -1,31 +1,29 @@
-﻿using FluentChange.Extensions.Common.Models.Rest;
+using FluentChange.Extensions.Common.Models.Rest;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker.Http;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using SystemNet = System.Net;
 
 namespace FluentChange.Extensions.Azure.Functions.Helper
 {
-
-    public abstract class AbstractResponseHelpersNew
+    public abstract class AbstractResponseHelpersIsolated
     {
         private readonly IEntityMapper mapper;
         protected JsonSerializerOptions? jsonOptions;
-        public AbstractResponseHelpersNew(IEntityMapper mapper, JsonSerializerOptions? jsonOptions)
+
+        public AbstractResponseHelpersIsolated(IEntityMapper mapper, JsonSerializerOptions? jsonOptions)
         {
             this.mapper = mapper;
             this.jsonOptions = jsonOptions;
         }
 
-        public AbstractResponseHelpersNew WithJson(JsonSerializerOptions? options)
+        public AbstractResponseHelpersIsolated WithJson(JsonSerializerOptions options)
         {
             this.jsonOptions = options;
             return this;
@@ -34,7 +32,6 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
         protected async Task<TServiceModel> GetRequestBody<TServiceModel, TOutputModel>(HttpRequest req, bool unwrapRequest) where TServiceModel : class where TOutputModel : class
         {
             if (req.Body == null) throw new ArgumentNullException();
-            //if (req.Body.Length == 0) throw new ArgumentNullException();
             var mapRequest = (typeof(TServiceModel) != typeof(TOutputModel));
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
@@ -57,7 +54,7 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
                 if (mapRequest)
                 {
                     var entity = JsonHelper.Deserialize<TOutputModel>(requestBody, jsonOptions);
-                    var entityMapped = mapper.MapTo<TServiceModel>(entity);
+                    var entityMapped = mapper.MapTo<TServiceModel>(entity!);
                     return entityMapped;
                 }
                 else
@@ -67,10 +64,10 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
                 }
             }
         }
+
         protected async Task<TServiceModel> GetRequestBody<TServiceModel, TOutputModel>(HttpRequestData req, bool unwrapRequest) where TServiceModel : class where TOutputModel : class
         {
             if (req.Body == null) throw new ArgumentNullException();
-            //if (req.Body.Length == 0) throw new ArgumentNullException();
             var mapRequest = (typeof(TServiceModel) != typeof(TOutputModel));
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
@@ -93,7 +90,7 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
                 if (mapRequest)
                 {
                     var entity = JsonHelper.Deserialize<TOutputModel>(requestBody, jsonOptions);
-                    var entityMapped = mapper.MapTo<TServiceModel>(entity);
+                    var entityMapped = mapper.MapTo<TServiceModel>(entity!);
                     return entityMapped;
                 }
                 else
@@ -104,69 +101,64 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
             }
         }
 
-        public IActionResult RespondEmpty(HttpStatusCode code = HttpStatusCode.OK)
+        public HttpResponseData RespondEmpty(HttpRequestData req, HttpStatusCode code = HttpStatusCode.OK)
         {
-            return ResponseHelper.CreateEmptyResponse(code);
+            return ResponseHelperIsolated.CreateEmptyResponse(req, code);
         }
-        public IActionResult RespondJson(object result, HttpStatusCode code = HttpStatusCode.OK)
+        public HttpResponseData RespondJson(HttpRequestData req, object result, HttpStatusCode code = HttpStatusCode.OK)
         {
-            return ResponseHelper.CreateJsonResponse(result, code, jsonOptions);
+            return ResponseHelperIsolated.CreateJsonResponse(req, result, code, jsonOptions);
         }
-        public IActionResult RespondWrapped<TModel>(TModel result) where TModel : class
-        {
-            var wrappedResponse = new DataResponse<TModel>();
-            wrappedResponse.Data = result;
-            return RespondJson(wrappedResponse);
-        }
-        public IActionResult RespondWrappedIsolated<TModel>(TModel result) where TModel : class
+        public HttpResponseData RespondWrapped<TModel>(HttpRequestData req, TModel result) where TModel : class
         {
             var wrappedResponse = new DataResponse<TModel>();
             wrappedResponse.Data = result;
-            return RespondJson(wrappedResponse);
+            return RespondJson(req, wrappedResponse);
         }
-        public IActionResult RespondWrappedList<TServiceModel>(IEnumerable<TServiceModel> results) where TServiceModel : class
+
+        public HttpResponseData RespondWrappedList<TServiceModel>(HttpRequestData req, IEnumerable<TServiceModel> results) where TServiceModel : class
         {
             var wrappedResponse = new DataResponse<IEnumerable<TServiceModel>>();
             wrappedResponse.Data = results.ToList();
-            return RespondJson(wrappedResponse);
+            return RespondJson(req, wrappedResponse);
         }
-        public IActionResult RespondMapped<TServiceModel, TOutputModel>(TServiceModel result) where TServiceModel : class where TOutputModel : class
+        public HttpResponseData RespondMapped<TServiceModel, TOutputModel>(HttpRequestData req, TServiceModel result) where TServiceModel : class where TOutputModel : class
         {
             var mappedResult = mapper.MapTo<TOutputModel>(result);
-            return RespondJson(mappedResult);
+            return RespondJson(req, mappedResult);
         }
-        public IActionResult RespondMappedList<TServiceModel, TOutputModel>(IEnumerable<TServiceModel> results) where TServiceModel : class where TOutputModel : class
+        public HttpResponseData RespondMappedList<TServiceModel, TOutputModel>(HttpRequestData req, IEnumerable<TServiceModel> results) where TServiceModel : class where TOutputModel : class
         {
             var mappedResults = mapper.ProjectTo<TOutputModel>(results.ToList().AsQueryable());
-            return RespondJson(mappedResults);
+            return RespondJson(req, mappedResults);
         }
-        public IActionResult RespondMappedAndWrapped<TServiceModel, TOutputModel>(TServiceModel result) where TServiceModel : class where TOutputModel : class
+        public HttpResponseData RespondMappedAndWrapped<TServiceModel, TOutputModel>(HttpRequestData req, TServiceModel result) where TServiceModel : class where TOutputModel : class
         {
             //if (IsGenericList(typeof(TServiceModel)))
             //{
 
             //    return RespondMappedAndWrappedList<TServiceModel, TOutputModel>(result);
             //}
-            var mappedResult = mapper.MapTo<TOutputModel>(result);           
-            return RespondWrapped(mappedResult);
+            var mappedResult = mapper.MapTo<TOutputModel>(result);
+            return RespondWrapped(req, mappedResult);
         }
-        public IActionResult RespondMappedAndWrappedList<TServiceModel, TOutputModel>(IEnumerable<TServiceModel> results) where TServiceModel : class where TOutputModel : class
+        public HttpResponseData RespondMappedAndWrappedList<TServiceModel, TOutputModel>(HttpRequestData req, IEnumerable<TServiceModel> results) where TServiceModel : class where TOutputModel : class
         {
             var mappedResults = mapper.ProjectTo<TOutputModel>(results.ToList().AsQueryable());
-            return RespondWrappedList(mappedResults);
+            return RespondWrappedList(req, mappedResults);
         }
 
 
-        public IActionResult RespondNotFound()
+        public HttpResponseData RespondNotFound(HttpRequestData req)
         {
-            return RespondError(null, false, HttpStatusCode.NotFound);
+            return RespondError(req, null, false, HttpStatusCode.NotFound);
         }
-        public IActionResult RespondNotFound(Exception ex, bool wrapResponse)
+        public HttpResponseData RespondNotFound(HttpRequestData req, Exception ex, bool wrapResponse)
         {
-            return RespondError(ex, wrapResponse, HttpStatusCode.NotFound);
+            return RespondError(req, ex, wrapResponse, HttpStatusCode.NotFound);
         }
 
-        public IActionResult RespondError(Exception? ex, bool wrapResponse, SystemNet.HttpStatusCode code = SystemNet.HttpStatusCode.InternalServerError)
+        public HttpResponseData RespondError(HttpRequestData req, Exception? ex, bool wrapResponse, SystemNet.HttpStatusCode code = SystemNet.HttpStatusCode.InternalServerError)
         {
             if (ex != null)
             {
@@ -175,32 +167,32 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
                 {
                     var response = new Response();
                     response.Errors.Add(errorInfo);
-                    return RespondJson(response, code);
+                    return RespondJson(req, response, code);
                 }
                 else
                 {
-                    return RespondJson(errorInfo, code);
+                    return RespondJson(req, errorInfo, code);
                 }
             }
             else
             {
-                return RespondEmpty(code);
+                return RespondEmpty(req, code);
             }
         }
-        public IActionResult RespondEmpty(bool wrapResponse)
+        public HttpResponseData RespondEmpty(HttpRequestData req, bool wrapResponse)
         {
             if (wrapResponse)
             {
                 var response = new Response();
-                return RespondJson(response);
+                return RespondJson(req, response);
             }
             else
             {
-                return RespondJson(null);
+                return RespondJson(req, null);
             }
         }
 
-        protected IActionResult Respond<TServiceModel, TOutputModel>(TServiceModel result, bool wrapResponse) where TServiceModel : class where TOutputModel : class
+        protected HttpResponseData Respond<TServiceModel, TOutputModel>(HttpRequestData req, TServiceModel result, bool wrapResponse) where TServiceModel : class where TOutputModel : class
         {
             var typeInput = typeof(TServiceModel);
             var mapResponse = (typeof(TServiceModel) != typeof(TOutputModel));
@@ -209,53 +201,26 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
             {
                 if (mapResponse)
                 {
-                    return RespondMappedAndWrapped<TServiceModel, TOutputModel>(result);
+                    return RespondMappedAndWrapped<TServiceModel, TOutputModel>(req, result);
                 }
                 else
                 {
-                    return RespondWrapped(result);
+                    return RespondWrapped(req, result);
                 }
             }
             else
             {
                 if (mapResponse)
                 {
-                    return RespondMapped<TServiceModel, TOutputModel>(result);
+                    return RespondMapped<TServiceModel, TOutputModel>(req, result);
                 }
                 else
                 {
-                    return RespondJson(result);
+                    return RespondJson(req, result);
                 }
             }
         }
-        protected IActionResult RespondIsolated<TServiceModel, TOutputModel>(TServiceModel result, bool wrapResponse) where TServiceModel : class where TOutputModel : class
-        {
-            var typeInput = typeof(TServiceModel);
-            var mapResponse = (typeof(TServiceModel) != typeof(TOutputModel));
 
-            if (wrapResponse)
-            {
-                if (mapResponse)
-                {
-                    return RespondMappedAndWrapped<TServiceModel, TOutputModel>(result);
-                }
-                else
-                {
-                    return RespondWrapped(result);
-                }
-            }
-            else
-            {
-                if (mapResponse)
-                {
-                    return RespondMapped<TServiceModel, TOutputModel>(result);
-                }
-                else
-                {
-                    return RespondJson(result);
-                }
-            }
-        }
         private static bool IsGenericList(Type typeInput)
         {
             var isList = false;
@@ -272,30 +237,30 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
             return isList;
         }
 
-        protected IActionResult RespondList<TServiceModel, TOutputModel>(IEnumerable<TServiceModel> results, bool wrapResponse) where TServiceModel : class where TOutputModel : class
+        protected HttpResponseData RespondList<TServiceModel, TOutputModel>(HttpRequestData req, IEnumerable<TServiceModel> results, bool wrapResponse) where TServiceModel : class where TOutputModel : class
         {
             var mapResponse = (typeof(TServiceModel) != typeof(TOutputModel));
             if (wrapResponse)
             {
                 if (mapResponse)
                 {
-                    return RespondMappedAndWrappedList<TServiceModel, TOutputModel>(results);
+                    return RespondMappedAndWrappedList<TServiceModel, TOutputModel>(req, results);
                 }
                 else
                 {
-                    return RespondWrappedList(results);
+                    return RespondWrappedList(req, results);
                 }
             }
             else
             {
                 if (mapResponse)
                 {
-                    return RespondMappedList<TServiceModel, TOutputModel>(results);
+                    return RespondMappedList<TServiceModel, TOutputModel>(req, results);
                 }
                 else
                 {
 
-                    return RespondJson(results);
+                    return RespondJson(req, results);
                 }
             }
         }

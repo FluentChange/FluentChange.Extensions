@@ -1,15 +1,14 @@
-﻿using FluentChange.Extensions.Azure.Functions.Helper;
+using FluentChange.Extensions.Azure.Functions.Helper;
 using FluentChange.Extensions.Azure.Functions.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace FluentChange.Extensions.Azure.Functions.CRUDL
@@ -17,8 +16,8 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
     public class ResponseBuilderWithId
     {
         private readonly IServiceProvider provider;
-        private Func<HttpRequest, ILogger, Task> contextCreateFunc;
-        private JsonSerializerSettings jsonSettings;
+        private Func<HttpRequest, ILogger, Task>? contextCreateFunc;
+        private JsonSerializerOptions? jsonOptions;
 
         public ResponseBuilderWithId(IServiceProvider provider)
         {
@@ -27,12 +26,13 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
 
         public ResponseBuilderWithIdEntity<T, T> ForEntity<T>() where T : class
         {
-            var builder = new ResponseBuilderWithIdEntity<T, T>(provider, contextCreateFunc, jsonSettings);
+            var builder = new ResponseBuilderWithIdEntity<T, T>(provider, contextCreateFunc, jsonOptions);
             return builder;
         }
+
         public ResponseBuilderWithIdEntity<T, M> ForEntityWithMapping<T, M>() where T : class where M : class
         {
-            var builder = new ResponseBuilderWithIdEntity<T, M>(provider, contextCreateFunc, jsonSettings);
+            var builder = new ResponseBuilderWithIdEntity<T, M>(provider, contextCreateFunc, jsonOptions);
             return builder;
         }
 
@@ -41,9 +41,9 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             return await ForEntity<T>().UseInterface<S>().Handle(req, log);
         }
 
-        public void WithJson(JsonSerializerSettings jsonSettings)
+        public void WithJson(JsonSerializerOptions jsonOptions)
         {
-            this.jsonSettings = jsonSettings;
+            this.jsonOptions = jsonOptions;
         }
 
         public async Task<IActionResult> HandleAndMap<T, M, S>(HttpRequest req, ILogger log) where T : class where M : class where S : class, ICRUDLServiceWithId<T>
@@ -85,7 +85,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             if (service == null) throw new NullReferenceException(nameof(service));
             if (mapper == null) throw new NullReferenceException(nameof(mapper));
 
-            var builder = new ResponseBuilderWithIdEntityService<TServiceModel>(service, contextCreateFunc, mapper, jsonSettings);
+            var builder = new ResponseBuilderWithIdEntityService<TServiceModel>(service, contextCreateFunc, mapper, jsonOptions);
             return builder;
         }
 
@@ -110,13 +110,13 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         private readonly IServiceProvider provider;
         //private readonly bool usesMapping;
         private readonly Func<HttpRequest, ILogger, Task> contextCreateFunc;
-        private readonly JsonSerializerSettings jsonSettings;
-        public ResponseBuilderWithIdEntity(IServiceProvider provider, Func<HttpRequest, ILogger, Task> contextCreateFunc, JsonSerializerSettings jsonSettings)
+        private readonly JsonSerializerOptions? jsonOptions;
+        public ResponseBuilderWithIdEntity(IServiceProvider provider, Func<HttpRequest, ILogger, Task> contextCreateFunc, JsonSerializerOptions? jsonOptions)
         {
             this.provider = provider;
             //this.usesMapping = !(typeof(T).Equals(typeof(M)));
             this.contextCreateFunc = contextCreateFunc;
-            this.jsonSettings = jsonSettings;
+            this.jsonOptions = jsonOptions;
         }
 
         public ResponseBuilderWithIdEntityServiceWithModels<T, M, S> Use<S>() where S : class
@@ -126,7 +126,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             if (service == null) throw new NullReferenceException(nameof(service));
             if (mapper == null) throw new NullReferenceException(nameof(mapper));
 
-            var builder = new ResponseBuilderWithIdEntityServiceWithModels<T, M, S>(service, contextCreateFunc, mapper, jsonSettings);
+            var builder = new ResponseBuilderWithIdEntityServiceWithModels<T, M, S>(service, contextCreateFunc, mapper, jsonOptions);
             return builder;
         }
 
@@ -138,7 +138,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             if (service == null) throw new NullReferenceException(nameof(service));
             if (mapper == null) throw new NullReferenceException(nameof(mapper));
 
-            var builder = new ResponseBuilderWithIdEntityInterfaceService<T, M, S>(service, contextCreateFunc, mapper, jsonSettings);
+            var builder = new ResponseBuilderWithIdEntityInterfaceService<T, M, S>(service, contextCreateFunc, mapper, jsonOptions);
             return builder;
         }
         private IEntityMapper GetMapperService()
@@ -155,13 +155,13 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
     {
         private readonly ResponseBuilderWithIdEntityServiceWithModels<T, M, S> internalBuilder;
         private readonly Func<HttpRequest, ILogger, Task> contextCreateFunc;
-        public ResponseBuilderWithIdEntityInterfaceService(S service, Func<HttpRequest, ILogger, Task> contextCreateFunc, IEntityMapper mapper, JsonSerializerSettings jsonSettings)
+        public ResponseBuilderWithIdEntityInterfaceService(S service, Func<HttpRequest, ILogger, Task> contextCreateFunc, IEntityMapper mapper, JsonSerializerOptions? jsonOptions)
         {
             if (service == null) throw new ArgumentNullException(nameof(service));
             if (mapper == null) throw new ArgumentNullException(nameof(mapper));
             this.contextCreateFunc = contextCreateFunc;
 
-            internalBuilder = new ResponseBuilderWithIdEntityServiceWithModels<T, M, S>(service, contextCreateFunc, mapper, jsonSettings);
+            internalBuilder = new ResponseBuilderWithIdEntityServiceWithModels<T, M, S>(service, contextCreateFunc, mapper, jsonOptions);
             internalBuilder.OnPost(s => s.Create).OnGetWithId(s => s.Read).OnPut(s => s.Update).OnDeleteWithId(s => s.Delete).OnGet<IEnumerable<T>, IEnumerable<M>>(s => s.List);
         }
         public async Task<IActionResult> Handle(HttpRequest req, ILogger log)
@@ -177,7 +177,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
 
         private bool unwrap = false;
         private bool wrapout = false;
-        public ResponseBuilderWithIdEntityService(TService service, Func<HttpRequest, ILogger, Task> contextCreateFunc, IEntityMapper mapper, JsonSerializerSettings jsonSettings) : base(mapper, jsonSettings)
+        public ResponseBuilderWithIdEntityService(TService service, Func<HttpRequest, ILogger, Task> contextCreateFunc, IEntityMapper mapper, JsonSerializerOptions? jsonOptions) : base(mapper, jsonOptions)
         {
             if (service == null) throw new ArgumentNullException(nameof(service));
             if (mapper == null) throw new ArgumentNullException(nameof(mapper));
@@ -741,14 +741,14 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
                 return RespondError(ex, wrapout);
             }
         }
-
+       
     }
 
     public class ResponseBuilderWithIdEntityServiceWithModels<ServiceModel, ApiModel, TService> : ResponseBuilderWithIdEntityService<TService> where TService : class where ServiceModel : class where ApiModel : class
     {
 
 
-        public ResponseBuilderWithIdEntityServiceWithModels(TService service, Func<HttpRequest, ILogger, Task> contextCreateFunc, IEntityMapper mapper, JsonSerializerSettings jsonSettings) : base(service, contextCreateFunc, mapper, jsonSettings)
+        public ResponseBuilderWithIdEntityServiceWithModels(TService service, Func<HttpRequest, ILogger, Task> contextCreateFunc, IEntityMapper mapper, JsonSerializerOptions? jsonOptions) : base(service, contextCreateFunc, mapper, jsonOptions)
         {
 
         }
