@@ -1,26 +1,28 @@
 ﻿using FluentChange.Extensions.System.Helper;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Emit;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis;
 
 namespace FluentChange.Extensions.System.CodeGen
 {
 
     public class CodeGenerator
     {
-        private List<CodeResultGenerator> files = new List<CodeResultGenerator>();
+        public List<CodeResultGenerator> Files = new List<CodeResultGenerator>();
         public CodeFileGenerator CreateFile(string path, string filename)
         {
             var fileGen = new CodeFileGenerator();
             fileGen.FilePath = path;
             fileGen.FileName = filename;
 
-            files.Add(fileGen);
+            Files.Add(fileGen);
             return fileGen;
         }
 
@@ -30,16 +32,19 @@ namespace FluentChange.Extensions.System.CodeGen
             fileGen.FilePath = path;
             fileGen.FileName = filename;
 
-            files.Add(fileGen);
+            Files.Add(fileGen);
             return fileGen;
         }
 
-        public void Generate()
+        public bool Generate()
         {
-            foreach (var file in files)
+           
+            
+            foreach (var file in Files)
             {
                 file.Generate();
             }
+            return Files.All(f => f.Success);
         }
     }
 
@@ -50,6 +55,10 @@ namespace FluentChange.Extensions.System.CodeGen
         internal String FileName;
 
         protected List<NamespaceGenerator> namespaces = new List<NamespaceGenerator>();
+
+        public bool Success = false;
+        public string Source { get; protected set; }
+        public ImmutableArray<Diagnostic> GenerationDiagnostics { get; protected set; }
 
         public CodeResultGenerator AddUsing(string reference)
         {
@@ -91,10 +100,16 @@ namespace FluentChange.Extensions.System.CodeGen
     {
         internal List<String> AssemblyLocations = new List<String>();
 
+        
         public MemoryStream StreamSource;
         public MemoryStream StreamLib;
         public MemoryStream StreamPdb;
-        public bool Success = false;
+
+
+        //public string Source { get; private set; }
+        //public ImmutableArray<Diagnostic> GenerationDiagnostics { get; private set; }
+
+
         public CodeCompiledLibGenerator AddAssemblyByType(Type type)
         {
             AddAssembly(type.Assembly);
@@ -132,15 +147,15 @@ namespace FluentChange.Extensions.System.CodeGen
 
         internal override void Generate()
         {
-            var source = GenerateCode();
+            Source = GenerateCode();
             StreamSource = new MemoryStream();
 
             var writer = new StreamWriter(StreamSource);
-            writer.Write(source);
+            writer.Write(Source);
             writer.Flush();
             StreamSource.Position = 0;
 
-            var syntaxTree = CSharpSyntaxTree.ParseText(source);
+            var syntaxTree = CSharpSyntaxTree.ParseText(Source);
 
             var references = new List<MetadataReference>();
             //references.Add(MetadataReference.CreateFromFile(typeof(object).Assembly.Location));
@@ -162,11 +177,8 @@ namespace FluentChange.Extensions.System.CodeGen
             var emitResult = compilation.Emit(StreamLib, StreamPdb);
             if (!emitResult.Success)
             {
-                var xy = emitResult.Diagnostics.FirstOrDefault();
-                if (xy != null)
-                {
-                    Console.WriteLine(xy.GetMessage());
-                }
+                GenerationDiagnostics = emitResult.Diagnostics;
+                Success = false;               
             }
             else
             {
@@ -175,9 +187,9 @@ namespace FluentChange.Extensions.System.CodeGen
 
         }
 
-        public void SaveToFiles()
+        public void SaveToFiles(string folder)
         {
-            var path = "C:\\Code\\2023\\Test\\CompileDynamicNetApp\\results";
+            var path = folder;
 
             var assemblyFile = Path.Combine(path, FileName + ".dll");
             var sourceFile = Path.Combine(path, FileName + ".cs");
@@ -213,11 +225,12 @@ namespace FluentChange.Extensions.System.CodeGen
         private List<ClassGenerator> classes = new List<ClassGenerator>();
         internal string Name { get; set; }
 
-        public ClassGenerator CreateClass(string name, string baseclass = null)
+        public ClassGenerator CreateClass(string name, string baseclass = null, string interfaceName = null)
         {
             var @class = new ClassGenerator();
             @class.Name = name;
             @class.BaseClass = baseclass;
+            @class.Interface = interfaceName;
             classes.Add(@class);
             return @class;
         }
@@ -256,6 +269,29 @@ namespace FluentChange.Extensions.System.CodeGen
         protected List<ClassPropertyGenerator> properties = new List<ClassPropertyGenerator>();
         protected List<ClassMethodGenerator> methods = new List<ClassMethodGenerator>();
 
+        public ClassPropertyGenerator CreatePropertyLambda(string type, string name, bool isPrivate, string lambda)
+        {
+            var prop = new ClassPropertyGenerator();
+            prop.Name = name;
+            prop.TypeName = type;
+            prop.IsPrivate = isPrivate;
+            prop.Lambda = lambda;
+            properties.Add(prop);
+            return prop;
+        }
+
+        public ClassPropertyGenerator CreateStaticField(string type, string name, bool isPrivate, string init)
+        {
+            var prop = new ClassPropertyGenerator();
+            prop.Name = name;
+            prop.TypeName = type;
+            prop.IsPrivate = isPrivate;
+            prop.IsStatic = true;
+            prop.IsProperty = false;
+            prop.DefaultInit = init;
+            properties.Add(prop);
+            return prop;
+        }
         public ClassPropertyGenerator CreateProperty(string type, string name, bool isPrivate, string? defaultInit)
         {
             var prop = new ClassPropertyGenerator();
@@ -267,7 +303,7 @@ namespace FluentChange.Extensions.System.CodeGen
             return prop;
         }
         public ClassMethodGenerator CreateMethod(string returnType, string name, Dictionary<string, Type> parameters,
-            bool isPrivate, string region, Action<StringBuilder, int> codeAction = null)
+            bool isPrivate, string region, Action<StringBuilder, int> codeAction = null, bool isOverride = false)
 
         {
             var method = new ClassMethodGenerator();
@@ -277,6 +313,7 @@ namespace FluentChange.Extensions.System.CodeGen
             method.IsPrivate = isPrivate;
             method.Parameters = parameters;
             method.CodeAction = codeAction;
+            method.IsOverride = isOverride;
             methods.Add(method);
             return method;
         }
@@ -312,9 +349,19 @@ namespace FluentChange.Extensions.System.CodeGen
     {
         internal string Name { get; set; }
         internal string BaseClass { get; set; }
+        internal string Interface { get; set; }
 
 
         private List<ClassRegionGenerator> regions = new List<ClassRegionGenerator>();
+
+
+        public ClassRegionGenerator CreateRegion(string name)
+        {
+            var region = new ClassRegionGenerator();
+            region.Name = name;
+            regions.Add(region);
+            return region;
+        }
         public ClassRegionGenerator CreateRegion(string name, Action<StringBuilder, int> codeAction)
         {
             var region = new ClassRegionGenerator();
@@ -335,15 +382,22 @@ namespace FluentChange.Extensions.System.CodeGen
 
         internal void Generate(StringBuilder builder, int indentation)
         {
-            if (String.IsNullOrEmpty(BaseClass))
-            {
-                builder.AppendLineIndented(indentation, "public class " + Name);
-            }
-            else
-            {
-                builder.AppendLineIndented(indentation, "public class " + Name + " : " + BaseClass);
-            }
+            var inheritance = "";
 
+            if (!String.IsNullOrEmpty(Interface))
+            {
+                inheritance = Interface;
+            }
+            if (!String.IsNullOrEmpty(BaseClass))
+            {
+                if (!String.IsNullOrEmpty(inheritance)) inheritance += ", ";
+                inheritance = BaseClass;
+            }
+            
+
+            inheritance = " : " + inheritance;
+
+            builder.AppendLineIndented(indentation, "public class " + Name + inheritance);
             builder.AppendLineIndented(indentation, "{");
             foreach (var region in regions)
             {
@@ -384,6 +438,9 @@ namespace FluentChange.Extensions.System.CodeGen
         internal string Name { get; set; }
         internal string TypeName { get; set; }
         internal bool IsPrivate { get; set; }
+        internal bool IsStatic { get; set; } = false;
+        internal bool IsProperty { get; set; } = true;
+        internal string? Lambda { get; set; }
         internal string DefaultInit;
 
         internal void Generate(StringBuilder builder, int indentation)
@@ -393,10 +450,20 @@ namespace FluentChange.Extensions.System.CodeGen
             if (IsPrivate) propCode = "private ";
             else propCode = "public ";
 
+            if (IsStatic) propCode += "static ";
+
             propCode += TypeName + " ";
             propCode += Name;
-            propCode += " { get; set; }";
-            if (!String.IsNullOrEmpty(DefaultInit)) propCode += " = " + DefaultInit + ";";
+
+            if (String.IsNullOrEmpty(Lambda))
+            {
+                if (IsProperty) propCode += " { get; set; }";
+                if (!String.IsNullOrEmpty(DefaultInit)) propCode += " = " + DefaultInit + ";";
+            }
+            else
+            {
+                propCode += " => " + Lambda + ";";
+            }
 
             builder.AppendLineIndented(indentation, propCode);
         }
@@ -409,6 +476,7 @@ namespace FluentChange.Extensions.System.CodeGen
         internal Action<StringBuilder, int> CodeAction;
         internal Dictionary<string, Type> Parameters;
         internal bool IsPrivate;
+        internal bool IsOverride = false;
 
         public CodeLinesGenerator Code = new CodeLinesGenerator();
 
@@ -428,6 +496,8 @@ namespace FluentChange.Extensions.System.CodeGen
 
             var modifiers = "public";
             if (IsPrivate) modifiers = "private";
+
+            if (IsOverride) modifiers += " override";
 
             builder.AppendLineIndented(indentation, modifiers + " " + returnTypeName + " " + Name + "(" + parameterString + ")");
             builder.AppendLineIndented(indentation, "{");
@@ -544,11 +614,13 @@ namespace FluentChange.Extensions.System.CodeGen
 
     public class ClassGeneratorHelpers
     {
-        public static string GenerateClassField(string modelName, string fieldName, bool isPrivate, bool initNew)
+        public static string GenerateClassField(string modelName, string fieldName, bool isPrivate, bool initNew, bool isStatic = false, string initParam = "")
         {
             var builder = new StringBuilder();
             if (isPrivate) builder.Append("private ");
             else builder.Append("public ");
+
+            if (isStatic) builder.Append("static ");
 
             builder.Append(modelName + " ");
             builder.Append(fieldName);
@@ -557,6 +629,24 @@ namespace FluentChange.Extensions.System.CodeGen
             {
                 builder.Append(" = new " + modelName + "()");
             }
+            if (!String.IsNullOrEmpty(initParam))
+            {
+                builder.Append(" = " + initParam);
+            }
+            builder.Append(";");
+
+            return builder.ToString();
+        }
+        public static string GenerateClassFieldLamda(string modelName, string fieldName, bool isPrivate, string lambda)
+        {
+            var builder = new StringBuilder();
+            if (isPrivate) builder.Append("private ");
+            else builder.Append("public ");
+
+            builder.Append(modelName + " ");
+            builder.Append(fieldName);
+            builder.Append(" => " + lambda);
+
             builder.Append(";");
 
             return builder.ToString();
@@ -627,6 +717,16 @@ namespace FluentChange.Extensions.System.CodeGen
                 elseCaseAction.Invoke(builder, indentation + 1);
                 builder.AppendLineIndented(indentation, "}");
             }
+            return builder.ToString();
+
+        }
+        public static string GenerateIfSingleLine(int indentation, string check, Action<StringBuilder> trueCaseAction)
+        {
+            var builder = new StringBuilder();
+            var ifCode = new StringBuilder();
+            trueCaseAction.Invoke(ifCode);
+            builder.AppendLineIndented(indentation, "if (" + check + ") { " + ifCode.ToString() + " }");
+
             return builder.ToString();
 
         }
