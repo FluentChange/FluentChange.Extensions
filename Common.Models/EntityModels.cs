@@ -31,7 +31,10 @@ namespace FluentChange.Extensions.Common.Models
         public Guid SpaceId { get; set; }      
     }
 
-
+    public interface ITrackedModel: ITrackedEntity, IUserTrackedEntity
+    {
+     
+    }
     public abstract class AbstractEntity : IEntity
     {
 

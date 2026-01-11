@@ -7,6 +7,11 @@ using System.Threading.Tasks;
 
 namespace FluentChange.Extensions.Common.Database
 {
+
+    public interface IRepository
+    {
+    }
+
     [Obsolete("Please use SmartRepo")]
     public interface IRepository<T, E> where T : E where E : AbstractIdEntity
     {
