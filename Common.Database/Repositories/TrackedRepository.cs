@@ -1,4 +1,4 @@
-﻿using EFCore.BulkExtensions;
+﻿
 using FluentChange.Extensions.Common.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -59,7 +59,7 @@ namespace FluentChange.Extensions.Common.Database
                 //entity.UpdatedUtc = now;
                 //    dbSet.Add(entity);
             }
-            database.BulkInsert(entities.ToList());
+            database.AddRange(entities.ToList());
             database.SaveChanges();
         }
         public virtual async Task InsertAsync(E entity)
@@ -86,7 +86,7 @@ namespace FluentChange.Extensions.Common.Database
                 //entity.UpdatedUtc = now;
                 //    await dbSet.AddAsync(entity);
             }
-            await database.BulkInsertAsync(entities.ToList());
+            await database.AddRangeAsync(entities.ToList());
             await database.SaveChangesAsync();
 
         }

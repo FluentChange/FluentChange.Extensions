@@ -1,5 +1,4 @@
-﻿using EFCore.BulkExtensions;
-using FluentChange.Extensions.Common.Database.Services;
+﻿using FluentChange.Extensions.Common.Database.Services;
 using FluentChange.Extensions.Common.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -16,7 +15,7 @@ namespace FluentChange.Extensions.Common.Database
         protected readonly D database;
         private DbSet<E> dbSet;
         private UserContextService contextUser;
-        private SpaceContextService contextSpace;
+        //private SpaceContextService contextSpace;
 
         string errorMessage = string.Empty;
         private bool generalAllowInsertWithNewId = false;
@@ -27,13 +26,13 @@ namespace FluentChange.Extensions.Common.Database
         private static bool isSpaceDependendEntity = typeof(ISpaceDependendEntity).IsAssignableFrom(eType);
 
 
-        public SmartRepository(D database, UserContextService userContext, SpaceContextService contextSpace, bool allowInsertWithNewId = false)
+        public SmartRepository(D database, UserContextService userContext, bool allowInsertWithNewId = false)
         {
             this.database = database;
             dbSet = database.Set<E>();
             this.generalAllowInsertWithNewId = allowInsertWithNewId;
             this.contextUser = userContext;
-            this.contextSpace = contextSpace;
+            //this.contextSpace = contextSpace;
         }
 
         #region READ
@@ -49,11 +48,11 @@ namespace FluentChange.Extensions.Common.Database
             return All().Where(e => ((ISpaceDependendEntity)e).SpaceId == spaceId);
         }
 
-        public IQueryable<E> AllForCurrentSpace()
-        {
-            contextSpace.EnsureExist();
-            return AllFor(contextSpace.CurrentId);
-        }
+        //public IQueryable<E> AllForCurrentSpace()
+        //{
+        //    contextSpace.EnsureExist();
+        //    return AllFor(contextSpace.CurrentId);
+        //}
 
         public virtual E GetById(Guid id)
         {
@@ -146,7 +145,7 @@ namespace FluentChange.Extensions.Common.Database
                 CheckForIdInsert(entity);
                 TrackDateCreatedIfNeeded(entity);
                 TrackUserCreatedIfNeeded(entity);
-                TrackSpaceIfNeeded(entity);
+                //TrackSpaceIfNeeded(entity);
             }
         }
 
@@ -157,7 +156,7 @@ namespace FluentChange.Extensions.Common.Database
         public virtual void Update(E entity)
         {
             // for direct calls i.e. in unit tests without rest we need to detach 
-            Detach(entity);
+            //Detach(entity);
 
             if (entity == null) throw new ArgumentNullException("entity");
             UpdateCheckAndTrack(entity);
@@ -179,21 +178,46 @@ namespace FluentChange.Extensions.Common.Database
             {
                 //if (detach) Detach(entity);
 
-                if (entity == null) throw new ArgumentNullException("entity");
-                UpdateCheckAndTrack(entity);
-                dbSet.Update(entity);
-                //database.Attach(entity).State = EntityState.Modified;
+                //if (entity == null) throw new ArgumentNullException("entity");
+                //UpdateCheckAndTrack(entity);
+                //dbSet.Update(entity);
+                ////database.Attach(entity).State = EntityState.Modified;
+
+                Update(entity);
             }
 
 
             //dbSet.BatchUpdate(entities);
             database.SaveChanges();
         }
+        public virtual async Task UpdateBulkSaveAsync(IEnumerable<E> entities, bool detach = true)
+        {
+            // for direct calls i.e. in unit tests without rest we need to detach 
+            var tasks = new List<Task>();
+            foreach (var entity in entities)
+            {
+                //if (detach) Detach(entity);
+
+                //if (entity == null) throw new ArgumentNullException("entity");
+                //UpdateCheckAndTrack(entity);
+                //dbSet.Update(entity);
+                ////database.Attach(entity).State = EntityState.Modified;
+
+                var task = UpdateAsync(entity);
+                tasks.Add(task);
+            }
+
+            await Task.WhenAll(tasks);
+
+
+            //dbSet.BatchUpdate(entities);
+            await database.SaveChangesAsync();
+        }
 
 
         public virtual async Task UpdateAsync(E entity)
         {  // for direct calls i.e. in unit tests without rest we need to detach 
-            //Detach(entity);
+            Detach(entity);
 
             if (entity == null) throw new ArgumentNullException("entity");
             UpdateCheckAndTrack(entity);
@@ -210,7 +234,7 @@ namespace FluentChange.Extensions.Common.Database
         {
             TrackDateUpdatedIfNeeded(entity);
             TrackUserUpdatedIfNeeded(entity);
-            CheckSpaceIfNeededOnInsert(entity);
+            //CheckSpaceIfNeededOnInsert(entity);
         }
 
         #endregion
@@ -223,33 +247,36 @@ namespace FluentChange.Extensions.Common.Database
             if (id == Guid.Empty) throw new ArgumentNullException("id");
 
             E entity = dbSet.Find(id);
+            DeleteSave(entity);
+
+        }
+        public virtual void DeleteSave(E entity)
+        {
             if (entity != null)
             {
-                Delete(entity);
+                dbSet.Remove(entity);
+                database.SaveChanges();
             }
         }
-        public virtual void Delete(E entity)
-        {
-            dbSet.Remove(entity);
-            database.SaveChanges();
-        }
-        public virtual async Task DeleteAsync(Guid id)
+        public virtual async Task DeleteSaveAsync(Guid id)
         {
             CheckIfIdSupported();
             if (id == Guid.Empty) throw new ArgumentNullException(nameof(id));
 
             E entity = await dbSet.FindAsync(id);
+
+            await DeleteSaveAsync(entity);
+
+        }
+        public virtual async Task DeleteSaveAsync(E entity)
+        {
             if (entity != null)
             {
-                await DeleteAsync(entity);
+                dbSet.Remove(entity);
+                await database.SaveChangesAsync();
             }
         }
-        public virtual async Task DeleteAsync(E entity)
-        {
-            dbSet.Remove(entity);
-            await database.SaveChangesAsync();
-        }
-        public void DeleteBulk(IEnumerable<E> entities)
+        public void DeleteSave(IEnumerable<E> entities)
         {
             if (entities == null) throw new ArgumentNullException(nameof(entities));
 
@@ -366,31 +393,31 @@ namespace FluentChange.Extensions.Common.Database
             }
         }
 
-        private void TrackSpaceIfNeeded(E entity)
-        {
-            if (isSpaceDependendEntity)
-            {
-                contextSpace.EnsureExist();
-                if (((ISpaceDependendEntity)entity).SpaceId != Guid.Empty
-                   && ((ISpaceDependendEntity)entity).SpaceId != contextSpace.CurrentId)
-                {
-                    throw new ArgumentException("SpaceId should not be set or has to be same as current space");
-                }
-                ((ISpaceDependendEntity)entity).SpaceId = contextSpace.CurrentId;
-            }
-        }
-        private void CheckSpaceIfNeededOnInsert(E entity)
-        {
-            if (isSpaceDependendEntity)
-            {
-                contextSpace.EnsureExist();
-                if (((ISpaceDependendEntity)entity).SpaceId != Guid.Empty
-                   && ((ISpaceDependendEntity)entity).SpaceId != contextSpace.CurrentId)
-                {
-                    throw new ArgumentException("SpaceId should not be set or has to be same as current space");
-                }
-            }
-        }
+        //private void TrackSpaceIfNeeded(E entity)
+        //{
+        //    if (isSpaceDependendEntity)
+        //    {
+        //        contextSpace.EnsureExist();
+        //        if (((ISpaceDependendEntity)entity).SpaceId != Guid.Empty
+        //           && ((ISpaceDependendEntity)entity).SpaceId != contextSpace.CurrentId)
+        //        {
+        //            throw new ArgumentException("SpaceId should not be set or has to be same as current space");
+        //        }
+        //        ((ISpaceDependendEntity)entity).SpaceId = contextSpace.CurrentId;
+        //    }
+        //}
+        //private void CheckSpaceIfNeededOnInsert(E entity)
+        //{
+        //    if (isSpaceDependendEntity)
+        //    {
+        //        contextSpace.EnsureExist();
+        //        if (((ISpaceDependendEntity)entity).SpaceId != Guid.Empty
+        //           && ((ISpaceDependendEntity)entity).SpaceId != contextSpace.CurrentId)
+        //        {
+        //            throw new ArgumentException("SpaceId should not be set or has to be same as current space");
+        //        }
+        //    }
+        //}
 
         #endregion
 

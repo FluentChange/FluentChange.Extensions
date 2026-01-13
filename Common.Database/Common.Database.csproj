@@ -26,7 +26,6 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.10" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.10" />
 
-		<PackageReference Include="EFCore.BulkExtensions" Version="8.0.1" />
 
 
 	

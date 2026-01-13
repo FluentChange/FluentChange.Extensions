@@ -28,7 +28,7 @@ namespace FluentChange.Extensions.Common.Rest
         }
 
         // The HEAD method asks for a response identical to a GET request, but without a response body.
-        protected abstract Task<HttpResponseMessage>  HeadImplementation(string route, Dictionary<string, object> parameters);
+        protected abstract Task<HttpResponseMessage> HeadImplementation(string route, Dictionary<string, object> parameters);
         public async Task<T> Head<T>(string route, Dictionary<string, object> parameters = null)
         {
             var response = await HeadImplementation(route, parameters);
@@ -49,8 +49,8 @@ namespace FluentChange.Extensions.Common.Rest
             return response;
         }
         public async Task<T> PostFile<T>(string route, string filePath, Dictionary<string, object> parameters = null)
-        {          
-            var file = new FileInfo(filePath);          
+        {
+            var file = new FileInfo(filePath);
             return await PostFile<T>(route, file.OpenRead(), file.Name, parameters);
         }
 
@@ -137,7 +137,7 @@ namespace FluentChange.Extensions.Common.Rest
 
             return content;
         }
-      
+
 
 
         // HEADER stuff
@@ -258,7 +258,7 @@ namespace FluentChange.Extensions.Common.Rest
             {
                 foreach (var param in parameters)
                 {
-                    if (param.Key.StartsWith("{") && param.Key.EndsWith("}"))
+                    if (param.Key.StartsWith("{") && (param.Key.EndsWith("}") || param.Key.EndsWith("?}")))
                     {
                         if (route.Contains(param.Key))
                         {
@@ -271,6 +271,16 @@ namespace FluentChange.Extensions.Common.Rest
                         if (route.Contains("{" + param.Key + "}"))
                         {
                             route = route.Replace("{" + param.Key + "}", param.Value.ToString());
+                            routevalues.Add(param.Key, param.Value.ToString());
+                        }
+                        if (route.Contains("{" + param.Key + "?}"))
+                        {
+                            route = route.Replace("{" + param.Key + "?}", param.Value.ToString());
+                            routevalues.Add(param.Key, param.Value.ToString());
+                        }
+                        if (route.Contains("{*" + param.Key + "}"))
+                        {
+                            route = route.Replace("{*" + param.Key + "}", param.Value.ToString());
                             routevalues.Add(param.Key, param.Value.ToString());
                         }
                     }
