@@ -27,6 +27,20 @@ namespace FluentChange.Extensions.Common.Rest
             return await HandleContentOrError<T>(response);
         }
 
+        // GetStream - for downloading files as streams
+        public async Task<Stream> GetStream(string route, Dictionary<string, object> parameters = null)
+        {
+            var response = await GetImplementation(route, parameters);
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadAsStreamAsync();
+            }
+            else
+            {
+                throw await HandleError(response);
+            }
+        }
+
         // The HEAD method asks for a response identical to a GET request, but without a response body.
         protected abstract Task<HttpResponseMessage> HeadImplementation(string route, Dictionary<string, object> parameters);
         public async Task<T> Head<T>(string route, Dictionary<string, object> parameters = null)
