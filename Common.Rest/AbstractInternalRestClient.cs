@@ -204,40 +204,52 @@ namespace FluentChange.Extensions.Common.Rest
 
             if (response.Content != null)
             {
+                string data = null;
                 try
                 {
-                    var data = await response.Content.ReadAsStringAsync();
-                    var result = JsonConvert.DeserializeObject<Response>(data);
+                    data = await response.Content.ReadAsStringAsync();
+                }
+                catch { }
 
-                    if (result != null && result.Errors != null)
+                if (!string.IsNullOrEmpty(data))
+                {
+                    try
                     {
-                        var j = 1;
-                        foreach (var error in result.Errors)
+                        var result = JsonConvert.DeserializeObject<Response>(data);
+
+                        if (result != null && result.Errors != null && result.Errors.Count > 0)
                         {
-                            message += "- Error " + j + ": " + error.Message + Environment.NewLine;
-                            j++;
+                            var j = 1;
+                            foreach (var error in result.Errors)
+                            {
+                                message += "- Error " + j + ": " + error.Message + Environment.NewLine;
+                                j++;
+                            }
+
+                            var i = 1;
+                            foreach (var error in result.Errors)
+                            {
+                                exceptionData.Add("Error " + i, error.FullMessage);
+                                i++;
+                            }
                         }
-
-
-                        var i = 1;
-                        foreach (var error in result.Errors)
+                        else
                         {
-                            exceptionData.Add("Error " + i, error.FullMessage);
-                            i++;
+                            // No structured errors, include raw response
+                            message += data;
                         }
                     }
+                    catch
+                    {
+                        // JSON parsing failed, include raw response
+                        message += data;
+                    }
                 }
-                catch (Exception ex)
-                {
-                    exceptionData.Add("Reading Response Content", ex.ToString());
-                }
-
-
             }
             var exception = new Exception(message);
-            foreach (var data in exceptionData)
+            foreach (var kvp in exceptionData)
             {
-                exception.Data.Add(data.Key, data.Value);
+                exception.Data.Add(kvp.Key, kvp.Value);
             }
             return exception;
         }
