@@ -1,4 +1,5 @@
 ﻿
+using FluentChange.Extensions.Common.Database.Repositories.Interfaces;
 using FluentChange.Extensions.Common.Models;
 using Microsoft.EntityFrameworkCore;
 using System;

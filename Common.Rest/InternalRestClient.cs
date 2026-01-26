@@ -16,50 +16,50 @@ namespace FluentChange.Extensions.Common.Rest
             http = new HttpClient() { BaseAddress = new Uri(endpoint) };
         }
 
-        protected override Task<HttpResponseMessage> GetImplementation(string route, Dictionary<string, object> parameters)
+        protected override async Task<HttpResponseMessage> GetImplementation(string route, Dictionary<string, object> parameters)
         {
             route = ReplaceParams(route, parameters);
-            return http.GetAsync(route);
+            return await http.GetAsync(route);
         }
-        protected override Task<HttpResponseMessage> HeadImplementation(string route, Dictionary<string, object> parameters)
+        protected override async Task<HttpResponseMessage> HeadImplementation(string route, Dictionary<string, object> parameters)
         {
             route = ReplaceParams(route, parameters);
-            return http.GetAsync(route);
+            return await http.GetAsync(route);
         }
-        protected override Task<HttpResponseMessage> PostImplementation(string route, object requestBody, Dictionary<string, object> parameters)
+        protected override async Task<HttpResponseMessage> PostImplementation(string route, object requestBody, Dictionary<string, object> parameters)
         {
             var content = SerializeContentIfNeeded(requestBody);
             route = ReplaceParams(route, parameters);
-            return http.PostAsync(route, content);
+            return await http.PostAsync(route, content);
         }
-        protected override Task<HttpResponseMessage> PutImplementation(string route, object requestBody, Dictionary<string, object> parameters)
+        protected override async Task<HttpResponseMessage> PutImplementation(string route, object requestBody, Dictionary<string, object> parameters)
         {
             var content = SerializeContentIfNeeded(requestBody);
             route = ReplaceParams(route, parameters);
-            return http.PutAsync(route, content);
+            return await http.PutAsync(route, content);
         }
-        protected override Task<HttpResponseMessage> DeleteImplementation(string route, Dictionary<string, object> parameters)
+        protected override async Task<HttpResponseMessage> DeleteImplementation(string route, Dictionary<string, object> parameters)
         {
             route = ReplaceParams(route, parameters);
-            return http.DeleteAsync(route);
+            return await http.DeleteAsync(route);
         }
-        protected override Task<HttpResponseMessage> ConnectImplementation(string route, Dictionary<string, object> parameters)
+        protected override async Task<HttpResponseMessage> ConnectImplementation(string route, Dictionary<string, object> parameters)
         {
             throw new NotImplementedException();
         }
-        protected override Task<HttpResponseMessage> OptionsImplementation(string route, Dictionary<string, object> parameters)
+        protected override async Task<HttpResponseMessage> OptionsImplementation(string route, Dictionary<string, object> parameters)
         {
             throw new NotImplementedException();
         }
-        protected override Task<HttpResponseMessage> TraceImplementation(string route, object requestBody, Dictionary<string, object> parameters)
+        protected override async Task<HttpResponseMessage> TraceImplementation(string route, object requestBody, Dictionary<string, object> parameters)
         {
             throw new NotImplementedException();
         }
-        protected override Task<HttpResponseMessage> PatchImplementation(string route, object requestBody, Dictionary<string, object> parameters)
+        protected override async Task<HttpResponseMessage> PatchImplementation(string route, object requestBody, Dictionary<string, object> parameters)
         {
             var content = SerializeContentIfNeeded(requestBody);
             route = ReplaceParams(route, parameters);
-            return http.PatchAsync(route, content);
+            return await http.PatchAsync(route, content);
         }
 
         public override void SetHeader(string key, string value)

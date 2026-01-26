@@ -27,6 +27,20 @@ namespace FluentChange.Extensions.Common.Rest
             return await HandleContentOrError<T>(response);
         }
 
+        // GetStream - for downloading files as streams
+        public async Task<Stream> GetStream(string route, Dictionary<string, object> parameters = null)
+        {
+            var response = await GetImplementation(route, parameters);
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadAsStreamAsync();
+            }
+            else
+            {
+                throw await HandleError(response);
+            }
+        }
+
         // The HEAD method asks for a response identical to a GET request, but without a response body.
         protected abstract Task<HttpResponseMessage> HeadImplementation(string route, Dictionary<string, object> parameters);
         public async Task<T> Head<T>(string route, Dictionary<string, object> parameters = null)
@@ -190,40 +204,52 @@ namespace FluentChange.Extensions.Common.Rest
 
             if (response.Content != null)
             {
+                string data = null;
                 try
                 {
-                    var data = await response.Content.ReadAsStringAsync();
-                    var result = JsonConvert.DeserializeObject<Response>(data);
+                    data = await response.Content.ReadAsStringAsync();
+                }
+                catch { }
 
-                    if (result != null && result.Errors != null)
+                if (!string.IsNullOrEmpty(data))
+                {
+                    try
                     {
-                        var j = 1;
-                        foreach (var error in result.Errors)
+                        var result = JsonConvert.DeserializeObject<Response>(data);
+
+                        if (result != null && result.Errors != null && result.Errors.Count > 0)
                         {
-                            message += "- Error " + j + ": " + error.Message + Environment.NewLine;
-                            j++;
+                            var j = 1;
+                            foreach (var error in result.Errors)
+                            {
+                                message += "- Error " + j + ": " + error.Message + Environment.NewLine;
+                                j++;
+                            }
+
+                            var i = 1;
+                            foreach (var error in result.Errors)
+                            {
+                                exceptionData.Add("Error " + i, error.FullMessage);
+                                i++;
+                            }
                         }
-
-
-                        var i = 1;
-                        foreach (var error in result.Errors)
+                        else
                         {
-                            exceptionData.Add("Error " + i, error.FullMessage);
-                            i++;
+                            // No structured errors, include raw response
+                            message += data;
                         }
                     }
+                    catch
+                    {
+                        // JSON parsing failed, include raw response
+                        message += data;
+                    }
                 }
-                catch (Exception ex)
-                {
-                    exceptionData.Add("Reading Response Content", ex.ToString());
-                }
-
-
             }
             var exception = new Exception(message);
-            foreach (var data in exceptionData)
+            foreach (var kvp in exceptionData)
             {
-                exception.Data.Add(data.Key, data.Value);
+                exception.Data.Add(kvp.Key, kvp.Value);
             }
             return exception;
         }
