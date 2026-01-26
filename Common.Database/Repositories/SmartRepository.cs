@@ -1,4 +1,4 @@
-﻿using EFCore.BulkExtensions;
+﻿
 using FluentChange.Extensions.Common.Database.Services;
 using FluentChange.Extensions.Common.Models;
 using Microsoft.EntityFrameworkCore;
