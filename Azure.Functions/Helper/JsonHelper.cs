@@ -1,5 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
+using Microsoft.Azure.Functions.Worker.Http;
 
 namespace FluentChange.Extensions.Azure.Functions.Helper
 {
@@ -41,6 +43,19 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
         public static T? Deserialize<T>(string json, JsonSerializerOptions? options)
         {
             return JsonSerializer.Deserialize<T>(json, options ?? DefaultOptions);
+        }
+    }
+
+    /// <summary>
+    /// Extension methods for HttpResponseData to write JSON with camelCase serialization.
+    /// Use this instead of WriteAsJsonAsync to ensure consistent camelCase output.
+    /// </summary>
+    public static class HttpResponseDataJsonExtensions
+    {
+        public static async Task WriteJsonAsync<T>(this HttpResponseData response, T value)
+        {
+            response.Headers.Add("Content-Type", "application/json; charset=utf-8");
+            await response.WriteStringAsync(JsonHelper.Serialize(value));
         }
     }
 }
