@@ -257,6 +257,13 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             MakeGetFunc<OutgoingModel, OutgoingModel>(predicate);
             return this;
         }
+        // async, no need for mapping outgoing
+        public ResponseBuilderWithIdEntityServiceIsolated<TService> OnGet<OutgoingModel>(Func<TService, Func<Task<OutgoingModel>>> predicate)
+            where OutgoingModel : class
+        {
+            MakeGetFuncAsync<OutgoingModel, OutgoingModel>(predicate);
+            return this;
+        }
         public ResponseBuilderWithIdEntityServiceIsolated<TService> OnGetWithId<Model>(Func<TService, Func<Guid, Model>> predicate)
             where Model : class
         {
@@ -309,11 +316,16 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         #endregion
 
         #region POST
-        // only model outgoing
-        // no need for mapping ingoing and outgoing
+        // no body, only model outgoing (sync)
         public ResponseBuilderWithIdEntityServiceIsolated<TService> OnPost<Model>(Func<TService, Func<Model>> predicate) where Model : class
         {
-            MakePostFunc<Model, Model, Model, Model>(predicate);
+            MakePostFuncNoBody<Model, Model>(predicate);
+            return this;
+        }
+        // no body, only model outgoing (async)
+        public ResponseBuilderWithIdEntityServiceIsolated<TService> OnPost<Model>(Func<TService, Func<Task<Model>>> predicate) where Model : class
+        {
+            MakePostFuncNoBodyAsync<Model, Model>(predicate);
             return this;
         }
         public ResponseBuilderWithIdEntityServiceIsolated<TService> OnPostWithId<Model>(Func<TService, Func<Guid, Model>> predicate) where Model : class
@@ -462,6 +474,16 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
                 return Respond<OutgoingServiceModel, OutgoingModel>(req, listResult, wrapout);
             };
         }
+        protected void MakeGetFuncAsync<OutgoingServiceModel, OutgoingModel>(Func<TService, Func<Task<OutgoingServiceModel>>> predicate)
+            where OutgoingServiceModel : class
+            where OutgoingModel : class
+        {
+            getFunc = async (TService service, HttpRequestData req) =>
+            {
+                var result = await predicate.Invoke(service).Invoke();
+                return Respond<OutgoingServiceModel, OutgoingModel>(req, result, wrapout);
+            };
+        }
         protected void MakeGetWithIdFunc<OutgoingServiceModel, OutgoingModel>(Func<TService, Func<Guid, OutgoingServiceModel>> predicate)
           where OutgoingServiceModel : class
           where OutgoingModel : class
@@ -505,21 +527,24 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
 
 
 
-        protected void MakePostFunc<IngoingModel, IngoingServiceModel, OutgoingServiceModel, OutgoingModel>(Func<TService, Func<OutgoingServiceModel>> predicate)
-            where IngoingModel : class
-            where IngoingServiceModel : class
+        protected void MakePostFuncNoBody<OutgoingServiceModel, OutgoingModel>(Func<TService, Func<OutgoingServiceModel>> predicate)
             where OutgoingServiceModel : class
             where OutgoingModel : class
         {
             postFunc = async (TService service, HttpRequestData req) =>
             {
-                IngoingServiceModel createData = await GetRequestBody<IngoingServiceModel, IngoingModel>(req, unwrap);
-
-                if (createData == null) throw new ArgumentNullException();
                 var resultCreated = predicate.Invoke(service).Invoke();
-
                 return Respond<OutgoingServiceModel, OutgoingModel>(req, resultCreated, wrapout);
-
+            };
+        }
+        protected void MakePostFuncNoBodyAsync<OutgoingServiceModel, OutgoingModel>(Func<TService, Func<Task<OutgoingServiceModel>>> predicate)
+            where OutgoingServiceModel : class
+            where OutgoingModel : class
+        {
+            postFunc = async (TService service, HttpRequestData req) =>
+            {
+                var resultCreated = await predicate.Invoke(service).Invoke();
+                return Respond<OutgoingServiceModel, OutgoingModel>(req, resultCreated, wrapout);
             };
         }
         protected void MakePostWithIdFunc<IngoingModel, IngoingServiceModel, OutgoingServiceModel, OutgoingModel>(Func<TService, Func<Guid, OutgoingServiceModel>> predicate)
