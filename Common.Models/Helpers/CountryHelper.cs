@@ -22,7 +22,7 @@ namespace FluentChange.Extensions.Common.Models.Helpers
                 case "AT": return "Österreich";
                 case "BG": return "Bulgarien";
                 case "CH": return "Schweiz";
-                case "CZ": return "Tschechoslowakei";
+                case "CZ": return "Tschechien";
                 case "D": return "Deutschland";
                 case "DE": return "Deutschland";
                 case "Deutschland": return value;
@@ -45,7 +45,7 @@ namespace FluentChange.Extensions.Common.Models.Helpers
                 case "PL": return "Polen";
                 case "Po": return "Polen";
                 case "RO": return "Rumänien";
-                case "SE": return "Sweden";
+                case "SE": return "Schweden";
                 case "SI": return "Slowenien";
                 case "SK": return "Slowakische Republik";
 
