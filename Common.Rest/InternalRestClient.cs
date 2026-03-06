@@ -64,15 +64,8 @@ namespace FluentChange.Extensions.Common.Rest
 
         public override void SetHeader(string key, string value)
         {
-            if (!http.DefaultRequestHeaders.Contains(key))
-            {
-                http.DefaultRequestHeaders.Add(key, value);
-            }
-            else
-            {
-                http.DefaultRequestHeaders.Remove(key);
-                http.DefaultRequestHeaders.Add(key, value);
-            }
+            http.DefaultRequestHeaders.Remove(key);
+            http.DefaultRequestHeaders.TryAddWithoutValidation(key, value);
         }
 
         public override void RemoveHeader(string key)
