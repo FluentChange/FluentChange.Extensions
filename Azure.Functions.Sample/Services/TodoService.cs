@@ -1,4 +1,5 @@
-﻿using DemoCRUDLFunctions.Models;
+﻿#nullable enable
+using DemoCRUDLFunctions.Models;
 using FluentChange.Extensions.Azure.Functions.Interfaces;
 
 namespace DemoCRUDLFunctions.Services
@@ -36,7 +37,7 @@ namespace DemoCRUDLFunctions.Services
         public Todo Read(Guid id)
         {
             if (id == Guid.Empty) throw new ArgumentException();
-            return todos.SingleOrDefault(t => t.Id == id);
+            return todos.SingleOrDefault(t => t.Id == id)!;
         }
         public Todo Update(Todo todo)
         {

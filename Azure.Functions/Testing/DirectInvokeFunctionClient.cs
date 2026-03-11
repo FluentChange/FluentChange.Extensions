@@ -271,7 +271,7 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
             dummyHttpRequest.Path = "/" + route;
             foreach (var header in headers)
             {
-                dummyHttpRequest.Headers.Add(header.Key, header.Value);
+                dummyHttpRequest.Headers.Append(header.Key, header.Value);
             }
 
             if (content != null)
@@ -282,7 +282,7 @@ namespace FluentChange.Extensions.Azure.Functions.Testing
                 foreach (var header in httpContent.Headers)
                 {
                     var sv = new StringValues(header.Value.ToArray());
-                    dummyHttpRequest.Headers.Add(header.Key, sv);
+                    dummyHttpRequest.Headers.Append(header.Key, sv);
                 }
             }
 

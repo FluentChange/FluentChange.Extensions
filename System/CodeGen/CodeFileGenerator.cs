@@ -1,4 +1,5 @@
-﻿using FluentChange.Extensions.System.Helper;
+﻿#nullable enable
+using FluentChange.Extensions.System.Helper;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
@@ -51,13 +52,13 @@ namespace FluentChange.Extensions.System.CodeGen
     public abstract class CodeResultGenerator
     {
         internal List<String> Usings = new List<String>();
-        internal String FilePath;
-        internal String FileName;
+        internal String FilePath = default!;
+        internal String FileName = default!;
 
         protected List<NamespaceGenerator> namespaces = new List<NamespaceGenerator>();
 
         public bool Success = false;
-        public string Source { get; protected set; }
+        public string Source { get; protected set; } = default!;
         public ImmutableArray<Diagnostic> GenerationDiagnostics { get; protected set; }
 
         public CodeResultGenerator AddUsing(string reference)
@@ -100,10 +101,10 @@ namespace FluentChange.Extensions.System.CodeGen
     {
         internal List<String> AssemblyLocations = new List<String>();
 
-        
-        public MemoryStream StreamSource;
-        public MemoryStream StreamLib;
-        public MemoryStream StreamPdb;
+
+        public MemoryStream StreamSource = default!;
+        public MemoryStream StreamLib = default!;
+        public MemoryStream StreamPdb = default!;
 
 
         //public string Source { get; private set; }
@@ -117,7 +118,7 @@ namespace FluentChange.Extensions.System.CodeGen
             return this;
         }
 
-        public CodeCompiledLibGenerator AddAssembly(Assembly assembly)
+        public CodeCompiledLibGenerator AddAssembly(Assembly? assembly)
         {
             if (assembly != null)
             {
@@ -130,7 +131,7 @@ namespace FluentChange.Extensions.System.CodeGen
                     var referencedAssemblies = assembly.GetReferencedAssemblies();
                     foreach (var refAssembly in referencedAssemblies)
                     {
-                        var subAssembly = GetAssemblyByName(refAssembly.Name);
+                        var subAssembly = GetAssemblyByName(refAssembly.Name!);
                         AddAssembly(subAssembly);
                     }
                 }
@@ -139,7 +140,7 @@ namespace FluentChange.Extensions.System.CodeGen
             return this;
         }
 
-        Assembly GetAssemblyByName(string name)
+        Assembly? GetAssemblyByName(string name)
         {
             return AppDomain.CurrentDomain.GetAssemblies().
                    SingleOrDefault(assembly => assembly.GetName().Name == name);
@@ -223,9 +224,9 @@ namespace FluentChange.Extensions.System.CodeGen
     public class NamespaceGenerator
     {
         private List<ClassGenerator> classes = new List<ClassGenerator>();
-        internal string Name { get; set; }
+        internal string Name { get; set; } = default!;
 
-        public ClassGenerator CreateClass(string name, string baseclass = null, string interfaceName = null)
+        public ClassGenerator CreateClass(string name, string? baseclass = null, string? interfaceName = null)
         {
             var @class = new ClassGenerator();
             @class.Name = name;
@@ -235,7 +236,7 @@ namespace FluentChange.Extensions.System.CodeGen
             return @class;
         }
 
-        public ClassGenerator CreateClass(string name, Action<ClassGenerator> classAction, string baseclass = null)
+        public ClassGenerator CreateClass(string name, Action<ClassGenerator> classAction, string? baseclass = null)
         {
             var @class = new ClassGenerator();
             @class.Name = name;
@@ -302,8 +303,8 @@ namespace FluentChange.Extensions.System.CodeGen
             properties.Add(prop);
             return prop;
         }
-        public ClassMethodGenerator CreateMethod(string returnType, string name, Dictionary<string, Type> parameters,
-            bool isPrivate, string region, Action<StringBuilder, int> codeAction = null, bool isOverride = false)
+        public ClassMethodGenerator CreateMethod(string returnType, string name, Dictionary<string, Type>? parameters,
+            bool isPrivate, string region, Action<StringBuilder, int>? codeAction = null, bool isOverride = false)
 
         {
             var method = new ClassMethodGenerator();
@@ -347,9 +348,9 @@ namespace FluentChange.Extensions.System.CodeGen
 
     public class ClassGenerator : AbstractClassGenerator
     {
-        internal string Name { get; set; }
-        internal string BaseClass { get; set; }
-        internal string Interface { get; set; }
+        internal string Name { get; set; } = default!;
+        internal string? BaseClass { get; set; }
+        internal string? Interface { get; set; }
 
 
         private List<ClassRegionGenerator> regions = new List<ClassRegionGenerator>();
@@ -412,8 +413,8 @@ namespace FluentChange.Extensions.System.CodeGen
 
     public class ClassRegionGenerator : AbstractClassGenerator
     {
-        internal string Name;
-        internal Action<StringBuilder, int> CodeAction;
+        internal string? Name;
+        internal Action<StringBuilder, int>? CodeAction;
         internal void Generate(StringBuilder builder, int indentation)
         {
             if (!String.IsNullOrEmpty(Name))
@@ -435,13 +436,13 @@ namespace FluentChange.Extensions.System.CodeGen
 
     public class ClassPropertyGenerator
     {
-        internal string Name { get; set; }
-        internal string TypeName { get; set; }
+        internal string Name { get; set; } = default!;
+        internal string TypeName { get; set; } = default!;
         internal bool IsPrivate { get; set; }
         internal bool IsStatic { get; set; } = false;
         internal bool IsProperty { get; set; } = true;
         internal string? Lambda { get; set; }
-        internal string DefaultInit;
+        internal string? DefaultInit;
 
         internal void Generate(StringBuilder builder, int indentation)
         {
@@ -470,11 +471,11 @@ namespace FluentChange.Extensions.System.CodeGen
     }
     public class ClassMethodGenerator
     {
-        internal string Region;
-        internal string Name;
-        internal string ReturnType;
-        internal Action<StringBuilder, int> CodeAction;
-        internal Dictionary<string, Type> Parameters;
+        internal string? Region;
+        internal string Name = default!;
+        internal string ReturnType = default!;
+        internal Action<StringBuilder, int>? CodeAction;
+        internal Dictionary<string, Type>? Parameters;
         internal bool IsPrivate;
         internal bool IsOverride = false;
 
@@ -517,9 +518,9 @@ namespace FluentChange.Extensions.System.CodeGen
 
     public class CodeIfGenerator : ICodeLine
     {
-        internal string Check;
-        internal CodeLinesGenerator trueCase;
-        internal CodeLinesGenerator elseCase;
+        internal string Check = default!;
+        internal CodeLinesGenerator trueCase = default!;
+        internal CodeLinesGenerator? elseCase;
 
         public void Generate(StringBuilder builder, int indentation)
         {
@@ -567,7 +568,7 @@ namespace FluentChange.Extensions.System.CodeGen
         protected List<ICodeLine> lines = new List<ICodeLine>();
 
 
-        public CodeIfGenerator CreateIf(string check, Action<CodeLinesGenerator> trueCase, Action<CodeLinesGenerator> elseCase = null)
+        public CodeIfGenerator CreateIf(string check, Action<CodeLinesGenerator> trueCase, Action<CodeLinesGenerator>? elseCase = null)
         {
             var ifGen = new CodeIfGenerator();
             ifGen.Check = check;
@@ -652,7 +653,7 @@ namespace FluentChange.Extensions.System.CodeGen
             return builder.ToString();
         }
 
-        public static string GenerateMethod(int indentation, string methodName, string returntype, Dictionary<string, Type> parameters, Action<StringBuilder, int> builderAction, bool isOverride = false)
+        public static string GenerateMethod(int indentation, string methodName, string returntype, Dictionary<string, Type>? parameters, Action<StringBuilder, int> builderAction, bool isOverride = false)
         {
             var returnTypeName = returntype;
 
@@ -703,7 +704,7 @@ namespace FluentChange.Extensions.System.CodeGen
             return builder.ToString();
 
         }
-        public static string GenerateIf(int indentation, string check, Action<StringBuilder, int> trueCaseAction, Action<StringBuilder, int> elseCaseAction = null)
+        public static string GenerateIf(int indentation, string check, Action<StringBuilder, int> trueCaseAction, Action<StringBuilder, int>? elseCaseAction = null)
         {
             var builder = new StringBuilder();
             builder.AppendLineIndented(indentation, "if (" + check + ")");
@@ -730,7 +731,7 @@ namespace FluentChange.Extensions.System.CodeGen
             return builder.ToString();
 
         }
-        public static string GenerateTryCatch(int indentation, Action<StringBuilder, int> tryAction, Action<StringBuilder, int> catchAction = null)
+        public static string GenerateTryCatch(int indentation, Action<StringBuilder, int> tryAction, Action<StringBuilder, int>? catchAction = null)
         {
             var builder = new StringBuilder();
             builder.AppendLineIndented(indentation, "try");

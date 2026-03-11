@@ -1,3 +1,4 @@
+#nullable enable
 using FluentChange.Extensions.Common.Models.Rest;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Functions.Worker.Http;
@@ -188,7 +189,7 @@ namespace FluentChange.Extensions.Azure.Functions.Helper
             }
             else
             {
-                return RespondJson(req, null);
+                return RespondJson(req, null!);
             }
         }
 

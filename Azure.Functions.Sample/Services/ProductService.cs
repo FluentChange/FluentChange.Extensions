@@ -1,4 +1,5 @@
-﻿using DemoCRUDLFunctions.Models;
+﻿#nullable enable
+using DemoCRUDLFunctions.Models;
 using FluentChange.Extensions.Azure.Functions.CRUDL;
 using FluentChange.Extensions.Azure.Functions.Interfaces;
 using System;
@@ -41,7 +42,7 @@ namespace DemoCRUDLFunctions.Services
         public Product Read(Guid id)
         {
             if (id == Guid.Empty) throw new ArgumentException();
-            return products.SingleOrDefault(t => t.Id == id);
+            return products.SingleOrDefault(t => t.Id == id)!;
         }
         public Product Update(Product product)
         {

@@ -43,15 +43,15 @@ namespace FluentChange.Extensions.Common.Rest
             route = ReplaceParams(route, parameters);
             return await http.DeleteAsync(route);
         }
-        protected override async Task<HttpResponseMessage> ConnectImplementation(string route, Dictionary<string, object> parameters)
+        protected override Task<HttpResponseMessage> ConnectImplementation(string route, Dictionary<string, object> parameters)
         {
             throw new NotImplementedException();
         }
-        protected override async Task<HttpResponseMessage> OptionsImplementation(string route, Dictionary<string, object> parameters)
+        protected override Task<HttpResponseMessage> OptionsImplementation(string route, Dictionary<string, object> parameters)
         {
             throw new NotImplementedException();
         }
-        protected override async Task<HttpResponseMessage> TraceImplementation(string route, object requestBody, Dictionary<string, object> parameters)
+        protected override Task<HttpResponseMessage> TraceImplementation(string route, object requestBody, Dictionary<string, object> parameters)
         {
             throw new NotImplementedException();
         }

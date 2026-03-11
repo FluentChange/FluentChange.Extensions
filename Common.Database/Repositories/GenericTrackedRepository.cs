@@ -1,4 +1,5 @@
-﻿using FluentChange.Extensions.Common.Database.Repositories.Interfaces;
+﻿#nullable enable
+using FluentChange.Extensions.Common.Database.Repositories.Interfaces;
 using FluentChange.Extensions.Common.Database.Services.Interfaces;
 using FluentChange.Extensions.Common.Models;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,7 @@ namespace FluentChange.Extensions.Common.Database
     public abstract class GenericTrackedRepository<TEntity>(DbContext dbContext, IUserContextService userContext, ILogger logger)
         : AbstractTrackedRepository(userContext, logger), IRepository, IGenericTrackedRepository<TEntity> where TEntity : class, IEntityWithId, ITrackedModel
     {
+        private readonly ILogger _logger = logger;
 
         public async Task<TEntity> AddAsync(TEntity entity)
         {
@@ -21,7 +23,7 @@ namespace FluentChange.Extensions.Common.Database
             await dbContext.Set<TEntity>().AddAsync(entity);
             await dbContext.SaveChangesAsync();
 
-            logger.LogInformation("Added entity of type {EntityType} with Id {EntityId}", typeof(TEntity).Name, entity.Id);
+            _logger.LogInformation("Added entity of type {EntityType} with Id {EntityId}", typeof(TEntity).Name, entity.Id);
 
             return entity;
         }
@@ -33,7 +35,7 @@ namespace FluentChange.Extensions.Common.Database
             await dbContext.Set<TEntity>().AddRangeAsync(entities);
             await dbContext.SaveChangesAsync();
 
-            logger.LogInformation("Added {EntityCount} entities of type {EntityType}", entities.Count(), typeof(TEntity).Name);
+            _logger.LogInformation("Added {EntityCount} entities of type {EntityType}", entities.Count(), typeof(TEntity).Name);
 
             return entities;
         }
@@ -56,7 +58,7 @@ namespace FluentChange.Extensions.Common.Database
 
             await dbContext.SaveChangesAsync();
 
-            logger.LogInformation("Updated entity of type {EntityType} with Id {EntityId}", typeof(TEntity).Name, entity.Id);
+            _logger.LogInformation("Updated entity of type {EntityType} with Id {EntityId}", typeof(TEntity).Name, entity.Id);
 
             return trackedEntity ?? entity;
         }
@@ -67,7 +69,7 @@ namespace FluentChange.Extensions.Common.Database
             dbContext.Set<TEntity>().UpdateRange(entities);
             await dbContext.SaveChangesAsync();
 
-            logger.LogInformation("Updated {EntityCount} entities of type {EntityType}", entities.Count(), typeof(TEntity).Name);
+            _logger.LogInformation("Updated {EntityCount} entities of type {EntityType}", entities.Count(), typeof(TEntity).Name);
 
             return entities;
         }
@@ -78,7 +80,7 @@ namespace FluentChange.Extensions.Common.Database
             dbContext.Set<TEntity>().Remove(entity);
             var changes = await dbContext.SaveChangesAsync();
 
-            logger.LogInformation("Deleted entity of type {EntityType} with Id {EntityId}", typeof(TEntity).Name, entity.Id);
+            _logger.LogInformation("Deleted entity of type {EntityType} with Id {EntityId}", typeof(TEntity).Name, entity.Id);
 
             return changes == 1;
         }
@@ -90,36 +92,37 @@ namespace FluentChange.Extensions.Common.Database
             dbContext.Set<TEntity>().RemoveRange(entities);
             var changes = await dbContext.SaveChangesAsync();
 
-            logger.LogInformation("Deleted {EntityCount} entities of type {EntityType}", entities.Count(), typeof(TEntity).Name);
+            _logger.LogInformation("Deleted {EntityCount} entities of type {EntityType}", entities.Count(), typeof(TEntity).Name);
 
             return changes == entities.Count();
         }
 
         public TEntity? GetById(Guid id)
         {
-            logger.LogInformation("Retrieving entity of type {EntityType} with Id {EntityId}", typeof(TEntity).Name, id);
+            _logger.LogInformation("Retrieving entity of type {EntityType} with Id {EntityId}", typeof(TEntity).Name, id);
 
             return List().FirstOrDefault(o => o.Id == id);
         }
 
         public async Task<TEntity?> GetByIdAsync(Guid id)
         {
-            logger.LogInformation("Retrieving entity of type {EntityType} with Id {EntityId}", typeof(TEntity).Name, id);
+            _logger.LogInformation("Retrieving entity of type {EntityType} with Id {EntityId}", typeof(TEntity).Name, id);
 
             return await List().FirstOrDefaultAsync(o => o.Id == id);
         }
 
         public IQueryable<TEntity> List()
         {
-            logger.LogInformation("Listing entities of type {EntityType}", typeof(TEntity).Name);
+            _logger.LogInformation("Listing entities of type {EntityType}", typeof(TEntity).Name);
 
             return dbContext.Set<TEntity>();
         }
 
         public async Task<IQueryable<TEntity>> ListAsync()
         {
-            logger.LogInformation("Listing entities of type {EntityType}", typeof(TEntity).Name);
+            _logger.LogInformation("Listing entities of type {EntityType}", typeof(TEntity).Name);
 
+            await Task.CompletedTask;
             return dbContext.Set<TEntity>();
         }
     }

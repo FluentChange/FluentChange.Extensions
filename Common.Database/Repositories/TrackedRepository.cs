@@ -1,4 +1,4 @@
-﻿
+﻿#nullable enable
 using FluentChange.Extensions.Common.Database.Repositories.Interfaces;
 using FluentChange.Extensions.Common.Models;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +11,9 @@ using System.Threading.Tasks;
 namespace FluentChange.Extensions.Common.Database
 {
 
+#pragma warning disable CS0618 // Type or member is obsolete
     public class TrackedRepository<E, D> : ITrackedRepository<E> where E : AbstractTrackedEntity where D : DbContext
+#pragma warning restore CS0618
     {
         protected readonly D database;
         private DbSet<E> dbSet;
@@ -31,11 +33,11 @@ namespace FluentChange.Extensions.Common.Database
 
         public virtual E GetById(Guid id)
         {
-            return dbSet.Find(id);
+            return dbSet.Find(id)!;
         }
         public virtual async Task<E> GetByIdAsync(Guid id)
         {
-            return await dbSet.FindAsync(id);
+            return (await dbSet.FindAsync(id))!;
         }
 
         public virtual void Insert(E entity)
@@ -127,11 +129,11 @@ namespace FluentChange.Extensions.Common.Database
         {
             if (id == Guid.Empty) throw new ArgumentNullException("id");
 
-            E entity = dbSet.Find(id);
+            E entity = dbSet.Find(id)!;
             if (entity != null)
             {
                 Delete(entity);
-            }           
+            }
         }
         public virtual void Delete(E entity)
         {
@@ -142,7 +144,7 @@ namespace FluentChange.Extensions.Common.Database
         {
             if (id == Guid.Empty) throw new ArgumentNullException(nameof(id));
 
-            E entity = await dbSet.FindAsync(id);
+            E entity = (await dbSet.FindAsync(id))!;
             if (entity != null)
             {
                 await DeleteAsync(entity);

@@ -1,4 +1,5 @@
-﻿using DemoCRUDLFunctions.Models;
+﻿#nullable enable
+using DemoCRUDLFunctions.Models;
 using FluentChange.Extensions.Azure.Functions.CRUDL;
 using System;
 using System.Collections.Generic;
@@ -38,7 +39,7 @@ namespace DemoCRUDLFunctions.Services
         public Event Get(Guid id)
         {
             if (id == Guid.Empty) throw new ArgumentException();
-            return events.SingleOrDefault(t => t.Id == id);
+            return events.SingleOrDefault(t => t.Id == id)!;
         }
         public Event Edit(Event @event)
         {

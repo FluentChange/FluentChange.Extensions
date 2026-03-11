@@ -1,3 +1,4 @@
+#nullable enable
 using FluentChange.Extensions.Azure.Functions.Helper;
 using FluentChange.Extensions.Azure.Functions.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -60,7 +61,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         {
             if (contextCreateFunc == null)
             {
-                contextCreateFunc = (HttpRequest req, ILogger log) => provider.GetService<C>().Create(req, log);
+                contextCreateFunc = (HttpRequest req, ILogger log) => provider.GetService<C>()!.Create(req, log);
             }
             else
             {
@@ -68,8 +69,8 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
                 // execute multiple context creation services
                 contextCreateFunc = async (HttpRequest req, ILogger log) =>
                 {
-                    await existingCreate.Invoke(req, log);
-                    await provider.GetService<C>().Create(req, log);
+                    await existingCreate!.Invoke(req, log);
+                    await provider.GetService<C>()!.Create(req, log);
                 };
             }
 
@@ -96,8 +97,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
 
         private IEntityMapper GetMapperService()
         {
-            IEntityMapper mapper = null;
-            mapper = provider.GetService<IEntityMapper>();
+            IEntityMapper mapper = provider.GetService<IEntityMapper>()!;
             if (mapper == null) throw new Exception("Mapper is missing");
 
             return mapper;
@@ -109,9 +109,9 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
     {
         private readonly IServiceProvider provider;
         //private readonly bool usesMapping;
-        private readonly Func<HttpRequest, ILogger, Task> contextCreateFunc;
+        private readonly Func<HttpRequest, ILogger, Task>? contextCreateFunc;
         private readonly JsonSerializerOptions? jsonOptions;
-        public ResponseBuilderWithIdEntity(IServiceProvider provider, Func<HttpRequest, ILogger, Task> contextCreateFunc, JsonSerializerOptions? jsonOptions)
+        public ResponseBuilderWithIdEntity(IServiceProvider provider, Func<HttpRequest, ILogger, Task>? contextCreateFunc, JsonSerializerOptions? jsonOptions)
         {
             this.provider = provider;
             //this.usesMapping = !(typeof(T).Equals(typeof(M)));
@@ -143,8 +143,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         }
         private IEntityMapper GetMapperService()
         {
-            IEntityMapper mapper = null;
-            mapper = provider.GetService<IEntityMapper>();
+            IEntityMapper mapper = provider.GetService<IEntityMapper>()!;
             if (mapper == null) throw new Exception("Mapper is missing");
 
             return mapper;
@@ -154,8 +153,8 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
     public class ResponseBuilderWithIdEntityInterfaceService<T, M, S> where S : class, ICRUDLServiceWithId<T> where M : class where T : class
     {
         private readonly ResponseBuilderWithIdEntityServiceWithModels<T, M, S> internalBuilder;
-        private readonly Func<HttpRequest, ILogger, Task> contextCreateFunc;
-        public ResponseBuilderWithIdEntityInterfaceService(S service, Func<HttpRequest, ILogger, Task> contextCreateFunc, IEntityMapper mapper, JsonSerializerOptions? jsonOptions)
+        private readonly Func<HttpRequest, ILogger, Task>? contextCreateFunc;
+        public ResponseBuilderWithIdEntityInterfaceService(S service, Func<HttpRequest, ILogger, Task>? contextCreateFunc, IEntityMapper mapper, JsonSerializerOptions? jsonOptions)
         {
             if (service == null) throw new ArgumentNullException(nameof(service));
             if (mapper == null) throw new ArgumentNullException(nameof(mapper));
@@ -173,11 +172,11 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
     public class ResponseBuilderWithIdEntityService<TService> : AbstractResponseHelpersNew where TService : class
     {
         private readonly TService service;
-        private readonly Func<HttpRequest, ILogger, Task> contextCreateFunc;
+        private readonly Func<HttpRequest, ILogger, Task>? contextCreateFunc;
 
         private bool unwrap = false;
         private bool wrapout = false;
-        public ResponseBuilderWithIdEntityService(TService service, Func<HttpRequest, ILogger, Task> contextCreateFunc, IEntityMapper mapper, JsonSerializerOptions? jsonOptions) : base(mapper, jsonOptions)
+        public ResponseBuilderWithIdEntityService(TService service, Func<HttpRequest, ILogger, Task>? contextCreateFunc, IEntityMapper mapper, JsonSerializerOptions? jsonOptions) : base(mapper, jsonOptions)
         {
             if (service == null) throw new ArgumentNullException(nameof(service));
             if (mapper == null) throw new ArgumentNullException(nameof(mapper));
@@ -211,14 +210,14 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         #endregion
 
 
-        private Func<TService, HttpRequest, Task<IActionResult>> getFunc;
-        private Func<TService, HttpRequest, Task<IActionResult>> getWithIdFunc;
-        private Func<TService, HttpRequest, Task<IActionResult>> postFunc;
-        private Func<TService, HttpRequest, Task<IActionResult>> postWithIdFunc;
-        private Func<TService, HttpRequest, Task<IActionResult>> putFunc;
-        private Func<TService, HttpRequest, Task<IActionResult>> putWithIdFunc;
-        private Func<TService, HttpRequest, Task<IActionResult>> deleteFunc;
-        private Func<TService, HttpRequest, Task<IActionResult>> deleteWithIdFunc;
+        private Func<TService, HttpRequest, Task<IActionResult>>? getFunc;
+        private Func<TService, HttpRequest, Task<IActionResult>>? getWithIdFunc;
+        private Func<TService, HttpRequest, Task<IActionResult>>? postFunc;
+        private Func<TService, HttpRequest, Task<IActionResult>>? postWithIdFunc;
+        private Func<TService, HttpRequest, Task<IActionResult>>? putFunc;
+        private Func<TService, HttpRequest, Task<IActionResult>>? putWithIdFunc;
+        private Func<TService, HttpRequest, Task<IActionResult>>? deleteFunc;
+        private Func<TService, HttpRequest, Task<IActionResult>>? deleteWithIdFunc;
 
         #region GET
 
@@ -430,6 +429,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         {
             getFunc = async (TService service, HttpRequest req) =>
             {
+                await Task.CompletedTask;
                 var listResult = predicate.Invoke(service).Invoke();
                 return Respond<OutgoingServiceModel, OutgoingModel>(listResult, wrapout);
             };
@@ -440,6 +440,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         {
             getWithIdFunc = async (TService service, HttpRequest req) =>
             {
+                await Task.CompletedTask;
                 var idGuid = GetId(req);
                 var resultRead = predicate.Invoke(service).Invoke(idGuid);
                 if (resultRead != null)
@@ -455,6 +456,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         {
             getFunc = async (TService service, HttpRequest req) =>
             {
+                await Task.CompletedTask;
                 var listResult = predicate.Invoke(service).Invoke();
                 return RespondList<OutgoingServiceModel, OutgoingModel>(listResult, wrapout);
 
@@ -466,6 +468,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         {
             getWithIdFunc = async (TService service, HttpRequest req) =>
             {
+                await Task.CompletedTask;
                 var idGuid = GetId(req);
                 var listResult = predicate.Invoke(service).Invoke(idGuid);
                 return RespondList<OutgoingServiceModel, OutgoingModel>(listResult, wrapout);
@@ -582,7 +585,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
                 //       s.Upload(file.FileName, file.ContentType, file.Length, file.OpenReadStream());
 
                 //if (createData == null) throw new ArgumentNullException();
-                var resultCreated = predicate.Invoke(service).Invoke(file.FileName, file.ContentType, file.Length, file.OpenReadStream());
+                var resultCreated = predicate.Invoke(service).Invoke(file!.FileName, file.ContentType, file.Length, file.OpenReadStream());
 
                 return Respond<OutgoingServiceModel, OutgoingModel>(resultCreated, wrapout);
 
@@ -605,7 +608,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
                 //       s.Upload(file.FileName, file.ContentType, file.Length, file.OpenReadStream());
 
                 //if (createData == null) throw new ArgumentNullException();
-                var resultCreated = predicate.Invoke(service).Invoke(idGuid, file.FileName, file.ContentType, file.Length, file.OpenReadStream());
+                var resultCreated = predicate.Invoke(service).Invoke(idGuid, file!.FileName, file.ContentType, file.Length, file.OpenReadStream());
 
                 return Respond<OutgoingServiceModel, OutgoingModel>(resultCreated, wrapout);
 
@@ -652,6 +655,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         {
             deleteFunc = async (TService service, HttpRequest req) =>
             {
+                await Task.CompletedTask;
                 predicate.Invoke(service).Invoke();
                 return RespondEmpty(wrapout);
 
@@ -661,6 +665,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         {
             deleteWithIdFunc = async (TService service, HttpRequest req) =>
             {
+                await Task.CompletedTask;
                 var idGuid = GetId(req);
 
                 predicate.Invoke(service).Invoke(idGuid);
@@ -678,7 +683,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         private static Guid GetId(HttpRequest req)
         {
             if (!req.RouteValues.ContainsKey("id")) throw new ArgumentNullException("RouteValues do not contain id");
-            var idValue = req.RouteValues["id"].ToString();
+            var idValue = req.RouteValues["id"]!.ToString();
             if (String.IsNullOrEmpty(idValue)) throw new ArgumentNullException();
             var idGuid = Guid.Parse(idValue);
             return idGuid;
@@ -748,7 +753,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
     {
 
 
-        public ResponseBuilderWithIdEntityServiceWithModels(TService service, Func<HttpRequest, ILogger, Task> contextCreateFunc, IEntityMapper mapper, JsonSerializerOptions? jsonOptions) : base(service, contextCreateFunc, mapper, jsonOptions)
+        public ResponseBuilderWithIdEntityServiceWithModels(TService service, Func<HttpRequest, ILogger, Task>? contextCreateFunc, IEntityMapper mapper, JsonSerializerOptions? jsonOptions) : base(service, contextCreateFunc, mapper, jsonOptions)
         {
 
         }
@@ -795,7 +800,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         #nullable enable annotations
         public ResponseBuilderWithIdEntityServiceWithModels<ServiceModel, ApiModel, TService> OnGetWithId(Func<TService, Func<Guid, ServiceModel?>> predicate)
         {
-            MakeGetWithIdFunc<ServiceModel, ApiModel>(predicate);
+            MakeGetWithIdFunc<ServiceModel, ApiModel>(predicate!);
             return this;
         }
 

@@ -1,3 +1,4 @@
+#nullable enable
 using Microsoft.Azure.Functions.Worker.Http;
 using System.Net;
 using System.Text.Json;

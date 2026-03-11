@@ -38,7 +38,7 @@ namespace DemoCRUDLFunctions
         {
 
             return await ResponseBuilder
-                .With<Event, EventService>(s => s.New, null, null, null, s => s.All)
+                .With<Event, EventService>(s => s.New, null!, null!, null!, s => s.All)
                 .Handle(req, log);
 
         }
@@ -50,7 +50,7 @@ namespace DemoCRUDLFunctions
             return await ResponseBuilder
                  .ForEntity<Event>()
                  .Use<EventService>()
-                 .With(s => s.New, null, null, null, s => s.All)
+                 .With(s => s.New, null!, null!, null!, s => s.All)
                  .Handle(req, log);
 
         }
@@ -76,7 +76,7 @@ namespace DemoCRUDLFunctions
                 .ForEntity<Product>()
                 .Use<ProductService>()
                 .UnwrapRequest()
-                .With(s => s.Create, null, null, null, s => s.List)
+                .With(s => s.Create, null!, null!, null!, s => s.List)
                 .WrapResponse()
                 .Handle(req, log);
 
@@ -92,7 +92,7 @@ namespace DemoCRUDLFunctions
                   .ForEntityWithMapping<Product, ApiProduct>()
                   .Use<ProductService>()
                   .UnwrapRequest()
-                  .With(s => s.Create, null, null, null, s => s.List)
+                  .With(s => s.Create, null!, null!, null!, s => s.List)
                   .WrapResponse()
                   .Handle(req, log);
             }

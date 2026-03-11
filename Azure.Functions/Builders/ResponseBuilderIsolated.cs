@@ -1,3 +1,4 @@
+#nullable enable
 using FluentChange.Extensions.Azure.Functions.Helper;
 using FluentChange.Extensions.Azure.Functions.Interfaces;
 using HttpMultipartParser;
@@ -53,7 +54,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
 
             if (contextCreateFunc == null)
             {
-                contextCreateFunc = (ILogger log) => provider.GetService<C>().Create(routeData, log);
+                contextCreateFunc = (ILogger log) => provider.GetService<C>()!.Create(routeData, log);
             }
             else
             {
@@ -61,8 +62,8 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
                 // execute multiple context creation services
                 contextCreateFunc = async (ILogger log) =>
                 {
-                    await existingCreate.Invoke(log);
-                    await provider.GetService<C>().Create(routeData, log);
+                    await existingCreate!.Invoke(log);
+                    await provider.GetService<C>()!.Create(routeData, log);
                 };
             }
 
@@ -114,8 +115,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
 
         private IEntityMapper GetMapperService()
         {
-            IEntityMapper mapper = null;
-            mapper = provider.GetService<IEntityMapper>();
+            IEntityMapper mapper = provider.GetService<IEntityMapper>()!;
             if (mapper == null) throw new Exception("Mapper is missing");
 
             return mapper;
@@ -167,8 +167,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         }
         private IEntityMapper GetMapperService()
         {
-            IEntityMapper mapper = null;
-            mapper = provider.GetService<IEntityMapper>();
+            IEntityMapper mapper = provider.GetService<IEntityMapper>()!;
             if (mapper == null) throw new Exception("Mapper is missing");
 
             return mapper;
@@ -239,14 +238,14 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         #endregion
 
 
-        private Func<TService, HttpRequestData, Task<HttpResponseData>> getFunc;
-        private Func<TService, HttpRequestData, Task<HttpResponseData>> getWithIdFunc;
-        private Func<TService, HttpRequestData, Task<HttpResponseData>> postFunc;
-        private Func<TService, HttpRequestData, Task<HttpResponseData>> postWithIdFunc;
-        private Func<TService, HttpRequestData, Task<HttpResponseData>> putFunc;
-        private Func<TService, HttpRequestData, Task<HttpResponseData>> putWithIdFunc;
-        private Func<TService, HttpRequestData, Task<HttpResponseData>> deleteFunc;
-        private Func<TService, HttpRequestData, Task<HttpResponseData>> deleteWithIdFunc;
+        private Func<TService, HttpRequestData, Task<HttpResponseData>>? getFunc;
+        private Func<TService, HttpRequestData, Task<HttpResponseData>>? getWithIdFunc;
+        private Func<TService, HttpRequestData, Task<HttpResponseData>>? postFunc;
+        private Func<TService, HttpRequestData, Task<HttpResponseData>>? postWithIdFunc;
+        private Func<TService, HttpRequestData, Task<HttpResponseData>>? putFunc;
+        private Func<TService, HttpRequestData, Task<HttpResponseData>>? putWithIdFunc;
+        private Func<TService, HttpRequestData, Task<HttpResponseData>>? deleteFunc;
+        private Func<TService, HttpRequestData, Task<HttpResponseData>>? deleteWithIdFunc;
 
         #region GET
 
@@ -482,6 +481,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         {
             getFunc = async (TService service, HttpRequestData req) =>
             {
+                await Task.CompletedTask;
                 var listResult = predicate.Invoke(service).Invoke();
                 return Respond<OutgoingServiceModel, OutgoingModel>(req, listResult, wrapout);
             };
@@ -502,6 +502,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         {
             getWithIdFunc = async (TService service, HttpRequestData req) =>
             {
+                await Task.CompletedTask;
                 var idGuid = GetId(req);
                 var resultRead = predicate.Invoke(service).Invoke(idGuid);
                 if (resultRead != null)
@@ -517,6 +518,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         {
             getFunc = async (TService service, HttpRequestData req) =>
             {
+                await Task.CompletedTask;
                 var listResult = predicate.Invoke(service).Invoke();
                 return RespondList<OutgoingServiceModel, OutgoingModel>(req, listResult, wrapout);
 
@@ -528,6 +530,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         {
             getWithIdFunc = async (TService service, HttpRequestData req) =>
             {
+                await Task.CompletedTask;
                 var idGuid = GetId(req);
                 var listResult = predicate.Invoke(service).Invoke(idGuid);
                 return RespondList<OutgoingServiceModel, OutgoingModel>(req, listResult, wrapout);
@@ -545,6 +548,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         {
             postFunc = async (TService service, HttpRequestData req) =>
             {
+                await Task.CompletedTask;
                 var resultCreated = predicate.Invoke(service).Invoke();
                 return Respond<OutgoingServiceModel, OutgoingModel>(req, resultCreated, wrapout);
             };
@@ -645,7 +649,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
             postFunc = async (TService service, HttpRequestData req) =>
             {
                 var parser = await MultipartFormDataParser.ParseAsync(req.Body);
-                var file = parser.Files.Where(f => f.Name == "file").FirstOrDefault();
+                var file = parser.Files.Where(f => f.Name == "file").FirstOrDefault()!;
 
                 var resultCreated = predicate.Invoke(service).Invoke(file.FileName, file.ContentType, file.Data.Length, file.Data);
 
@@ -662,7 +666,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
 
 
                 var parser = await MultipartFormDataParser.ParseAsync(req.Body);
-                var file = parser.Files.Where(f => f.Name == "file").FirstOrDefault();
+                var file = parser.Files.Where(f => f.Name == "file").FirstOrDefault()!;
                 var idGuid = GetId(req);
 
                 var resultCreated = predicate.Invoke(service).Invoke(idGuid, file.FileName, file.ContentType, file.Data.Length, file.Data);
@@ -729,6 +733,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         {
             deleteFunc = async (TService service, HttpRequestData req) =>
             {
+                await Task.CompletedTask;
                 predicate.Invoke(service).Invoke();
                 return RespondEmpty(req, wrapout);
 
@@ -738,6 +743,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
         {
             deleteWithIdFunc = async (TService service, HttpRequestData req) =>
             {
+                await Task.CompletedTask;
                 var idGuid = GetId(req);
 
                 predicate.Invoke(service).Invoke(idGuid);
@@ -879,7 +885,7 @@ namespace FluentChange.Extensions.Azure.Functions.CRUDL
 #nullable enable annotations
         public ResponseBuilderWithIdEntityServiceWithModelsIsolated<ServiceModel, ApiModel, TService> OnGetWithId(Func<TService, Func<Guid, ServiceModel?>> predicate)
         {
-            MakeGetWithIdFunc<ServiceModel, ApiModel>(predicate);
+            MakeGetWithIdFunc<ServiceModel, ApiModel>(predicate!);
             return this;
         }
 

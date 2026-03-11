@@ -12,7 +12,7 @@ namespace SampleFunctions.Services
     {
         public async Task Create(HttpRequest req)
         {
-           // Do nothing for now
+           await Task.CompletedTask;
         }
     }
 }

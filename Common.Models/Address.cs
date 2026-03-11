@@ -1,15 +1,16 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Text;
 
 namespace FluentChange.Extensions.Common.Models
 {
     public class Address
     {
-        public string Street { get; set; }
-        public string Nr { get; set; }
-        public string City { get; set; }
-        public string Postcode { get; set; }
-        public string Country { get; set; }
+        public string Street { get; set; } = default!;
+        public string Nr { get; set; } = default!;
+        public string City { get; set; } = default!;
+        public string Postcode { get; set; } = default!;
+        public string Country { get; set; } = default!;
     }
 
     public class ComplexAddress

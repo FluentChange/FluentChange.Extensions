@@ -1,4 +1,5 @@
-﻿using FluentChange.Extensions.Common.Database.Repositories.Interfaces;
+﻿#nullable enable
+using FluentChange.Extensions.Common.Database.Repositories.Interfaces;
 using FluentChange.Extensions.Common.Database.Services;
 using FluentChange.Extensions.Common.Models;
 using Microsoft.EntityFrameworkCore;
@@ -58,12 +59,12 @@ namespace FluentChange.Extensions.Common.Database
         public virtual E GetById(Guid id)
         {
             CheckIfIdSupported();
-            return dbSet.Find(id);
+            return dbSet.Find(id)!;
         }
         public virtual async Task<E> GetByIdAsync(Guid id)
         {
             CheckIfIdSupported();
-            return await dbSet.FindAsync(id);
+            return (await dbSet.FindAsync(id))!;
         }
 
         #endregion
@@ -217,14 +218,14 @@ namespace FluentChange.Extensions.Common.Database
 
 
         public virtual async Task UpdateAsync(E entity)
-        {  // for direct calls i.e. in unit tests without rest we need to detach 
+        {  // for direct calls i.e. in unit tests without rest we need to detach
             Detach(entity);
 
             if (entity == null) throw new ArgumentNullException("entity");
             UpdateCheckAndTrack(entity);
             //database.Attach(entity).State = EntityState.Modified;
             var result = dbSet.Update(entity);
-
+            await Task.CompletedTask;
         }
         public virtual async Task UpdateSaveAsync(E entity)
         {
@@ -247,8 +248,8 @@ namespace FluentChange.Extensions.Common.Database
             CheckIfIdSupported();
             if (id == Guid.Empty) throw new ArgumentNullException("id");
 
-            E entity = dbSet.Find(id);
-            DeleteSave(entity);
+            E entity = dbSet.Find(id)!;
+            DeleteSave(entity!);
 
         }
         public virtual void DeleteSave(E entity)
@@ -264,9 +265,9 @@ namespace FluentChange.Extensions.Common.Database
             CheckIfIdSupported();
             if (id == Guid.Empty) throw new ArgumentNullException(nameof(id));
 
-            E entity = await dbSet.FindAsync(id);
+            E entity = (await dbSet.FindAsync(id))!;
 
-            await DeleteSaveAsync(entity);
+            await DeleteSaveAsync(entity!);
 
         }
         public virtual async Task DeleteSaveAsync(E entity)
