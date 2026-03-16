@@ -80,6 +80,7 @@ namespace FluentChange.Extensions.System.CodeGen
         {
 
             var builder = new StringBuilder();
+            builder.AppendLine("#nullable enable");
             foreach (var usingRef in Usings)
             {
                 builder.AppendLine("using " + usingRef + ";");
