@@ -15,7 +15,7 @@ builder.Services.AddSingleton<ProductService>();
 builder.Services.AddSingleton<EventService>();
 builder.Services.AddSingleton<ContextCreationService>();
 builder.Services.AddSingleton<IEntityMapper, MapperWrapper>();
-builder.Services.AddAutoMapper(typeof(MapperProfile));
+builder.Services.AddAutoMapper(cfg => cfg.AddMaps(typeof(MapperProfile)));
 
 // Application Insights isn't enabled by default. See https://aka.ms/AAt8mw4.
 // builder.Services
