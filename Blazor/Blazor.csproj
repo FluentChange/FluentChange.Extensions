@@ -16,6 +16,7 @@
     <PackageId>FluentChange.Extensions.Blazor</PackageId>
     <AssemblyName>FluentChange.Extensions.Blazor</AssemblyName>
     <RootNamespace>FluentChange.Extensions.Blazor</RootNamespace>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
   </PropertyGroup>
 
   <ItemGroup>
