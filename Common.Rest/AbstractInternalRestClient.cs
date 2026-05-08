@@ -1,6 +1,5 @@
 ﻿using FluentChange.Extensions.Common.Models.Rest;
 using MimeKit;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,12 +7,22 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace FluentChange.Extensions.Common.Rest
 {
     public abstract class AbstractInternalRestClient : IRestClient
     {
+        // Mimics Newtonsoft defaults that the old client relied on:
+        // case-insensitive property matching, enums as strings.
+        private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+            Converters = { new JsonStringEnumConverter() }
+        };
+
         public AbstractInternalRestClient()
         {
 
@@ -146,7 +155,7 @@ namespace FluentChange.Extensions.Common.Rest
             }
             else
             {
-                content = new StringContent(JsonConvert.SerializeObject(requestBody), Encoding.UTF8, "application/json");
+                content = new StringContent(JsonSerializer.Serialize(requestBody, JsonOptions), Encoding.UTF8, "application/json");
             }
 
             return content;
@@ -193,7 +202,7 @@ namespace FluentChange.Extensions.Common.Rest
         private static async Task<T> HandleContent<T>(HttpResponseMessage response)
         {
             var data = await response.Content.ReadAsStringAsync();
-            var result = JsonConvert.DeserializeObject<T>(data);
+            var result = JsonSerializer.Deserialize<T>(data, JsonOptions);
 
             return result;
         }
@@ -215,7 +224,7 @@ namespace FluentChange.Extensions.Common.Rest
                 {
                     try
                     {
-                        var result = JsonConvert.DeserializeObject<Response>(data);
+                        var result = JsonSerializer.Deserialize<Response>(data, JsonOptions);
 
                         if (result != null && result.Errors != null && result.Errors.Count > 0)
                         {

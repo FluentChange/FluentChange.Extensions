@@ -25,6 +25,5 @@
     <!-- HTTP / Files -->
     <PackageVersion Include="HttpMultipartParser" Version="9.0.0" />
     <PackageVersion Include="MimeKit" Version="4.15.1" />
-    <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 </Project>
