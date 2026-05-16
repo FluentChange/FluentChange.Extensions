@@ -10,6 +10,7 @@ namespace FluentChange.Extensions.Common.Database.Repositories.Interfaces
     public interface ISmartRepository<T> : IRepository where T : IEntity
     {
         IQueryable<T> All();
+        IQueryable<T> AllFor(Guid spaceId);
         T GetById(Guid id);
         Task<T> GetByIdAsync(Guid id);
 
@@ -23,6 +24,9 @@ namespace FluentChange.Extensions.Common.Database.Repositories.Interfaces
 
         void UpdateSave(T entity);
         Task UpdateSaveAsync(T entity);
+
+        void UpdateBulkSave(IEnumerable<T> entities, bool detach = true);
+        Task UpdateBulkSaveAsync(IEnumerable<T> entities, bool detach = true);
 
         void Delete(Guid id);
         void DeleteSave(T entity);
