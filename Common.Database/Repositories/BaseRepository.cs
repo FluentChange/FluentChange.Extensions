@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace FluentChange.Extensions.Common.Database
 {
-    public abstract class BaseRepository<T> : IRepository where T : class, IEntityWithId
+    public abstract class BaseRepository<T> : IBaseRepository<T> where T : class, IEntityWithId
     {
         protected abstract DbSet<T> DbSet { get; }
         protected abstract Task<int> SaveChangesAsync();
