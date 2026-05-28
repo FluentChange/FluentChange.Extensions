@@ -202,6 +202,11 @@ namespace FluentChange.Extensions.Common.Rest
         private static async Task<T> HandleContent<T>(HttpResponseMessage response)
         {
             var data = await response.Content.ReadAsStringAsync();
+            // Leerer Body ist legitim für Void-Endpoints (z.B. Post<object> auf
+            // Funktionen, die nur OK ohne Body zurückgeben). System.Text.Json
+            // wirft hier — Newtonsoft hätte das toleriert und null geliefert.
+            // Wir halten dieselbe Semantik aufrecht: kein Body → default(T).
+            if (string.IsNullOrWhiteSpace(data)) return default;
             var result = JsonSerializer.Deserialize<T>(data, JsonOptions);
 
             return result;
