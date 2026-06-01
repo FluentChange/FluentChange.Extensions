@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace FluentChange.Extensions.Common.Rest
@@ -31,6 +33,17 @@ namespace FluentChange.Extensions.Common.Rest
             var content = SerializeContentIfNeeded(requestBody);
             route = ReplaceParams(route, parameters);
             return await http.PostAsync(route, content);
+        }
+        protected override async Task<HttpResponseMessage> PostStreamImplementation(string route, Stream content, string contentType, Dictionary<string, object> parameters)
+        {
+            route = ReplaceParams(route, parameters);
+            var request = new HttpRequestMessage(HttpMethod.Post, route);
+            var streamContent = new StreamContent(content);
+            streamContent.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
+            request.Content = streamContent;
+            // ResponseHeadersRead: Antwort nicht vorpuffern. Der Request-Body wird gestreamt –
+            // bei seekbarem Stream setzt StreamContent Content-Length, kein LoadIntoBuffer.
+            return await http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
         }
         protected override async Task<HttpResponseMessage> PutImplementation(string route, object requestBody, Dictionary<string, object> parameters)
         {

@@ -88,6 +88,19 @@ namespace FluentChange.Extensions.Common.Rest
             return await PostInternal<T>(route, content, parameters);
         }
 
+        // Streaming-POST: sendet den Stream als rohen Request-Body (kein multipart, keine
+        // Vollpufferung). Für große Uploads gedacht. Standardimplementierung wirft – nur
+        // Clients mit echtem HttpClient (InternalRestClient) überschreiben PostStreamImplementation.
+        protected virtual Task<HttpResponseMessage> PostStreamImplementation(string route, Stream content, string contentType, Dictionary<string, object> parameters)
+        {
+            throw new NotSupportedException("Streaming POST wird von diesem RestClient nicht unterstützt.");
+        }
+        public async Task<T> PostStream<T>(string route, Stream content, string contentType, Dictionary<string, object> parameters = null)
+        {
+            var response = await PostStreamImplementation(route, content, contentType, parameters);
+            return await HandleContentOrError<T>(response);
+        }
+
 
         // The PUT method replaces all current representations of the target resource with the request content.
         protected abstract Task<HttpResponseMessage> PutImplementation(string route, object content, Dictionary<string, object> parameters);
